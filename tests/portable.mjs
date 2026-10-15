@@ -43,7 +43,8 @@ const server = http.createServer((req, res) => {
   );
   res.end(fs.readFileSync(p));
 });
-await new Promise((ok) => server.listen(4175, "127.0.0.1", ok));
+await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
+const base = `http://127.0.0.1:${server.address().port}/doke/`;
 const b = await chromium.launch({
   executablePath:
     process.env.CHROME_PATH ||
@@ -60,7 +61,7 @@ try {
   p.on("response", (r) => {
     if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`);
   });
-  await p.goto("http://127.0.0.1:4175/doke/");
+  await p.goto(base);
   await p.waitForFunction(
     () => document.documentElement.dataset.ready === "true",
     null,
@@ -81,6 +82,28 @@ try {
     { timeout: 180000 },
   );
   assert.match(await p.locator("#render-stats").textContent(), /2,100,796/);
+  await p.locator(".silicon-link").click();
+  await p.waitForFunction(() => window.dokeSilicon?.getRenderer());
+  assert.equal(new URL(p.url()).pathname, "/doke/silicon.html");
+  assert.equal(
+    await p.evaluate(() => window.dokeSilicon.finish().status),
+    "complete",
+  );
+  await p.locator("#compare-link").click();
+  await p.waitForFunction(() => window.dokeBrainComparison?.snapshot().ready);
+  assert.match(
+    await p.locator("#render-status").textContent(),
+    /BrowserWebGpu/,
+  );
+  assert.equal(
+    await p.evaluate(() => window.dokeBrainComparison.snapshot().backend),
+    "BrowserWebGpu",
+  );
+  await p.locator("#brain-guide-next").click();
+  assert.equal(
+    await p.evaluate(() => window.dokeBrainComparison.snapshot().time),
+    4,
+  );
   assert.deepEqual(errors, []);
   const report = {
     status: "passed",
