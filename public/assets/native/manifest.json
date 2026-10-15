@@ -1,0 +1,334 @@
+{
+  "version": "doke-native-0.5-v1",
+  "sourceHash": "2b05581e39c44f2623d9b0a69f64e3df0823c20d054abef92973812313335dc3",
+  "sourceVoxelMm": 0.5,
+  "processing": "native 0.5mm annotations, Gaussian sigma 0.7 voxels, three Taubin iterations; region budgets 260k faces, cerebellum 600k",
+  "encoding": "gzip-chunks",
+  "meshHash": "e5fd9e54aef282e6067c474d6885025199ecda7082ef3822c4e28e231e256d8e",
+  "vertices": 2539758,
+  "triangles": 5080888,
+  "bytes": 142242928,
+  "compressedBytes": 78943797,
+  "chunks": [
+    {
+      "url": "assets/native/part-000.brnz",
+      "bytes": 6077709,
+      "decodedBytes": 8388608,
+      "sha256": "369f4fd93ec37240d16bfb146c2cffecb1ecdfd7545795ccd0b230c3bf113f4f"
+    },
+    {
+      "url": "assets/native/part-001.brnz",
+      "bytes": 6029984,
+      "decodedBytes": 8388608,
+      "sha256": "e16d694640b3661bb4205350a8e7dba812a4aebb546a1050242342a948316bea"
+    },
+    {
+      "url": "assets/native/part-002.brnz",
+      "bytes": 6017287,
+      "decodedBytes": 8388608,
+      "sha256": "a46621a87418294750523f3954b247eeb9441bc773fe98ddbd5b902262ab361d"
+    },
+    {
+      "url": "assets/native/part-003.brnz",
+      "bytes": 6005010,
+      "decodedBytes": 8388608,
+      "sha256": "1a7caf3d8f7a51514dcdbcbcd36f923da2f90dcefa58af35ea86a6b536db03a8"
+    },
+    {
+      "url": "assets/native/part-004.brnz",
+      "bytes": 6037096,
+      "decodedBytes": 8388608,
+      "sha256": "357261b93df7d76ab3cdb9ed59731822b5e0a6e40bb855d431bbbcac72c0d91c"
+    },
+    {
+      "url": "assets/native/part-005.brnz",
+      "bytes": 6061716,
+      "decodedBytes": 8388608,
+      "sha256": "2b661fb77ffe167520605731e79ce4759affe5dcb82444491b67b735c0be3136"
+    },
+    {
+      "url": "assets/native/part-006.brnz",
+      "bytes": 5951407,
+      "decodedBytes": 8388608,
+      "sha256": "9c945f839997fb8e763554b2d82707527a2e91f5fa30354a799024731d9a9c71"
+    },
+    {
+      "url": "assets/native/part-007.brnz",
+      "bytes": 6031761,
+      "decodedBytes": 8388608,
+      "sha256": "e0b5506bb08a33c43ef7ab62fbf4c66ba8b29a682fd2d1d10c9563c0e49b13c6"
+    },
+    {
+      "url": "assets/native/part-008.brnz",
+      "bytes": 5960318,
+      "decodedBytes": 8388608,
+      "sha256": "2f4eea1882a71ef676898db783f50529e67de31f0e354474347d6d9d153a017a"
+    },
+    {
+      "url": "assets/native/part-009.brnz",
+      "bytes": 5054117,
+      "decodedBytes": 8388608,
+      "sha256": "8423e300fa29bbfcf1d87a1dd4350854e1a235c06ba3f6eee6c6c91f74fef12e"
+    },
+    {
+      "url": "assets/native/part-010.brnz",
+      "bytes": 2909376,
+      "decodedBytes": 8388608,
+      "sha256": "ad6f7f8d23678100aed6d5de357b58fdd2d8e1fb321fc4196807d205b4e641b8"
+    },
+    {
+      "url": "assets/native/part-011.brnz",
+      "bytes": 2871561,
+      "decodedBytes": 8388608,
+      "sha256": "6c5f6f303a830a0497d96308b8d9942cc8803f0599d2c426a2307c535138b976"
+    },
+    {
+      "url": "assets/native/part-012.brnz",
+      "bytes": 2827752,
+      "decodedBytes": 8388608,
+      "sha256": "c13af7910fdbba3b99efa172f0e5547ee0a6491d2bb594cda47959b52cf96d02"
+    },
+    {
+      "url": "assets/native/part-013.brnz",
+      "bytes": 2856142,
+      "decodedBytes": 8388608,
+      "sha256": "29b90676411adea33c2dbd5f894d5fff936df9f66e1416a48c6c277aa82396cf"
+    },
+    {
+      "url": "assets/native/part-014.brnz",
+      "bytes": 2792770,
+      "decodedBytes": 8388608,
+      "sha256": "5800b045eb6a53115d0f0466f08ec78014a1ca6ba1993c150972967073b3b513"
+    },
+    {
+      "url": "assets/native/part-015.brnz",
+      "bytes": 2769701,
+      "decodedBytes": 8388608,
+      "sha256": "1c2e0a4d0046a11733c9323e532e9cbd50252afce92b823f1df49bcc9d593697"
+    },
+    {
+      "url": "assets/native/part-016.brnz",
+      "bytes": 2690090,
+      "decodedBytes": 8025200,
+      "sha256": "645088027df184cbcd502746477d216aba1b15487db6431ced5810688f4a3eff"
+    }
+  ],
+  "regions": [
+    {
+      "id": "motor",
+      "nativeSurfaceTriangles": 320640,
+      "triangles": 260000,
+      "volume": 0.05436014592631198
+    },
+    {
+      "id": "prefrontal",
+      "nativeSurfaceTriangles": 850912,
+      "triangles": 260000,
+      "volume": 0.18205973023240762
+    },
+    {
+      "id": "inferior-frontal",
+      "nativeSurfaceTriangles": 192464,
+      "triangles": 192464,
+      "volume": 0.03393437789395865
+    },
+    {
+      "id": "orbitofrontal",
+      "nativeSurfaceTriangles": 229352,
+      "triangles": 229352,
+      "volume": 0.04285939107396534
+    },
+    {
+      "id": "somatosensory",
+      "nativeSurfaceTriangles": 338032,
+      "triangles": 260000,
+      "volume": 0.052891704361207326
+    },
+    {
+      "id": "parietal",
+      "nativeSurfaceTriangles": 209840,
+      "triangles": 209840,
+      "volume": 0.03579440298438746
+    },
+    {
+      "id": "inferior-parietal",
+      "nativeSurfaceTriangles": 330144,
+      "triangles": 260000,
+      "volume": 0.07053820439565135
+    },
+    {
+      "id": "precuneus",
+      "nativeSurfaceTriangles": 208940,
+      "triangles": 208940,
+      "volume": 0.03927667836251129
+    },
+    {
+      "id": "superior-temporal",
+      "nativeSurfaceTriangles": 295400,
+      "triangles": 260000,
+      "volume": 0.05185172476852177
+    },
+    {
+      "id": "middle-temporal",
+      "nativeSurfaceTriangles": 264608,
+      "triangles": 260000,
+      "volume": 0.05175787940943511
+    },
+    {
+      "id": "inferior-temporal",
+      "nativeSurfaceTriangles": 179752,
+      "triangles": 179752,
+      "volume": 0.03268582101421003
+    },
+    {
+      "id": "fusiform",
+      "nativeSurfaceTriangles": 227912,
+      "triangles": 227912,
+      "volume": 0.041222939654546036
+    },
+    {
+      "id": "auditory",
+      "nativeSurfaceTriangles": 41296,
+      "triangles": 41296,
+      "volume": 0.005326237994995088
+    },
+    {
+      "id": "visual",
+      "nativeSurfaceTriangles": 553512,
+      "triangles": 260000,
+      "volume": 0.11777619249088904
+    },
+    {
+      "id": "insula",
+      "nativeSurfaceTriangles": 122392,
+      "triangles": 122392,
+      "volume": 0.020418943030513205
+    },
+    {
+      "id": "anterior-cingulate",
+      "nativeSurfaceTriangles": 112888,
+      "triangles": 112888,
+      "volume": 0.01837692826479195
+    },
+    {
+      "id": "posterior-cingulate",
+      "nativeSurfaceTriangles": 128832,
+      "triangles": 128832,
+      "volume": 0.020925615754990853
+    },
+    {
+      "id": "parahippocampal",
+      "nativeSurfaceTriangles": 77688,
+      "triangles": 77688,
+      "volume": 0.009829977282576093
+    },
+    {
+      "id": "hippocampus",
+      "nativeSurfaceTriangles": 57400,
+      "triangles": 57400,
+      "volume": 0.008192699222606173
+    },
+    {
+      "id": "amygdala",
+      "nativeSurfaceTriangles": 23520,
+      "triangles": 23520,
+      "volume": 0.004428703280506447
+    },
+    {
+      "id": "caudate",
+      "nativeSurfaceTriangles": 71184,
+      "triangles": 71184,
+      "volume": 0.01075533595686816
+    },
+    {
+      "id": "putamen",
+      "nativeSurfaceTriangles": 60064,
+      "triangles": 60064,
+      "volume": 0.01326287855600683
+    },
+    {
+      "id": "accumbens",
+      "nativeSurfaceTriangles": 10736,
+      "triangles": 10736,
+      "volume": 0.0012636784963637208
+    },
+    {
+      "id": "pallidum",
+      "nativeSurfaceTriangles": 26672,
+      "triangles": 26672,
+      "volume": 0.0029366400754406597
+    },
+    {
+      "id": "thalamus",
+      "nativeSurfaceTriangles": 68284,
+      "triangles": 68284,
+      "volume": 0.021847294789226826
+    },
+    {
+      "id": "hypothalamus",
+      "nativeSurfaceTriangles": 19384,
+      "triangles": 19384,
+      "volume": 0.002560652875254888
+    },
+    {
+      "id": "basal-forebrain",
+      "nativeSurfaceTriangles": 33700,
+      "triangles": 33700,
+      "volume": 0.002926556796976211
+    },
+    {
+      "id": "substantia-nigra",
+      "nativeSurfaceTriangles": 8232,
+      "triangles": 8232,
+      "volume": 0.0006099407467983675
+    },
+    {
+      "id": "midbrain",
+      "nativeSurfaceTriangles": 57284,
+      "triangles": 57284,
+      "volume": 0.01092343289267078
+    },
+    {
+      "id": "cerebellum",
+      "nativeSurfaceTriangles": 605876,
+      "triangles": 600000,
+      "volume": 0.1399609519788999
+    },
+    {
+      "id": "pons",
+      "nativeSurfaceTriangles": 55720,
+      "triangles": 55720,
+      "volume": 0.02045338307814881
+    },
+    {
+      "id": "medulla",
+      "nativeSurfaceTriangles": 309824,
+      "triangles": 260000,
+      "volume": 0.03773461530471134
+    },
+    {
+      "id": "callosum",
+      "nativeSurfaceTriangles": 99000,
+      "triangles": 99000,
+      "volume": 0.021689098645300442
+    },
+    {
+      "id": "olfactory",
+      "nativeSurfaceTriangles": 18160,
+      "triangles": 18160,
+      "volume": 0.0012789087756924396
+    },
+    {
+      "id": "subthalamic",
+      "nativeSurfaceTriangles": 4384,
+      "triangles": 4384,
+      "volume": 0.00031955949138297936
+    },
+    {
+      "id": "other-deep",
+      "nativeSurfaceTriangles": 55808,
+      "triangles": 55808,
+      "volume": 0.003013086222540142
+    }
+  ]
+}

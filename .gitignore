@@ -1,0 +1,33 @@
+/target/
+/.venv/
+/tools/.bin/
+/data/raw/
+/dist/
+/public/pkg/
+__pycache__/
+.DS_Store
+/test-results/
+
+/node_modules/
+# Reproducible generated anatomy binaries and compressed build products.
+/public/assets/brain*.bin*
+/public/*.gz
+/public/release.json
+/.work/
+
+/public/assets/native/*.brnz
+/public/assets/fine/*.brnz
+
+# Local history, screenshots and deployment details are not source documentation.
+/docs/archive/
+/ops/deploy.local.env
+
+# Credentials and machine-local configuration. Keep sanitized examples.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.log

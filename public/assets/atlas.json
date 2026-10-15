@@ -1,0 +1,2050 @@
+{
+  "version": "allen-2020-v1-brain-1",
+  "source": "https://download.alleninstitute.org/informatics-archive/allen_human_reference_atlas_3d_2020/version_1/",
+  "license": "CC BY 4.0",
+  "attribution": "Allen Human Reference Atlas \u2013 3D, 2020. Ding et al. Allen Institute for Brain Science. RRID:SCR_017764. Modified: grouped labels, sampled to 1 mm, smoothed and meshed.",
+  "reference": "ICBM 2009b Nonlinear Symmetric",
+  "sourceAffine": [
+    [
+      0.5,
+      0.0,
+      0.0,
+      -98.0
+    ],
+    [
+      0.0,
+      0.5,
+      0.0,
+      -134.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.5,
+      -72.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "sourceShape": [
+    394,
+    466,
+    378
+  ],
+  "sourceHash": "2b05581e39c44f2623d9b0a69f64e3df0823c20d054abef92973812313335dc3",
+  "meshHash": "c09c2c3731d04006dd88c607f34c1a92d6b728b4ee608104fedbd0966100c1ab",
+  "renderTransform": "x=RAS.x/100; y=(RAS.z-15)/100; z=(-RAS.y-20)/100; model units=100mm",
+  "vertices": 134416,
+  "triangles": 270212,
+  "ranges": [
+    {
+      "region": 0,
+      "start": 0,
+      "count": 42876
+    },
+    {
+      "region": 1,
+      "start": 42876,
+      "count": 110898
+    },
+    {
+      "region": 2,
+      "start": 153774,
+      "count": 25254
+    },
+    {
+      "region": 3,
+      "start": 179028,
+      "count": 30174
+    },
+    {
+      "region": 4,
+      "start": 209202,
+      "count": 44742
+    },
+    {
+      "region": 5,
+      "start": 253944,
+      "count": 26850
+    },
+    {
+      "region": 6,
+      "start": 280794,
+      "count": 43200
+    },
+    {
+      "region": 7,
+      "start": 323994,
+      "count": 27300
+    },
+    {
+      "region": 8,
+      "start": 351294,
+      "count": 39162
+    },
+    {
+      "region": 9,
+      "start": 390456,
+      "count": 34938
+    },
+    {
+      "region": 10,
+      "start": 425394,
+      "count": 23634
+    },
+    {
+      "region": 11,
+      "start": 449028,
+      "count": 30084
+    },
+    {
+      "region": 12,
+      "start": 479112,
+      "count": 5400
+    },
+    {
+      "region": 13,
+      "start": 484512,
+      "count": 72012
+    },
+    {
+      "region": 14,
+      "start": 556524,
+      "count": 16092
+    },
+    {
+      "region": 15,
+      "start": 572616,
+      "count": 14904
+    },
+    {
+      "region": 16,
+      "start": 587520,
+      "count": 16878
+    },
+    {
+      "region": 17,
+      "start": 604398,
+      "count": 10236
+    },
+    {
+      "region": 18,
+      "start": 614634,
+      "count": 7512
+    },
+    {
+      "region": 19,
+      "start": 622146,
+      "count": 3126
+    },
+    {
+      "region": 20,
+      "start": 625272,
+      "count": 8916
+    },
+    {
+      "region": 21,
+      "start": 634188,
+      "count": 7998
+    },
+    {
+      "region": 22,
+      "start": 642186,
+      "count": 1368
+    },
+    {
+      "region": 23,
+      "start": 643554,
+      "count": 2742
+    },
+    {
+      "region": 24,
+      "start": 646296,
+      "count": 9084
+    },
+    {
+      "region": 25,
+      "start": 655380,
+      "count": 2418
+    },
+    {
+      "region": 26,
+      "start": 657798,
+      "count": 4008
+    },
+    {
+      "region": 27,
+      "start": 661806,
+      "count": 1062
+    },
+    {
+      "region": 28,
+      "start": 662868,
+      "count": 7500
+    },
+    {
+      "region": 29,
+      "start": 670368,
+      "count": 73224
+    },
+    {
+      "region": 30,
+      "start": 743592,
+      "count": 7398
+    },
+    {
+      "region": 31,
+      "start": 750990,
+      "count": 36936
+    },
+    {
+      "region": 32,
+      "start": 787926,
+      "count": 13128
+    },
+    {
+      "region": 34,
+      "start": 801054,
+      "count": 2244
+    },
+    {
+      "region": 35,
+      "start": 803298,
+      "count": 900
+    },
+    {
+      "region": 36,
+      "start": 804198,
+      "count": 6438
+    }
+  ],
+  "regions": [
+    {
+      "index": 0,
+      "id": "motor",
+      "name": "Precentral gyrus",
+      "role": "Movement",
+      "kind": 0,
+      "labels": [
+        12114,
+        12126
+      ],
+      "atlasNames": [
+        "precentral gyrus",
+        "paracentral lobule, rostral part"
+      ],
+      "centroid": [
+        5.0692094160805486e-06,
+        0.3265731920588435,
+        -0.09180321211300697
+      ],
+      "bounds": [
+        [
+          -0.6650899533387528,
+          -0.1916024791168618,
+          -0.34494132884879136
+        ],
+        [
+          0.6650899454990113,
+          0.6651021819725572,
+          0.1650933417651967
+        ]
+      ],
+      "vertices": 39704,
+      "triangles": 79400,
+      "leftCentroid": [
+        -0.3538888568806835,
+        0.3237177866734562,
+        -0.09390675990977393
+      ],
+      "rightCentroid": [
+        0.3538991666329357,
+        0.32370198713480436,
+        -0.09390767690305013
+      ],
+      "overviewTriangles": 14292
+    },
+    {
+      "index": 1,
+      "id": "prefrontal",
+      "name": "Prefrontal gyri",
+      "role": "Planning",
+      "kind": 0,
+      "labels": [
+        12115,
+        12116,
+        146034872,
+        146034876,
+        146034884,
+        146034888
+      ],
+      "atlasNames": [
+        "superior frontal gyrus",
+        "middle frontal gyrus",
+        "paracingulate gyrus",
+        "rostral gyrus",
+        "frontomarginal gyrus",
+        "frontal pole"
+      ],
+      "centroid": [
+        1.0090849475185239e-06,
+        0.16555444110590378,
+        -0.5269573243800759
+      ],
+      "bounds": [
+        [
+          -0.5647470591897851,
+          -0.4417714008081856,
+          -0.9450951436298761
+        ],
+        [
+          0.5647655296997619,
+          0.6351408862264658,
+          -0.035280544863523125
+        ]
+      ],
+      "vertices": 102700,
+      "triangles": 205376,
+      "leftCentroid": [
+        -0.22165306909085078,
+        0.16880686674334308,
+        -0.5256639400327979
+      ],
+      "rightCentroid": [
+        0.22162953739068542,
+        0.16874319548198777,
+        -0.5256846296900332
+      ],
+      "overviewTriangles": 36966
+    },
+    {
+      "index": 2,
+      "id": "inferior-frontal",
+      "name": "Inferior frontal gyrus",
+      "role": "Language",
+      "kind": 0,
+      "labels": [
+        12118,
+        12119,
+        12127
+      ],
+      "atlasNames": [
+        "inferior frontal gyrus, triangular part",
+        "inferior frontal gyrus, opercular part",
+        "frontal operculum"
+      ],
+      "centroid": [
+        1.1432972474305752e-06,
+        -0.052656992470996526,
+        -0.4108674206321668
+      ],
+      "bounds": [
+        [
+          -0.6150953506662139,
+          -0.2502580821140148,
+          -0.6845442413463759
+        ],
+        [
+          0.6150954529474105,
+          0.15491892157139064,
+          -0.03768123417775153
+        ]
+      ],
+      "vertices": 23388,
+      "triangles": 46768,
+      "leftCentroid": [
+        -0.4638923098281732,
+        -0.05265356997878328,
+        -0.41086767682952513
+      ],
+      "rightCentroid": [
+        0.46389459607966926,
+        -0.052660414950299834,
+        -0.4108671648254226
+      ],
+      "overviewTriangles": 8418
+    },
+    {
+      "index": 3,
+      "id": "orbitofrontal",
+      "name": "Orbital gyri",
+      "role": "Valuation",
+      "kind": 0,
+      "labels": [
+        12121,
+        12122,
+        12123,
+        12124,
+        12125
+      ],
+      "atlasNames": [
+        "gyrus rectus (straight gyrus)",
+        "medial orbital gyrus",
+        "anterior intermediate orbital gyrus",
+        "posterior intermediate orbital gyrus",
+        "lateral orbital gyrus"
+      ],
+      "centroid": [
+        6.82271380385126e-07,
+        -0.3265052129273137,
+        -0.5415858720350708
+      ],
+      "bounds": [
+        [
+          -0.5537951755638708,
+          -0.47286107430694435,
+          -0.7751139540310892
+        ],
+        [
+          0.5537758175241454,
+          -0.11943405275355752,
+          -0.24967635442668665
+        ]
+      ],
+      "vertices": 27944,
+      "triangles": 55888,
+      "leftCentroid": [
+        -0.2583704364162301,
+        -0.3243268285370077,
+        -0.5404225441254221
+      ],
+      "rightCentroid": [
+        0.25822488552691997,
+        -0.32438053870658184,
+        -0.5404162287296373
+      ],
+      "overviewTriangles": 10058
+    },
+    {
+      "index": 4,
+      "id": "somatosensory",
+      "name": "Postcentral gyrus",
+      "role": "Touch",
+      "kind": 0,
+      "labels": [
+        12132,
+        12138,
+        13230
+      ],
+      "atlasNames": [
+        "postcentral gyrus",
+        "paracentral lobule, caudal part",
+        "parietal operculum"
+      ],
+      "centroid": [
+        -2.638928461552513e-06,
+        0.2970183899309167,
+        0.04616687377404631
+      ],
+      "bounds": [
+        [
+          -0.6950769233104164,
+          -0.1405958241321148,
+          -0.20223175012214678
+        ],
+        [
+          0.6950769935418469,
+          0.675090388556735,
+          0.2831143155554102
+        ]
+      ],
+      "vertices": 41432,
+      "triangles": 82856,
+      "leftCentroid": [
+        -0.40072510601695716,
+        0.29660768076284194,
+        0.04592334084239114
+      ],
+      "rightCentroid": [
+        0.400719818355696,
+        0.29657993104125996,
+        0.04592349845891478
+      ],
+      "overviewTriangles": 14914
+    },
+    {
+      "index": 5,
+      "id": "parietal",
+      "name": "Superior parietal lobule",
+      "role": "Spatial attention",
+      "kind": 0,
+      "labels": [
+        12133
+      ],
+      "atlasNames": [
+        "supraparietal lobule"
+      ],
+      "centroid": [
+        -6.404831036173396e-06,
+        0.41058909490076045,
+        0.3754398716380171
+      ],
+      "bounds": [
+        [
+          -0.4644107911757456,
+          0.14469845968446313,
+          0.16493625880068308
+        ],
+        [
+          0.4644107852780449,
+          0.6622619558439773,
+          0.6518646390704191
+        ]
+      ],
+      "vertices": 24868,
+      "triangles": 49728,
+      "leftCentroid": [
+        -0.26491128296458166,
+        0.41059354571297524,
+        0.3754369520383171
+      ],
+      "rightCentroid": [
+        0.2648984732755572,
+        0.4105846443220563,
+        0.37544279120945173
+      ],
+      "overviewTriangles": 8950
+    },
+    {
+      "index": 6,
+      "id": "inferior-parietal",
+      "name": "Inferior parietal gyri",
+      "role": "Integration",
+      "kind": 0,
+      "labels": [
+        12135,
+        12136
+      ],
+      "atlasNames": [
+        "supramarginal gyrus",
+        "angular gyrus"
+      ],
+      "centroid": [
+        -3.618142793208264e-06,
+        0.20716009172705785,
+        0.3014083323760058
+      ],
+      "bounds": [
+        [
+          -0.7040637788760229,
+          -0.04506576678683408,
+          -0.04509503393990537
+        ],
+        [
+          0.7040637734840364,
+          0.4450895420485528,
+          0.6217400864207174
+        ]
+      ],
+      "vertices": 40008,
+      "triangles": 80000,
+      "leftCentroid": [
+        -0.5022631202774319,
+        0.20715805912056237,
+        0.30141095235827353
+      ],
+      "rightCentroid": [
+        0.502255884266405,
+        0.2071621243380962,
+        0.30140571236193037
+      ],
+      "overviewTriangles": 14400
+    },
+    {
+      "index": 7,
+      "id": "precuneus",
+      "name": "Precuneus",
+      "role": "Internal experience",
+      "kind": 0,
+      "labels": [
+        12137
+      ],
+      "atlasNames": [
+        "precuneus"
+      ],
+      "centroid": [
+        -1.9491466227798607e-06,
+        0.25134272017590126,
+        0.40197875309205605
+      ],
+      "bounds": [
+        [
+          -0.28437112507475376,
+          -0.13140706922232515,
+          0.2048825971762442
+        ],
+        [
+          0.28435691229811855,
+          0.6305484816134455,
+          0.6450179020396387
+        ]
+      ],
+      "vertices": 25292,
+      "triangles": 50560,
+      "leftCentroid": [
+        -0.10885317737177153,
+        0.24985559255771403,
+        0.40298199061134243
+      ],
+      "rightCentroid": [
+        0.10873787068589033,
+        0.24984234607498987,
+        0.40299769305155814
+      ],
+      "overviewTriangles": 9100
+    },
+    {
+      "index": 8,
+      "id": "superior-temporal",
+      "name": "Superior temporal gyrus",
+      "role": "Sound",
+      "kind": 0,
+      "labels": [
+        12140,
+        12145,
+        12146,
+        12147
+      ],
+      "atlasNames": [
+        "superior temporal gyrus",
+        "planum temporale",
+        "temporal pole",
+        "planum polare"
+      ],
+      "centroid": [
+        4.787060430579166e-06,
+        -0.2118075165404224,
+        -0.08983316066665437
+      ],
+      "bounds": [
+        [
+          -0.7150745505053704,
+          -0.6223908625280568,
+          -0.46509776308366363
+        ],
+        [
+          0.7150744373557096,
+          0.1128283261270457,
+          0.3211769461362992
+        ]
+      ],
+      "vertices": 36268,
+      "triangles": 72528,
+      "leftCentroid": [
+        -0.5115319233323203,
+        -0.2118091024125255,
+        -0.08983749847707383
+      ],
+      "rightCentroid": [
+        0.5115414973292091,
+        -0.21180593059397937,
+        -0.0898288228219407
+      ],
+      "overviewTriangles": 13054
+    },
+    {
+      "index": 9,
+      "id": "middle-temporal",
+      "name": "Middle temporal gyrus",
+      "role": "Meaning",
+      "kind": 0,
+      "labels": [
+        12141
+      ],
+      "atlasNames": [
+        "middle temporal gyrus"
+      ],
+      "centroid": [
+        3.268002295675615e-06,
+        -0.27213991961312467,
+        0.07238390513944805
+      ],
+      "bounds": [
+        [
+          -0.7251011406067978,
+          -0.6250894215852755,
+          -0.3902680467594932
+        ],
+        [
+          0.7251011494416442,
+          0.015097079660794752,
+          0.5251109551498643
+        ]
+      ],
+      "vertices": 32356,
+      "triangles": 64704,
+      "leftCentroid": [
+        -0.5652452122370795,
+        -0.27213973324985147,
+        0.07237679115922194
+      ],
+      "rightCentroid": [
+        0.5652517479482754,
+        -0.27214010603667094,
+        0.07239101918378021
+      ],
+      "overviewTriangles": 11646
+    },
+    {
+      "index": 10,
+      "id": "inferior-temporal",
+      "name": "Inferior temporal gyrus",
+      "role": "Object vision",
+      "kind": 0,
+      "labels": [
+        12142
+      ],
+      "atlasNames": [
+        "inferior temporal gyrus"
+      ],
+      "centroid": [
+        6.269520316699183e-06,
+        -0.3965147823605543,
+        0.12309841289534948
+      ],
+      "bounds": [
+        [
+          -0.6845515262945705,
+          -0.6550815570227513,
+          -0.2550267296461902
+        ],
+        [
+          0.6845137923252611,
+          -0.15940365074924012,
+          0.5049628270984222
+        ]
+      ],
+      "vertices": 21888,
+      "triangles": 43776,
+      "leftCentroid": [
+        -0.5243961680707745,
+        -0.3965170523737236,
+        0.12309653229559141
+      ],
+      "rightCentroid": [
+        0.5244087075803712,
+        -0.3965125124171725,
+        0.12310029353211234
+      ],
+      "overviewTriangles": 7878
+    },
+    {
+      "index": 11,
+      "id": "fusiform",
+      "name": "Fusiform gyrus",
+      "role": "Visual recognition",
+      "kind": 0,
+      "labels": [
+        12143,
+        12152,
+        146034892
+      ],
+      "atlasNames": [
+        "occipitotemporal (fusiform) gyrus, temporal part",
+        "occipitotemporal (fusiform) gyrus, occipital part",
+        "perirhinal gyrus ( rostral part of FuGt)"
+      ],
+      "centroid": [
+        6.667147063263791e-06,
+        -0.38963512248006243,
+        0.16323138591397574
+      ],
+      "bounds": [
+        [
+          -0.5306979806224422,
+          -0.6650895255622618,
+          -0.34510224318515076
+        ],
+        [
+          0.5306807743426697,
+          -0.16871357746663762,
+          0.6311134252173638
+        ]
+      ],
+      "vertices": 27860,
+      "triangles": 55720,
+      "leftCentroid": [
+        -0.34741045247391666,
+        -0.3896358343578035,
+        0.16322419907655436
+      ],
+      "rightCentroid": [
+        0.3474237867571515,
+        -0.3896344105128068,
+        0.1632385728828694
+      ],
+      "overviewTriangles": 10028
+    },
+    {
+      "index": 12,
+      "id": "auditory",
+      "name": "Heschl\u2019s gyrus",
+      "role": "Hearing",
+      "kind": 0,
+      "labels": [
+        12144
+      ],
+      "atlasNames": [
+        "transverse temporal gyrus (Heschl's gyrus)"
+      ],
+      "centroid": [
+        9.4591715921732e-07,
+        -0.06988872498038602,
+        0.0015395474141660075
+      ],
+      "bounds": [
+        [
+          -0.6203058545888547,
+          -0.16369813905068759,
+          -0.13101457414332385
+        ],
+        [
+          0.6203068758734502,
+          0.05296720893713344,
+          0.14147997579895386
+        ]
+      ],
+      "vertices": 5004,
+      "triangles": 10000,
+      "leftCentroid": [
+        -0.4563237167686391,
+        -0.0698978388830464,
+        0.0015393384832921855
+      ],
+      "rightCentroid": [
+        0.4563256088349459,
+        -0.06987961102536439,
+        0.0015397562996594084
+      ],
+      "overviewTriangles": 1800
+    },
+    {
+      "index": 13,
+      "id": "visual",
+      "name": "Occipital cortex",
+      "role": "Vision",
+      "kind": 0,
+      "labels": [
+        12149,
+        12150,
+        12151,
+        12153,
+        12154
+      ],
+      "atlasNames": [
+        "occipital pole",
+        "cuneus",
+        "lingual gyrus",
+        "inferior occipital gyrus",
+        "superior occipital gyrus"
+      ],
+      "centroid": [
+        4.010183432310791e-06,
+        -0.06867183855738708,
+        0.5969490784862955
+      ],
+      "bounds": [
+        [
+          -0.5651226372250304,
+          -0.3550656747381621,
+          0.1359936912711131
+        ],
+        [
+          0.5651226167961603,
+          0.3338300390754988,
+          0.8650911724252197
+        ]
+      ],
+      "vertices": 66668,
+      "triangles": 133360,
+      "leftCentroid": [
+        -0.23745673530457526,
+        -0.06985333670374005,
+        0.5962333807285501
+      ],
+      "rightCentroid": [
+        0.23737334716881445,
+        -0.06978852870115626,
+        0.5962128064234694
+      ],
+      "overviewTriangles": 24004
+    },
+    {
+      "index": 14,
+      "id": "insula",
+      "name": "Insular cortex",
+      "role": "Body awareness",
+      "kind": 0,
+      "labels": [
+        10329,
+        10330,
+        12177,
+        12178,
+        12179
+      ],
+      "atlasNames": [
+        "frontal agranular insular cortex (area FI)",
+        "temporal agranular insular cortex (area TI)",
+        "long insular gyri",
+        "short insular gyri",
+        "limen insula"
+      ],
+      "centroid": [
+        -3.7410696180889594e-06,
+        -0.15594473896552843,
+        -0.2299262347958215
+      ],
+      "bounds": [
+        [
+          -0.4643305397454567,
+          -0.46077175307298546,
+          -0.5044985418282621
+        ],
+        [
+          0.46433044435921167,
+          0.060590223918604025,
+          0.0833340415363733
+        ]
+      ],
+      "vertices": 14908,
+      "triangles": 29808,
+      "leftCentroid": [
+        -0.3602300275957773,
+        -0.15594940217482026,
+        -0.2299165283737896
+      ],
+      "rightCentroid": [
+        0.360222545347714,
+        -0.1559400757529354,
+        -0.22993594103859594
+      ],
+      "overviewTriangles": 5364
+    },
+    {
+      "index": 15,
+      "id": "anterior-cingulate",
+      "name": "Anterior cingulate",
+      "role": "Control & motivation",
+      "kind": 0,
+      "labels": [
+        12157,
+        12160
+      ],
+      "atlasNames": [
+        "cingulate gyrus, rostral (anterior) part",
+        "subcallosal gyrus (parolfactory gyrus)"
+      ],
+      "centroid": [
+        9.743838734236963e-06,
+        -0.009632313984543148,
+        -0.44863860168382724
+      ],
+      "bounds": [
+        [
+          -0.15061083100188205,
+          -0.33282144916413914,
+          -0.675107160273766
+        ],
+        [
+          0.15060740224241537,
+          0.29477936450712594,
+          -0.17489922502252356
+        ]
+      ],
+      "vertices": 13804,
+      "triangles": 27600,
+      "leftCentroid": [
+        -0.0656414679135299,
+        -0.008157378675163912,
+        -0.4508191021672385
+      ],
+      "rightCentroid": [
+        0.06570499536096443,
+        -0.007899067600781665,
+        -0.45090066630606573
+      ],
+      "overviewTriangles": 4968
+    },
+    {
+      "index": 16,
+      "id": "posterior-cingulate",
+      "name": "Posterior cingulate",
+      "role": "Internal context",
+      "kind": 0,
+      "labels": [
+        12158,
+        12159
+      ],
+      "atlasNames": [
+        "cingulate gyrus, caudal (posterior) part",
+        "cingulo-parahippocampal isthmus"
+      ],
+      "centroid": [
+        -8.613226079180022e-07,
+        0.13945491563021434,
+        0.1364167374469595
+      ],
+      "bounds": [
+        [
+          -0.25074427446484776,
+          -0.22296794806694392,
+          -0.17509156592902048
+        ],
+        [
+          0.2507159478418667,
+          0.3806948362617927,
+          0.34511789841446455
+        ]
+      ],
+      "vertices": 15632,
+      "triangles": 31264,
+      "leftCentroid": [
+        -0.09460312571595601,
+        0.13079557933162347,
+        0.14388033435041483
+      ],
+      "rightCentroid": [
+        0.09457658653487551,
+        0.13079997561112722,
+        0.14393874016668345
+      ],
+      "overviewTriangles": 5626
+    },
+    {
+      "index": 17,
+      "id": "parahippocampal",
+      "name": "Parahippocampal gyri",
+      "role": "Context",
+      "kind": 0,
+      "labels": [
+        12163,
+        12164,
+        12166
+      ],
+      "atlasNames": [
+        "anterior parahippocampal gyrus",
+        "posterior parahippocampal gyrus",
+        "ambiens gyrus"
+      ],
+      "centroid": [
+        9.319690478756233e-06,
+        -0.3948953348270057,
+        -0.02250843123261711
+      ],
+      "bounds": [
+        [
+          -0.35153671586481944,
+          -0.5545573059528001,
+          -0.27429304691613965
+        ],
+        [
+          0.3515397919261732,
+          -0.19928252521337472,
+          0.22509844198789242
+        ]
+      ],
+      "vertices": 9484,
+      "triangles": 18960,
+      "leftCentroid": [
+        -0.23533806469541269,
+        -0.3948946514527087,
+        -0.022498002503927812
+      ],
+      "rightCentroid": [
+        0.2353567039191044,
+        -0.394896018243022,
+        -0.022518859967732827
+      ],
+      "overviewTriangles": 3412
+    },
+    {
+      "index": 18,
+      "id": "hippocampus",
+      "name": "Hippocampus",
+      "role": "Memory",
+      "kind": 1,
+      "labels": [
+        12171,
+        12173,
+        12174
+      ],
+      "atlasNames": [
+        "head of hippocampus",
+        "body of hippocampus",
+        "tail of hippocampus"
+      ],
+      "centroid": [
+        1.121413129633669e-05,
+        -0.2836073446987905,
+        0.04228166221357482
+      ],
+      "bounds": [
+        [
+          -0.36440010534303724,
+          -0.444848885642117,
+          -0.1318468792656673
+        ],
+        [
+          0.3643798944650065,
+          -0.08583424511360155,
+          0.2224310839499325
+        ]
+      ],
+      "vertices": 6960,
+      "triangles": 13912,
+      "leftCentroid": [
+        -0.24496843167205995,
+        -0.28360763760604735,
+        0.04228656051841753
+      ],
+      "rightCentroid": [
+        0.24499085975661017,
+        -0.2836070520824742,
+        0.042276763807791704
+      ],
+      "overviewTriangles": 2504
+    },
+    {
+      "index": 19,
+      "id": "amygdala",
+      "name": "Amygdala",
+      "role": "Salience",
+      "kind": 1,
+      "labels": [
+        10361,
+        10362,
+        10363,
+        10367,
+        10368,
+        10369,
+        10374,
+        10375,
+        10376,
+        10377
+      ],
+      "atlasNames": [
+        "amygdaloid complex",
+        "anterior amygdaloid area",
+        "central nuclear group",
+        "lateral nucleus",
+        "basolateral nucleus (basal nucleus)",
+        "basomedial nucleus (accessory basal nucleus)",
+        "anterior cortical nucleus",
+        "posterior cortical nucleus",
+        "medial nucleus",
+        "amygdalohippocampal area"
+      ],
+      "centroid": [
+        1.436802463660908e-06,
+        -0.3448695845825819,
+        -0.15414170004105632
+      ],
+      "bounds": [
+        [
+          -0.33480668996675667,
+          -0.4515367004924172,
+          -0.2244138327530421
+        ],
+        [
+          0.33481780135849404,
+          -0.25491318156724174,
+          -0.06723430746379186
+        ]
+      ],
+      "vertices": 2900,
+      "triangles": 5792,
+      "leftCentroid": [
+        -0.23647390235600801,
+        -0.3448589270279325,
+        -0.15413669854916376
+      ],
+      "rightCentroid": [
+        0.23647677563901606,
+        -0.3448802424710372,
+        -0.15414670161645988
+      ],
+      "overviewTriangles": 1042
+    },
+    {
+      "index": 20,
+      "id": "caudate",
+      "name": "Caudate nucleus",
+      "role": "Learning",
+      "kind": 1,
+      "labels": [
+        10335,
+        10336,
+        10337
+      ],
+      "atlasNames": [
+        "head of caudate",
+        "body of caudate",
+        "tail of caudate"
+      ],
+      "centroid": [
+        -2.26246544818314e-06,
+        -0.05302251596188693,
+        -0.2166038707877992
+      ],
+      "bounds": [
+        [
+          -0.3605938405820861,
+          -0.30030419567343536,
+          -0.4622345336911855
+        ],
+        [
+          0.36062070404698077,
+          0.11450103601188719,
+          0.17360803254829027
+        ]
+      ],
+      "vertices": 8256,
+      "triangles": 16520,
+      "leftCentroid": [
+        -0.16336846861865573,
+        -0.053019144310089576,
+        -0.21661483307736093
+      ],
+      "rightCentroid": [
+        0.16336394384026873,
+        -0.05302588761840389,
+        -0.216592908489097
+      ],
+      "overviewTriangles": 2972
+    },
+    {
+      "index": 21,
+      "id": "putamen",
+      "name": "Putamen",
+      "role": "Action",
+      "kind": 1,
+      "labels": [
+        10338,
+        146034754
+      ],
+      "atlasNames": [
+        "putamen",
+        "posteroventral putamen"
+      ],
+      "centroid": [
+        5.426376209265913e-06,
+        -0.15402140588307722,
+        -0.20349734839635045
+      ],
+      "bounds": [
+        [
+          -0.34317223530475066,
+          -0.3106450601181199,
+          -0.4038045251320045
+        ],
+        [
+          0.3431658167727527,
+          -0.005538073881324322,
+          0.015858905088013495
+        ]
+      ],
+      "vertices": 7412,
+      "triangles": 14816,
+      "leftCentroid": [
+        -0.2607757335320654,
+        -0.154001313709381,
+        -0.20349203926539486
+      ],
+      "rightCentroid": [
+        0.26078658608877525,
+        -0.15404149800331945,
+        -0.20350265750610494
+      ],
+      "overviewTriangles": 2666
+    },
+    {
+      "index": 22,
+      "id": "accumbens",
+      "name": "Nucleus accumbens",
+      "role": "Reward",
+      "kind": 1,
+      "labels": [
+        10339
+      ],
+      "atlasNames": [
+        "nucleus accumbens"
+      ],
+      "centroid": [
+        -1.3826783514919238e-05,
+        -0.24694811843880451,
+        -0.293436371957381
+      ],
+      "bounds": [
+        [
+          -0.1913458338365857,
+          -0.3037000269819782,
+          -0.35122817126740663
+        ],
+        [
+          0.1912890334857208,
+          -0.17382908392021929,
+          -0.2548932787124004
+        ]
+      ],
+      "vertices": 1272,
+      "triangles": 2536,
+      "leftCentroid": [
+        -0.1043911093916252,
+        -0.24695333667427488,
+        -0.29342543689897227
+      ],
+      "rightCentroid": [
+        0.10436345575927938,
+        -0.2469429002383595,
+        -0.293447307633154
+      ],
+      "overviewTriangles": 456
+    },
+    {
+      "index": 23,
+      "id": "pallidum",
+      "name": "Globus pallidus",
+      "role": "Action control",
+      "kind": 1,
+      "labels": [
+        10343,
+        10344
+      ],
+      "atlasNames": [
+        "external segment of globus pallidus",
+        "internal segment of globus pallidus"
+      ],
+      "centroid": [
+        -1.019145149277406e-06,
+        -0.16093290243267733,
+        -0.17041784297919066
+      ],
+      "bounds": [
+        [
+          -0.2622196416261837,
+          -0.22505315406440168,
+          -0.274268769397809
+        ],
+        [
+          0.26221944194606595,
+          -0.08733365444783067,
+          -0.05661988207115107
+        ]
+      ],
+      "vertices": 2548,
+      "triangles": 5088,
+      "leftCentroid": [
+        -0.18786905219360273,
+        -0.16091615282689195,
+        -0.1704194528873852
+      ],
+      "rightCentroid": [
+        0.18786701405043693,
+        -0.1609496516957762,
+        -0.1704162332511491
+      ],
+      "overviewTriangles": 914
+    },
+    {
+      "index": 24,
+      "id": "thalamus",
+      "name": "Thalamus",
+      "role": "Relay & regulation",
+      "kind": 1,
+      "labels": [
+        10390,
+        10392,
+        10396,
+        10398,
+        10403,
+        10408,
+        10409,
+        10417,
+        10420,
+        10424,
+        10425,
+        10430,
+        10434,
+        10449,
+        10450,
+        10452,
+        10460,
+        10463,
+        13045
+      ],
+      "atlasNames": [
+        "thalamus",
+        "anterior nuclear complex of thalamus",
+        "lateral dorsal nucleus of thalamus",
+        "mediodorsal nucleus of thalamus",
+        "reuniens nucleus (medioventral nucleus) of thalamus",
+        "lateral posterior nucleus of thalamus",
+        "pulvinar of thalamus",
+        "ventral anterior nucleus of thalamus",
+        "ventral lateral nucleus of thalamus",
+        "ventral posterior lateral nucleus",
+        "ventral posterior medial nucleus",
+        "dorsal lateral geniculate nucleus",
+        "medial geniculate nuclei",
+        "centromedian nucleus of thalamus",
+        "parafascicular nucleus of thalamus",
+        "habenular nuclei",
+        "pineal body",
+        "zona incerta",
+        "midline nuclear complex"
+      ],
+      "centroid": [
+        -2.9041778446937824e-06,
+        -0.10109856452604159,
+        -0.00953011346509448
+      ],
+      "bounds": [
+        [
+          -0.25489757662709306,
+          -0.25378357361057297,
+          -0.20504665768068786
+        ],
+        [
+          0.2548973844345399,
+          0.052221205402331924,
+          0.16441312641732736
+        ]
+      ],
+      "vertices": 8422,
+      "triangles": 16828,
+      "leftCentroid": [
+        -0.12797707802414754,
+        -0.10065642474921889,
+        -0.008461465275201224
+      ],
+      "rightCentroid": [
+        0.12788362940234965,
+        -0.10074327365512367,
+        -0.008496778424123556
+      ],
+      "overviewTriangles": 3028
+    },
+    {
+      "index": 25,
+      "id": "hypothalamus",
+      "name": "Hypothalamus",
+      "role": "Homeostasis",
+      "kind": 1,
+      "labels": [
+        10467,
+        10468,
+        10473,
+        10483,
+        10495
+      ],
+      "atlasNames": [
+        "hypothalamus",
+        "preoptic region of HTH",
+        "supraoptic region of HTH",
+        "tuberal region of HTH",
+        "mammillary region of HTH"
+      ],
+      "centroid": [
+        -7.518695956010305e-07,
+        -0.2618162341853048,
+        -0.1566195997005909
+      ],
+      "bounds": [
+        [
+          -0.14128191437500318,
+          -0.37452924136285637,
+          -0.24127486885163785
+        ],
+        [
+          0.14139021973233362,
+          -0.17857364012057247,
+          -0.05920548611833987
+        ]
+      ],
+      "vertices": 2242,
+      "triangles": 4488,
+      "leftCentroid": [
+        -0.052689825502483585,
+        -0.259511785882395,
+        -0.1562460338614098
+      ],
+      "rightCentroid": [
+        0.05265141652949412,
+        -0.2596064664229944,
+        -0.15590680506709334
+      ],
+      "overviewTriangles": 806
+    },
+    {
+      "index": 26,
+      "id": "basal-forebrain",
+      "name": "Basal forebrain",
+      "role": "Modulation",
+      "kind": 1,
+      "labels": [
+        10349,
+        10350,
+        10384
+      ],
+      "atlasNames": [
+        "basal forebrain",
+        "septal nuclei",
+        "bed nucleus of stria terminalis"
+      ],
+      "centroid": [
+        -9.773918444673098e-07,
+        -0.1598570359010862,
+        -0.2191543162539971
+      ],
+      "bounds": [
+        [
+          -0.23238782167484356,
+          -0.30211846230037553,
+          -0.29604340892807635
+        ],
+        [
+          0.23237398406183057,
+          0.07093064167708969,
+          -0.03901059370251982
+        ]
+      ],
+      "vertices": 3710,
+      "triangles": 7432,
+      "leftCentroid": [
+        -0.0899567951215144,
+        -0.17816583625094176,
+        -0.22138064735685045
+      ],
+      "rightCentroid": [
+        0.0903060902740472,
+        -0.17852341344660427,
+        -0.22121341650838452
+      ],
+      "overviewTriangles": 1336
+    },
+    {
+      "index": 27,
+      "id": "substantia-nigra",
+      "name": "Substantia nigra",
+      "role": "Dopamine & movement",
+      "kind": 1,
+      "labels": [
+        12251
+      ],
+      "atlasNames": [
+        "substantia nigra"
+      ],
+      "centroid": [
+        1.5234699964113332e-05,
+        -0.28807532816945786,
+        -0.02556796853010388
+      ],
+      "bounds": [
+        [
+          -0.14401341764485054,
+          -0.3318923020865046,
+          -0.0924671959414182
+        ],
+        [
+          0.1440189466965088,
+          -0.2462720258014401,
+          0.041439285558046095
+        ]
+      ],
+      "vertices": 992,
+      "triangles": 1976,
+      "leftCentroid": [
+        -0.10216195318817851,
+        -0.2880812838012653,
+        -0.025580314153939392
+      ],
+      "rightCentroid": [
+        0.1021924223225083,
+        -0.2880693730567732,
+        -0.025555622984348526
+      ],
+      "overviewTriangles": 354
+    },
+    {
+      "index": 28,
+      "id": "midbrain",
+      "name": "Midbrain",
+      "role": "Orienting",
+      "kind": 1,
+      "labels": [
+        12181,
+        12195,
+        12247,
+        12292,
+        12305,
+        12330,
+        12354
+      ],
+      "atlasNames": [
+        "pretectal region",
+        "midbrain tegmentum",
+        "red nucleus",
+        "superior colliculus",
+        "inferior colliculus",
+        "cerebral peduncle (crus cerebri)",
+        "superior cerebellar peduncle (brachium conjunctivum)"
+      ],
+      "centroid": [
+        1.1745402844696098e-05,
+        -0.2913787107362133,
+        0.04553140433856626
+      ],
+      "bounds": [
+        [
+          -0.21072015815309492,
+          -0.48074067649420327,
+          -0.13209566290948577
+        ],
+        [
+          0.21071980624152167,
+          -0.14683449996003517,
+          0.3157709738288388
+        ]
+      ],
+      "vertices": 6950,
+      "triangles": 13892,
+      "leftCentroid": [
+        -0.09012141179255903,
+        -0.293800341243168,
+        0.04390940651322733
+      ],
+      "rightCentroid": [
+        0.09004689571046262,
+        -0.293736127929429,
+        0.043592856505897885
+      ],
+      "overviewTriangles": 2500
+    },
+    {
+      "index": 29,
+      "id": "cerebellum",
+      "name": "Cerebellum",
+      "role": "Coordination",
+      "kind": 1,
+      "labels": [
+        10658,
+        10660,
+        12384,
+        12390
+      ],
+      "atlasNames": [
+        "cerebellar vermis",
+        "cerebellar deep nuclei",
+        "paravermis of cerebellum",
+        "lateral hemisphere of cerebellum"
+      ],
+      "centroid": [
+        1.0234321958867678e-05,
+        -0.5141553148197247,
+        0.4221800754764502
+      ],
+      "bounds": [
+        [
+          -0.5707255966419835,
+          -0.8151035445968703,
+          0.08680386525636048
+        ],
+        [
+          0.5707255909415898,
+          -0.127443313003061,
+          0.7350959000555897
+        ]
+      ],
+      "vertices": 67532,
+      "triangles": 135600,
+      "leftCentroid": [
+        -0.24687010378496638,
+        -0.5183975121688875,
+        0.42298864959721016
+      ],
+      "rightCentroid": [
+        0.2470015969270108,
+        -0.5184661394587645,
+        0.423033466031193
+      ],
+      "overviewTriangles": 24408
+    },
+    {
+      "index": 30,
+      "id": "pons",
+      "name": "Pons",
+      "role": "Brainstem pathways",
+      "kind": 1,
+      "labels": [
+        12405,
+        12416,
+        12768
+      ],
+      "atlasNames": [
+        "basilar part of pons",
+        "pontine tegmentum",
+        "middle cerebellar peduncle"
+      ],
+      "centroid": [
+        1.4473534533082067e-05,
+        -0.48447845304425624,
+        0.10488823327054386
+      ],
+      "bounds": [
+        [
+          -0.26472565938182413,
+          -0.6447712421713252,
+          -0.07482848419775687
+        ],
+        [
+          0.2647203217485663,
+          -0.30265235291493126,
+          0.245087057764376
+        ]
+      ],
+      "vertices": 6856,
+      "triangles": 13708,
+      "leftCentroid": [
+        -0.11498457007592816,
+        -0.48480614689973794,
+        0.1055588852464063
+      ],
+      "rightCentroid": [
+        0.11497883802590365,
+        -0.4848327796494078,
+        0.10537507134730197
+      ],
+      "overviewTriangles": 2466
+    },
+    {
+      "index": 31,
+      "id": "medulla",
+      "name": "Medulla",
+      "role": "Autonomic regulation",
+      "kind": 1,
+      "labels": [
+        10668,
+        12535,
+        12538,
+        12600,
+        12741
+      ],
+      "atlasNames": [
+        "white matter of hindbrain",
+        "pyramidal part of medulla oblongata",
+        "tegmentum of medulla oblongata",
+        "inferior olive",
+        "inferior cerebellar peduncle"
+      ],
+      "centroid": [
+        8.943892677165823e-06,
+        -0.5378867368552509,
+        0.3851114263535138
+      ],
+      "bounds": [
+        [
+          -0.49047517182631784,
+          -0.8458231587047635,
+          0.09677455159699433
+        ],
+        [
+          0.4905013665572223,
+          -0.3088889008614695,
+          0.6713877947402873
+        ]
+      ],
+      "vertices": 33586,
+      "triangles": 68404,
+      "leftCentroid": [
+        -0.2075877014785673,
+        -0.5369355483309218,
+        0.38701185165432517
+      ],
+      "rightCentroid": [
+        0.20772496984243638,
+        -0.5368374763388828,
+        0.38716648578687113
+      ],
+      "overviewTriangles": 12312
+    },
+    {
+      "index": 32,
+      "id": "callosum",
+      "name": "Corpus callosum",
+      "role": "Between hemispheres",
+      "kind": 1,
+      "labels": [
+        10561
+      ],
+      "atlasNames": [
+        "corpus callosum"
+      ],
+      "centroid": [
+        8.702851107607188e-06,
+        0.01914927540152891,
+        -0.1714570126640229
+      ],
+      "bounds": [
+        [
+          -0.16068147404441557,
+          -0.2277295091750159,
+          -0.5547915251413871
+        ],
+        [
+          0.16067643401465417,
+          0.17097764600188525,
+          0.25506548151562913
+        ]
+      ],
+      "vertices": 12162,
+      "triangles": 24320,
+      "leftCentroid": [
+        -0.08786166587822761,
+        0.01920381909866514,
+        -0.17170884599440042
+      ],
+      "rightCentroid": [
+        0.08801470387703629,
+        0.019016576522042708,
+        -0.17160130223097483
+      ],
+      "overviewTriangles": 4376
+    },
+    {
+      "index": 33,
+      "id": "white-matter",
+      "name": "Cerebral white matter",
+      "role": "Long-range pathways",
+      "kind": 2,
+      "labels": [
+        10557,
+        10559,
+        10576,
+        10586,
+        10589,
+        12073,
+        266441621
+      ],
+      "atlasNames": [
+        "white matter of forebrain",
+        "anterior commissure",
+        "fornix",
+        "mammillothalamic tract",
+        "optic tract",
+        "olfactory tract",
+        "optic radiation"
+      ],
+      "centroid": [
+        1.34778066685518e-06,
+        0.0017327459168401543,
+        -0.02571031051128316
+      ],
+      "bounds": [
+        [
+          -0.6840401328282,
+          -0.650930696415508,
+          -0.9008872276201708
+        ],
+        [
+          0.684023763321461,
+          0.6344379063903285,
+          0.8326938878724144
+        ]
+      ],
+      "vertices": 299538,
+      "triangles": 600068,
+      "leftCentroid": [
+        -0.2980475084697198,
+        0.002150137975077172,
+        -0.025195712109593628
+      ],
+      "rightCentroid": [
+        0.2980444819542685,
+        0.0021263531070256133,
+        -0.02519242850304063
+      ],
+      "overviewTriangles": 0
+    },
+    {
+      "index": 34,
+      "id": "olfactory",
+      "name": "Olfactory structures",
+      "role": "Smell",
+      "kind": 1,
+      "labels": [
+        10307,
+        10308,
+        10311,
+        13229
+      ],
+      "atlasNames": [
+        "olfactory bulb",
+        "anterior olfactory nucleus",
+        "piriform cortex",
+        "lateral olfactory gyrus"
+      ],
+      "centroid": [
+        -1.0441176500054649e-05,
+        -0.3669551774121366,
+        -0.3163088635443696
+      ],
+      "bounds": [
+        [
+          -0.322796974005948,
+          -0.5243273983588851,
+          -0.6754995360023116
+        ],
+        [
+          0.322823718539232,
+          -0.28530561335529514,
+          -0.20921326859755107
+        ]
+      ],
+      "vertices": 2088,
+      "triangles": 4160,
+      "leftCentroid": [
+        -0.17795872750114008,
+        -0.3669528960610715,
+        -0.3163113186271483
+      ],
+      "rightCentroid": [
+        0.1779378455380242,
+        -0.3669574594132288,
+        -0.3163064083662526
+      ],
+      "overviewTriangles": 748
+    },
+    {
+      "index": 35,
+      "id": "subthalamic",
+      "name": "Subthalamic nucleus",
+      "role": "Action regulation",
+      "kind": 1,
+      "labels": [
+        10466
+      ],
+      "atlasNames": [
+        "subthalamic nucleus"
+      ],
+      "centroid": [
+        -3.331779473627157e-06,
+        -0.23330260772956832,
+        -0.08502602560335765
+      ],
+      "bounds": [
+        [
+          -0.14057121536955847,
+          -0.26435318028608534,
+          -0.12400041720230197
+        ],
+        [
+          0.1405193837806324,
+          -0.20555586980098126,
+          -0.03812815514560505
+        ]
+      ],
+      "vertices": 520,
+      "triangles": 1032,
+      "leftCentroid": [
+        -0.09992986764185703,
+        -0.23331105680419847,
+        -0.0850034103800471
+      ],
+      "rightCentroid": [
+        0.09992320401450762,
+        -0.23329415986171134,
+        -0.08504864100653392
+      ],
+      "overviewTriangles": 300
+    },
+    {
+      "index": 36,
+      "id": "other-deep",
+      "name": "Other deep structures",
+      "role": "Anatomical context",
+      "kind": 1,
+      "labels": [
+        10346
+      ],
+      "atlasNames": [
+        "claustrum"
+      ],
+      "centroid": [
+        3.6741048123761684e-06,
+        -0.16776092799390754,
+        -0.2111323951336424
+      ],
+      "bounds": [
+        [
+          -0.3650396799100206,
+          -0.3631489547664905,
+          -0.4132957944607967
+        ],
+        [
+          0.3650396744383657,
+          0.030597309037782516,
+          -0.005842461016275207
+        ]
+      ],
+      "vertices": 5880,
+      "triangles": 11928,
+      "leftCentroid": [
+        -0.3244879701307842,
+        -0.16773246525335786,
+        -0.21112091037045633
+      ],
+      "rightCentroid": [
+        0.32449531823295313,
+        -0.16778939068196724,
+        -0.2111438800614061
+      ],
+      "overviewTriangles": 2146
+    }
+  ],
+  "excludedLabels": [
+    {
+      "id": 10597,
+      "name": "anterior horn of lateral ventricle"
+    },
+    {
+      "id": 10598,
+      "name": "body of lateral ventricle"
+    },
+    {
+      "id": 10599,
+      "name": "posterior horn of lateral ventricle"
+    },
+    {
+      "id": 10600,
+      "name": "inferior horn of lateral ventricle"
+    },
+    {
+      "id": 10602,
+      "name": "third ventricle"
+    },
+    {
+      "id": 12369,
+      "name": "cerebral aqueduct"
+    },
+    {
+      "id": 12805,
+      "name": "fourth ventricle"
+    },
+    {
+      "id": 12826,
+      "name": "central canal of medulla oblongata"
+    },
+    {
+      "id": 266441657,
+      "name": "atrium of lateral ventricle"
+    }
+  ],
+  "highDetailTriangles": 2100796,
+  "lod": "18% quadric simplification per region; minimum 300 faces; white matter hidden mesh excluded",
+  "normalCorrection": "Outward winding verified by per-group signed volume; undefined vertex normals use the largest incident face normal.",
+  "highDetailMeshHash": "a88e97f52b7ff784c929f87e51fc30b8a1a3f260de18464a18bb826b9b087d24"
+}

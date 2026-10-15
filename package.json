@@ -1,0 +1,19 @@
+{
+  "name": "doke-browser-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/browser.mjs",
+    "build": "bash tools/build.sh",
+    "test:deployed": "node tests/deployed.mjs",
+    "test:performance": "node tests/performance.mjs",
+    "format": "prettier --write public/app.js public/style.css public/index.html tests/*.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.58.2",
+    "prettier": "3.6.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

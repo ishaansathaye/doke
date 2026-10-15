@@ -1,0 +1,748 @@
+{
+  "version": "1.1.0",
+  "reviewDate": "2026-09-06",
+  "review": "Editorial source review; not independent expert validation. Activity timing and intensity are authored.",
+  "sources": {
+    "allen": {
+      "title": "Allen Human Reference Atlas \u2013 3D, 2020",
+      "authors": "Ding and colleagues \u00b7 Allen Institute",
+      "year": "2020",
+      "method": "Anatomical atlas",
+      "species": "Human reference template",
+      "url": "https://download.alleninstitute.org/informatics-archive/allen_human_reference_atlas_3d_2020/version_1/README.pdf",
+      "finding": "An anatomical parcellation of the ICBM 2009b symmetric reference. The rendered meshes are derived from labeled voxels.",
+      "limit": "A symmetric reference atlas, not a scan of you. Teaching groups combine atlas labels; they are not functional parcels."
+    },
+    "music": {
+      "title": "Anatomically distinct dopamine release during anticipation and experience of peak emotion to music",
+      "authors": "Salimpoor et al. \u00b7 Nature Neuroscience",
+      "year": "2011",
+      "method": "PET + fMRI",
+      "species": "Human",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21217764/",
+      "finding": "The study reported striatal dopamine release during intensely pleasurable music, with caudate involvement during anticipation and nucleus accumbens involvement during peak responses.",
+      "limit": "Selected listeners and stimuli. PET release inference and complementary fMRI responses do not provide a universal second-by-second dopamine concentration."
+    },
+    "reward": {
+      "title": "A Neural Substrate of Prediction and Reward",
+      "authors": "Schultz, Dayan & Montague \u00b7 Science",
+      "year": "1997",
+      "method": "Physiology + computational theory",
+      "species": "Nonhuman primate",
+      "url": "https://www.gatsby.ucl.ac.uk/~dayan/papers/sdm97.html",
+      "finding": "Dopaminergic responses can reflect differences between predicted and obtained reward. Learned predictions change responses to cues and outcomes.",
+      "limit": "A simplified teaching account of a subset of dopaminergic responses. The human atlas localization and animation are schematic."
+    },
+    "vision": {
+      "title": "Distributed and overlapping representations of faces and objects in ventral temporal cortex",
+      "authors": "Haxby et al. \u00b7 Science",
+      "year": "2001",
+      "method": "fMRI",
+      "species": "Human",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11577229/",
+      "finding": "Faces and objects elicited discriminable, distributed patterns in ventral temporal cortex. Information was not restricted to the maximally responding patch.",
+      "limit": "Broad atlas gyri stand in for the study\u2019s patterns. Display intensity and stage timing are authored; they are not the original fMRI values."
+    },
+    "motor": {
+      "title": "Function in the Human Connectome: Task-fMRI and Individual Differences in Behavior",
+      "authors": "Barch et al. \u00b7 NeuroImage",
+      "year": "2013",
+      "method": "Task-fMRI",
+      "species": "Human",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4011498/",
+      "finding": "The HCP task battery includes movement conditions to examine functional activation. A controlled task and its contrast define what an activation map means.",
+      "limit": "The lesson highlights broad anatomical participants; it does not replay an HCP dataset or resolve finger somatotopy."
+    },
+    "brain": {
+      "title": "Physiology, Brain",
+      "authors": "NCBI Bookshelf \u00b7 StatPearls",
+      "year": "Reference",
+      "method": "Anatomy and physiology reference",
+      "species": "Human",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK551718/",
+      "finding": "Brain functions arise through interacting cortical, subcortical, cerebellar and brainstem systems.",
+      "limit": "Short region descriptions are introductory summaries, not exhaustive or exclusive functional assignments."
+    },
+    "basal": {
+      "title": "Neuroanatomy, Basal Ganglia",
+      "authors": "NCBI Bookshelf \u00b7 StatPearls",
+      "year": "Reference",
+      "method": "Anatomy reference",
+      "species": "Human",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK537141/",
+      "finding": "Basal ganglia participate in circuits related to action, learning and cognition, through interactions with cortex and thalamus.",
+      "limit": "Individual pathways contain cell-type and receptor-specific effects that a regional atlas does not resolve."
+    },
+    "synthesis": {
+      "title": "Neurotransmitter Synthesis",
+      "authors": "Purves et al. \u00b7 Neuroscience",
+      "year": "2001",
+      "method": "Mechanism reference",
+      "species": "General neurobiology",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK11110/",
+      "finding": "Synthesis, vesicle packaging, release and clearance are distinct processes. Small molecules and peptides have different synthesis and transport pathways.",
+      "limit": "The synapse is a representative diagram with expanded space and slowed teaching time, not a molecular recording."
+    },
+    "receptors": {
+      "title": "Two Families of Postsynaptic Receptors",
+      "authors": "Purves et al. \u00b7 Neuroscience",
+      "year": "2001",
+      "method": "Mechanism reference",
+      "species": "General neurobiology",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK10855/",
+      "finding": "Ionotropic receptors directly gate ion channels. Metabotropic receptors act through intracellular signaling pathways.",
+      "limit": "A transmitter\u2019s effect depends on receptor type and cellular context, not its name alone."
+    },
+    "glutamate": {
+      "title": "Glutamatergic Signaling in the Central Nervous System",
+      "authors": "Reiner & Levitz \u00b7 Neuron",
+      "year": "2018",
+      "method": "Mechanistic review",
+      "species": "Across experimental systems",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6484838/",
+      "finding": "Glutamate signals through both ionotropic and metabotropic receptor families, with different downstream effects.",
+      "limit": "The AMPA-like teaching diagram represents one mechanism; it does not represent all glutamate receptors."
+    },
+    "catecholamines": {
+      "title": "Physiology, Catecholamines",
+      "authors": "NCBI Bookshelf \u00b7 StatPearls",
+      "year": "Reference",
+      "method": "Biochemical reference",
+      "species": "General physiology",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK507716/",
+      "finding": "Dopamine synthesis proceeds from tyrosine through L-DOPA. Dopamine is also a precursor in the catecholamine pathway.",
+      "limit": "Precursor availability or an activity choice does not determine a visitor\u2019s dopamine level."
+    },
+    "neurotransmitters": {
+      "title": "Neurotransmitters",
+      "authors": "Purves et al. \u00b7 Neuroscience",
+      "year": "2001",
+      "method": "Teaching reference",
+      "species": "General neurobiology",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK10795/",
+      "finding": "Neurotransmitters act through diverse receptors; neurons can use more than one signaling molecule.",
+      "limit": "Excitation and inhibition depend on receptor and cellular conditions. No single chemical corresponds to one feeling."
+    },
+    "bold": {
+      "title": "Neurophysiological investigation of the basis of the fMRI signal",
+      "authors": "Logothetis et al. \u00b7 Nature",
+      "year": "2001",
+      "method": "Electrophysiology + fMRI",
+      "species": "Nonhuman primate",
+      "url": "https://www.nature.com/articles/35084005",
+      "finding": "BOLD is an indirect neurovascular signal; in the studied visual cortex conditions it related more strongly to local field potentials than to multi-unit output.",
+      "limit": "fMRI brightness cannot be converted directly into spike counts or chemical release."
+    },
+    "wilson": {
+      "title": "Excitatory and inhibitory interactions in localized populations of model neurons",
+      "authors": "Wilson & Cowan \u00b7 Biophysical Journal",
+      "year": "1972",
+      "method": "Mathematical model",
+      "species": "Abstract neural populations",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/4332108/",
+      "finding": "Coupled excitatory and inhibitory populations can produce nonlinear temporal behavior.",
+      "limit": "Our simplified rate model uses pedagogical parameters, not parameters fitted to a person or a particular brain region."
+    },
+    "yeo": {
+      "title": "The organization of the human cerebral cortex estimated by intrinsic functional connectivity",
+      "authors": "Yeo et al. \u00b7 Journal of Neurophysiology",
+      "year": "2011",
+      "method": "Resting-state functional connectivity",
+      "species": "Human",
+      "url": "https://surfer.nmr.mgh.harvard.edu/pub/articles/2011/2011_-_Yeo_et_al._-_Journal_of_neurophysiology.pdf",
+      "finding": "Large-scale cortical networks can be estimated from patterns of functional connectivity.",
+      "limit": "Network membership does not imply a unique mental function or a directed anatomical connection."
+    },
+    "release": {
+      "title": "Calcium Control of Neurotransmitter Release",
+      "authors": "S\u00fcdhof \u00b7 Cold Spring Harbor Perspectives in Biology",
+      "year": "2012",
+      "method": "Mechanistic review",
+      "species": "Across experimental systems",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/22453967/",
+      "finding": "Calcium entry couples electrical activity to vesicular release through calcium sensing and membrane fusion machinery.",
+      "limit": "Geometry, particle counts, diffusion paths and timing in this teaching view are authored, not molecular dynamics or measured kinetics."
+    },
+    "neuron-morphology": {
+      "title": "Pyramidal neurons: dendritic structure and synaptic integration",
+      "authors": "Spruston \u00b7 Nature Reviews Neuroscience",
+      "year": "2008",
+      "method": "Review of neuronal structure and integration",
+      "species": "Across experimental systems",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/18270515/",
+      "finding": "Pyramidal neurons have distinct apical and basal dendritic trees; dendritic structure participates in synaptic integration.",
+      "limit": "The enlarged neural tissue window is procedural teaching geometry. Cell positions, density, contacts and flashes are not reconstructed from the atlas or calibrated to recordings."
+    },
+    "structure-dopamine": {
+      "title": "Dopamine \u2014 PubChem compound record",
+      "authors": "PubChem \u00b7 NCBI",
+      "year": "Accessed 2026-09-06",
+      "method": "Computed 3D molecular conformer",
+      "species": "Chemical structure",
+      "url": "https://pubchem.ncbi.nlm.nih.gov/compound/681",
+      "finding": "Atom identities, bond orders and one 3D conformer provide the displayed ball-and-stick structure.",
+      "limit": "One structure, not molecular dynamics. Hydrogen and protonation states follow the source record; L-glutamic acid is the conjugate acid of physiological glutamate. Display radii are illustrative."
+    },
+    "structure-glutamate": {
+      "title": "L-glutamic acid \u2014 PubChem compound record",
+      "authors": "PubChem \u00b7 NCBI",
+      "year": "Accessed 2026-09-06",
+      "method": "Computed 3D molecular conformer",
+      "species": "Chemical structure",
+      "url": "https://pubchem.ncbi.nlm.nih.gov/compound/33032",
+      "finding": "Atom identities, bond orders and one 3D conformer provide the displayed ball-and-stick structure.",
+      "limit": "One structure, not molecular dynamics. Hydrogen and protonation states follow the source record; L-glutamic acid is the conjugate acid of physiological glutamate. Display radii are illustrative."
+    },
+    "structure-gaba": {
+      "title": "GABA \u2014 PubChem compound record",
+      "authors": "PubChem \u00b7 NCBI",
+      "year": "Accessed 2026-09-06",
+      "method": "Computed 3D molecular conformer",
+      "species": "Chemical structure",
+      "url": "https://pubchem.ncbi.nlm.nih.gov/compound/119",
+      "finding": "Atom identities, bond orders and one 3D conformer provide the displayed ball-and-stick structure.",
+      "limit": "One structure, not molecular dynamics. Hydrogen and protonation states follow the source record; L-glutamic acid is the conjugate acid of physiological glutamate. Display radii are illustrative."
+    }
+  },
+  "regions": {
+    "motor": {
+      "summary": "On the frontal side of the central sulcus, the precentral gyrus includes primary motor cortex. It participates in control of voluntary movement.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "prefrontal": {
+      "summary": "These frontal gyri participate in planning, working memory and cognitive control. Their contributions depend on the task and their interactions with other regions.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "inferior-frontal": {
+      "summary": "Inferior frontal regions participate in language and control processes. A broad anatomical gyrus is not identical to a functional language area.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "orbitofrontal": {
+      "summary": "Orbital frontal regions participate in evaluating outcomes and guiding decisions in context. Valuation is distributed across several interacting structures.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "somatosensory": {
+      "summary": "The postcentral gyrus includes primary somatosensory cortex, which processes information about the body. The atlas does not resolve a particular finger representation.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "parietal": {
+      "summary": "Superior parietal regions participate in spatial processing and coordination of sensory information with action.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "inferior-parietal": {
+      "summary": "The angular and supramarginal gyri sit at an association-cortex crossroads. Their roles include integration across sensory and cognitive domains.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "precuneus": {
+      "summary": "A medial parietal region involved in several internally directed and spatial processes. It participates in distributed networks rather than a single isolated function.",
+      "sources": [
+        "allen",
+        "yeo"
+      ]
+    },
+    "superior-temporal": {
+      "summary": "Superior temporal regions participate in auditory processing. This teaching group also includes adjacent temporal landmarks named in the atlas.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "middle-temporal": {
+      "summary": "A temporal association region. The atlas defines its anatomical boundary; functional patterns can span it and neighboring cortex.",
+      "sources": [
+        "allen"
+      ]
+    },
+    "inferior-temporal": {
+      "summary": "Part of the broader ventral visual system involved in object representations. Information is distributed across overlapping response patterns.",
+      "sources": [
+        "allen",
+        "vision"
+      ]
+    },
+    "fusiform": {
+      "summary": "The fusiform gyrus lies on the ventral temporal-occipital surface. It participates in visual recognition; the entire gyrus is not a dedicated \u201cface center.\u201d",
+      "sources": [
+        "allen",
+        "vision"
+      ]
+    },
+    "auditory": {
+      "summary": "Heschl\u2019s gyrus is an important auditory landmark on the superior temporal plane. It becomes easier to inspect when the surrounding cortex is hidden.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "visual": {
+      "summary": "Occipital structures participate in visual processing. This grouped mesh contains several anatomical labels and does not delineate every visual area.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "insula": {
+      "summary": "The insula lies within the lateral sulcus, beneath surrounding cortex. Its broad roles include integration of bodily and sensory information.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "anterior-cingulate": {
+      "summary": "Anterior cingulate regions participate in control, motivation and affect-related processes. Activity here does not establish one specific emotion.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "posterior-cingulate": {
+      "summary": "Posterior medial cortex participates in intrinsic functional networks. Its involvement changes with task and context.",
+      "sources": [
+        "allen",
+        "yeo"
+      ]
+    },
+    "parahippocampal": {
+      "summary": "These medial temporal gyri neighbor the hippocampus. This is an anatomical grouping, not a claim of a single memory pathway.",
+      "sources": [
+        "allen"
+      ]
+    },
+    "hippocampus": {
+      "summary": "The hippocampus participates in forming and organizing memories, in interaction with a wider medial temporal and cortical system.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "amygdala": {
+      "summary": "An anatomically complex set of nuclei in the medial temporal lobe. It participates in learning and the relevance of stimuli, beyond any one emotion.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "caudate": {
+      "summary": "A striatal structure with head, body and tail. In the music study, caudate responses were associated with anticipation of peak emotion.",
+      "sources": [
+        "allen",
+        "music"
+      ]
+    },
+    "putamen": {
+      "summary": "A striatal structure involved in basal ganglia circuits, including those concerned with action.",
+      "sources": [
+        "allen",
+        "basal"
+      ]
+    },
+    "accumbens": {
+      "summary": "Part of the ventral striatum. The music study associated this region with peak pleasurable responses; this does not make it a universal pleasure meter.",
+      "sources": [
+        "allen",
+        "music"
+      ]
+    },
+    "pallidum": {
+      "summary": "The internal and external pallidal segments participate in basal ganglia circuits. This teaching mesh groups both segments.",
+      "sources": [
+        "allen",
+        "basal"
+      ]
+    },
+    "thalamus": {
+      "summary": "A collection of nuclei that relay and regulate information in interactions with cortex and other structures. This mesh groups multiple atlas nuclei.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "hypothalamus": {
+      "summary": "A small, diverse region involved in bodily regulation and neuroendocrine functions. Its nuclei have distinct roles that are not resolved by a single global activity value.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "basal-forebrain": {
+      "summary": "An anatomical teaching group combining basal forebrain, septal and neighboring atlas labels. Individual cell populations and projections have different signaling roles.",
+      "sources": [
+        "allen"
+      ]
+    },
+    "substantia-nigra": {
+      "summary": "A midbrain structure participating in basal ganglia circuits. Dopaminergic neurons are associated with its pars compacta; the atlas mesh does not separate all cell types.",
+      "sources": [
+        "allen",
+        "basal"
+      ]
+    },
+    "midbrain": {
+      "summary": "This teaching group combines midbrain tegmental and orienting structures. It is not a cell-specific dopamine source map.",
+      "sources": [
+        "allen"
+      ]
+    },
+    "cerebellum": {
+      "summary": "The cerebellum contributes to coordination and learning of movement, alongside broader cognitive roles. It interacts with systems outside the cerebellum.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "pons": {
+      "summary": "The pons is part of the brainstem. This mesh combines atlas subdivisions and a connecting cerebellar peduncle for anatomical context.",
+      "sources": [
+        "allen"
+      ]
+    },
+    "medulla": {
+      "summary": "The medulla contains systems involved in autonomic regulation and pathways between brain and body. The displayed group includes adjacent labeled hindbrain tissue.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "callosum": {
+      "summary": "The corpus callosum is a major white matter connection between the cerebral hemispheres. A bundle is not a single axon or a single signal.",
+      "sources": [
+        "allen",
+        "brain"
+      ]
+    },
+    "white-matter": {
+      "summary": "White matter contains axonal pathways. Its dense internal atlas mesh is omitted from rendering to keep deeper structures visible.",
+      "sources": [
+        "allen"
+      ]
+    },
+    "olfactory": {
+      "summary": "This group contains the olfactory bulb, anterior olfactory nucleus and nearby olfactory cortical labels. Its boundaries come from the atlas ontology.",
+      "sources": [
+        "allen"
+      ]
+    },
+    "subthalamic": {
+      "summary": "A small nucleus participating in basal ganglia circuitry. Its role depends on its connections and activity patterns.",
+      "sources": [
+        "allen",
+        "basal"
+      ]
+    },
+    "other-deep": {
+      "summary": "Context group: claustrum, habenular nuclei, pineal body and zona incerta. They are separate anatomical structures with different functions, grouped only for this overview.",
+      "sources": [
+        "allen"
+      ]
+    }
+  },
+  "activities": [
+    {
+      "id": "music",
+      "number": "01",
+      "title": "When music moves you",
+      "short": "Music & anticipation",
+      "tag": "REWARD \u00b7 DOPAMINE",
+      "intro": "The moment before your favorite part. Then the part itself. Explore two phases of a studied musical experience.",
+      "duration": 60,
+      "chemical": "dopamine",
+      "sources": [
+        "music",
+        "synthesis",
+        "bold"
+      ],
+      "kind": "Human PET + fMRI",
+      "chapters": [
+        {
+          "title": "Set the scene",
+          "text": "The study used emotionally powerful music selected for the listeners. This story illustrates the findings; it does not measure your response to a song.",
+          "regions": [
+            "caudate",
+            "accumbens"
+          ],
+          "source": "music"
+        },
+        {
+          "title": "Anticipation",
+          "text": "Bring the caudate into view. Anticipation and peak emotion were associated with different striatal responses in this study.",
+          "regions": [
+            "caudate"
+          ],
+          "source": "music"
+        },
+        {
+          "title": "The peak",
+          "text": "Now locate the nucleus accumbens. This chapter illustrates its association with the experience of peak emotion.",
+          "regions": [
+            "accumbens"
+          ],
+          "source": "music"
+        },
+        {
+          "title": "A chemical signal",
+          "text": "Dopamine release, its synthesis, and receptor action are different processes. Open the synapse lesson to examine signaling at a smaller scale.",
+          "regions": [
+            "caudate",
+            "accumbens"
+          ],
+          "source": "synthesis"
+        }
+      ]
+    },
+    {
+      "id": "reward",
+      "number": "02",
+      "title": "The surprise in a reward",
+      "short": "Reward & prediction",
+      "tag": "LEARNING \u00b7 DOPAMINE",
+      "intro": "An expected outcome and a surprising one are not the same event for a learning system.",
+      "duration": 48,
+      "chemical": "dopamine",
+      "sources": [
+        "reward",
+        "basal"
+      ],
+      "kind": "Primate physiology + teaching model",
+      "chapters": [
+        {
+          "title": "An unexpected outcome",
+          "text": "A reward can produce a response when it was not predicted. The highlighted human structures provide schematic anatomical context.",
+          "regions": [
+            "substantia-nigra",
+            "caudate",
+            "accumbens"
+          ],
+          "source": "reward"
+        },
+        {
+          "title": "Learn the cue",
+          "text": "With learning, a reward-predicting cue can acquire a response. This is an explanatory sequence, not a fitted learning trajectory.",
+          "regions": [
+            "caudate",
+            "accumbens"
+          ],
+          "source": "reward"
+        },
+        {
+          "title": "Expected or omitted?",
+          "text": "Compare a predicted outcome with its omission. A negative prediction error is different from \u201cno dopamine anywhere.\u201d",
+          "regions": [
+            "substantia-nigra",
+            "caudate"
+          ],
+          "source": "reward"
+        },
+        {
+          "title": "A learning signal",
+          "text": "The idea is a difference between prediction and outcome. It does not mean that every dopaminergic neuron carries the same signal.",
+          "regions": [
+            "caudate",
+            "accumbens"
+          ],
+          "source": "reward"
+        }
+      ]
+    },
+    {
+      "id": "vision",
+      "number": "03",
+      "title": "More than meets the eye",
+      "short": "Faces & objects",
+      "tag": "PERCEPTION \u00b7 DISTRIBUTED PATTERNS",
+      "intro": "Recognition is a pattern across a system. Look beyond a single bright spot.",
+      "duration": 48,
+      "chemical": "glutamate",
+      "sources": [
+        "vision",
+        "bold"
+      ],
+      "kind": "Human fMRI",
+      "chapters": [
+        {
+          "title": "An anatomical starting point",
+          "text": "Find occipital cortex and the ventral temporal surface. These are broad atlas landmarks for the visual system.",
+          "regions": [
+            "visual"
+          ],
+          "source": "brain"
+        },
+        {
+          "title": "A distributed pattern",
+          "text": "Ventral temporal response patterns can distinguish faces and objects. Several regions are highlighted to illustrate distribution.",
+          "regions": [
+            "fusiform",
+            "inferior-temporal"
+          ],
+          "source": "vision"
+        },
+        {
+          "title": "Overlapping representations",
+          "text": "Switch face and object conditions. The illustrative patterns overlap; the entire fusiform gyrus is not a dedicated face detector.",
+          "regions": [
+            "fusiform",
+            "inferior-temporal",
+            "middle-temporal"
+          ],
+          "source": "vision"
+        },
+        {
+          "title": "What was measured?",
+          "text": "The study measured fMRI patterns. This does not specify individual spikes or task-evoked glutamate quantities.",
+          "regions": [
+            "fusiform",
+            "inferior-temporal"
+          ],
+          "source": "bold"
+        }
+      ]
+    },
+    {
+      "id": "movement",
+      "number": "04",
+      "title": "A small move. A whole system.",
+      "short": "Move your fingers",
+      "tag": "ACTION \u00b7 SENSORIMOTOR SYSTEMS",
+      "intro": "A simple movement offers a window onto coordinated brain function.",
+      "duration": 48,
+      "chemical": "gaba",
+      "sources": [
+        "motor",
+        "brain",
+        "basal"
+      ],
+      "kind": "Task-fMRI + anatomy",
+      "chapters": [
+        {
+          "title": "A defined task",
+          "text": "Choose a hand for the teaching scenario. The atlas cannot resolve the exact neurons responsible for your movement.",
+          "regions": [
+            "motor"
+          ],
+          "source": "motor"
+        },
+        {
+          "title": "Motor cortex",
+          "text": "Inspect the precentral gyrus. Contralateral emphasis is an introductory simplification; both hemispheres can participate.",
+          "regions": [
+            "motor"
+          ],
+          "source": "brain"
+        },
+        {
+          "title": "A wider system",
+          "text": "Cerebellar and basal ganglia systems contribute to movement. These paths are schematic relationships, not reconstructed axon trajectories.",
+          "regions": [
+            "motor",
+            "putamen",
+            "cerebellum"
+          ],
+          "source": "basal"
+        },
+        {
+          "title": "Sensation and action",
+          "text": "Sensory information participates in ongoing movement. Region brightness represents authored emphasis, not a measured firing rate.",
+          "regions": [
+            "motor",
+            "somatosensory",
+            "cerebellum"
+          ],
+          "source": "brain"
+        }
+      ]
+    }
+  ],
+  "chemicals": [
+    {
+      "id": "dopamine",
+      "name": "Dopamine",
+      "symbol": "DA",
+      "className": "Catecholamine \u00b7 neuromodulator",
+      "tagline": "A signal shaped by context.",
+      "summary": "Dopamine participates in learning, movement and other functions. Its effect depends on the pathway, receptor and state of the receiving cells.",
+      "synthesis": "Tyrosine \u2192 L-DOPA \u2192 dopamine. Synthesis is a biochemical process inside appropriate cells; a chosen activity does not specify its rate.",
+      "release": "Release occurs from dopaminergic terminals. The music lesson links to a study-specific inference about striatal release.",
+      "receptors": "Dopamine receptors are metabotropic: they influence intracellular signaling. This is distinct from a transmitter directly opening an ion channel.",
+      "clearance": "Transporters and metabolism help regulate the signal. The animation does not model calibrated dopamine kinetics.",
+      "regions": [
+        "substantia-nigra",
+        "caudate",
+        "accumbens"
+      ],
+      "sources": [
+        "catecholamines",
+        "receptors",
+        "music",
+        "reward",
+        "release",
+        "structure-dopamine"
+      ],
+      "activities": [
+        "music",
+        "reward"
+      ]
+    },
+    {
+      "id": "glutamate",
+      "name": "Glutamate",
+      "symbol": "Glu",
+      "className": "Amino acid \u00b7 neurotransmitter",
+      "tagline": "Fast signals. Many possibilities.",
+      "summary": "A major excitatory transmitter in the adult brain, acting through several ionotropic and metabotropic receptor types.",
+      "synthesis": "Neurons can form glutamate from metabolic precursors. Recycling between neurons and glia helps sustain signaling.",
+      "release": "Vesicles release glutamate at appropriate terminals. The lesson illustrates a representative chemical synapse.",
+      "receptors": "AMPA and NMDA are ionotropic receptor families; metabotropic glutamate receptors signal through G proteins. The synapse lesson uses an AMPA-like example.",
+      "clearance": "Transporters in neurons and glia remove glutamate from extracellular space. This is distinct from a synapse simply \u201cturning off.\u201d",
+      "regions": [],
+      "sources": [
+        "glutamate",
+        "synthesis",
+        "receptors",
+        "release",
+        "structure-glutamate"
+      ],
+      "activities": []
+    },
+    {
+      "id": "gaba",
+      "name": "GABA",
+      "symbol": "GABA",
+      "className": "Amino acid \u00b7 neurotransmitter",
+      "tagline": "Inhibition is active work.",
+      "summary": "A major inhibitory transmitter in the mature brain. Effects depend on receptor type and ionic conditions, so inhibition is not a universal property in every context.",
+      "synthesis": "GABA can be synthesized from glutamate by glutamic acid decarboxylase in GABAergic neurons.",
+      "release": "GABAergic terminals release GABA. A whole-region highlight cannot identify the activity of all inhibitory cells.",
+      "receptors": "GABA-A receptors are ionotropic; GABA-B receptors are metabotropic. The neural circuit illustrates inhibitory population interactions, not receptor-specific kinetics.",
+      "clearance": "Transporters contribute to GABA uptake. Signaling and recycling occur alongside ongoing network activity.",
+      "regions": [],
+      "sources": [
+        "neurotransmitters",
+        "synthesis",
+        "receptors",
+        "release",
+        "structure-gaba"
+      ],
+      "activities": []
+    }
+  ]
+}

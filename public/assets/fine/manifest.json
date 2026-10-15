@@ -1,0 +1,58 @@
+{
+  "version": "allen-fine-1mm-v1",
+  "encoding": "gzip-chunks",
+  "triangles": 2100796,
+  "bytes": 58778656,
+  "compressedBytes": 32694975,
+  "meshHash": "a88e97f52b7ff784c929f87e51fc30b8a1a3f260de18464a18bb826b9b087d24",
+  "chunks": [
+    {
+      "url": "assets/fine/part-000.brnz",
+      "bytes": 6092431,
+      "decodedBytes": 8388608,
+      "sha256": "067a02929544ed2cb4689bc5e2e725211f4dd19190f66b1f2bfbba57f3027f01"
+    },
+    {
+      "url": "assets/fine/part-001.brnz",
+      "bytes": 6086893,
+      "decodedBytes": 8388608,
+      "sha256": "70905840e3de6542847c43a7118784a30779b649a6b23555b9c5bb63bf3dca18"
+    },
+    {
+      "url": "assets/fine/part-002.brnz",
+      "bytes": 6096092,
+      "decodedBytes": 8388608,
+      "sha256": "2d4bd87d6cc5c7b7493ff91547b18de5a2acb698d81eba88461a02123f7ccf3f"
+    },
+    {
+      "url": "assets/fine/part-003.brnz",
+      "bytes": 6100071,
+      "decodedBytes": 8388608,
+      "sha256": "33bad40b6eba1fa193ae31d4ec7304d66632fb49ae6f63913966c2578c924012"
+    },
+    {
+      "url": "assets/fine/part-004.brnz",
+      "bytes": 2768649,
+      "decodedBytes": 8388608,
+      "sha256": "d75c1a59f2acbaaee63fab830e1ffef9e911766ca17df6c9a240659b6914f864"
+    },
+    {
+      "url": "assets/fine/part-005.brnz",
+      "bytes": 2749225,
+      "decodedBytes": 8388608,
+      "sha256": "00e9d03237c13b2f92ba24fdafcfcfc22b4d413fd0c6f77dc4701ec2cdb1eaf5"
+    },
+    {
+      "url": "assets/fine/part-006.brnz",
+      "bytes": 2783171,
+      "decodedBytes": 8388608,
+      "sha256": "50a5cc74aa73a721cd16670a2a43fa61d4f808eb2032eb0bab1c120d0af278f7"
+    },
+    {
+      "url": "assets/fine/part-007.brnz",
+      "bytes": 18443,
+      "decodedBytes": 58400,
+      "sha256": "90b303ffaed30f46f65d22efbbac664c5d85d482fc3577f04c3b836cf114ffe3"
+    }
+  ]
+}
