@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>doke · Possible futures</title>
+    <link rel="icon" href="data:," />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #070b0a;
+        color: #eef1eb;
+        font-family: Arial, sans-serif;
+        background-image: radial-gradient(
+          ellipse at 70% 15%,
+          #2441313b,
+          transparent 60%
+        );
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      a:focus-visible {
+        outline: 2px solid #d1edd6;
+        outline-offset: 6px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 29px 4vw;
+      }
+      .brand {
+        font-size: 32px;
+        letter-spacing: -2px;
+        font-weight: 750;
+      }
+      .edition {
+        font: 10px monospace;
+        letter-spacing: 1.5px;
+        color: #9baaa0;
+      }
+      .research {
+        font-size: 12px;
+        color: #a9b6ad;
+      }
+      main {
+        max-width: 1440px;
+        margin: auto;
+        padding: 65px 4vw 50px;
+      }
+      .eyebrow {
+        font: 10px monospace;
+        letter-spacing: 2px;
+        color: #a9c5b4;
+      }
+      h1 {
+        font-weight: 400;
+        font-size: clamp(45px, 5vw, 77px);
+        line-height: 1.04;
+        letter-spacing: -3.8px;
+        margin: 23px 0;
+      }
+      h1 em {
+        font-family: Georgia, serif;
+        font-weight: 400;
+      }
+      .lede {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #aebbb2;
+        max-width: 630px;
+      }
+      .concepts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 19px;
+        margin-top: 53px;
+      }
+      .card {
+        border: 1px solid #b4c7b327;
+        border-radius: 23px;
+        background: #111a15aa;
+        overflow: hidden;
+        display: block;
+        transition:
+          transform 0.25s,
+          border-color 0.25s;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+        border-color: #c1ddbd77;
+      }
+      .visual {
+        height: 255px;
+        position: relative;
+        background: #09100c;
+        overflow: hidden;
+      }
+      .visual img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.9;
+        transition: transform 0.8s;
+      }
+      .card:hover img {
+        transform: scale(1.035);
+      }
+      .visual:after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(transparent 65%, #111a15);
+      }
+      .number {
+        position: absolute;
+        left: 22px;
+        top: 20px;
+        font: 10px monospace;
+        color: #d8e4d5;
+        border: 1px solid #ffffff24;
+        border-radius: 40px;
+        padding: 7px 10px;
+        background: #07110cad;
+      }
+      .content {
+        padding: 22px 24px 25px;
+      }
+      .category {
+        font: 9px monospace;
+        color: #99b29f;
+        letter-spacing: 1px;
+      }
+      h2 {
+        font-size: 28px;
+        letter-spacing: -0.9px;
+        font-weight: 400;
+        margin: 11px 0;
+      }
+      .content p {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #afbeb3;
+        min-height: 47px;
+        margin: 0 0 26px;
+      }
+      .entry {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+      }
+      .entry span:last-child {
+        width: 29px;
+        height: 29px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #ffffff2a;
+        border-radius: 50%;
+        font-size: 17px;
+      }
+      .foot {
+        margin-top: 37px;
+        display: flex;
+        gap: 25px;
+        justify-content: space-between;
+        font: 10px/1.8 monospace;
+        color: #8e9f94;
+      }
+      .foot p {
+        margin: 0;
+        max-width: 530px;
+      }
+      .choice {
+        margin-top: 45px;
+        border-top: 1px solid #ffffff15;
+        padding-top: 25px;
+        color: #c6d3c9;
+        font-size: 16px;
+      }
+      .choice small {
+        display: block;
+        font-size: 12px;
+        color: #93a59a;
+        margin-top: 10px;
+      }
+      @media (max-width: 850px) {
+        main {
+          padding-top: 35px;
+        }
+        .concepts {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          display: grid;
+          grid-template-columns: 40% 60%;
+        }
+        .visual {
+          height: 100%;
+          min-height: 230px;
+        }
+        .content p {
+          min-height: 0;
+        }
+        .foot {
+          display: block;
+        }
+        .foot p {
+          margin-top: 15px;
+        }
+        .edition {
+          display: none;
+        }
+        h1 {
+          letter-spacing: -2px;
+        }
+      }
+      @media (max-width: 500px) {
+        header {
+          padding: 23px;
+        }
+        .research {
+          font-size: 10px;
+        }
+        main {
+          padding: 25px 22px 45px;
+        }
+        h1 {
+          font-size: 44px;
+        }
+        .lede {
+          font-size: 13px;
+        }
+        .concepts {
+          margin-top: 31px;
+          gap: 20px;
+        }
+        .card {
+          display: block;
+        }
+        .visual {
+          height: 240px;
+        }
+        .content {
+          padding: 20px;
+        }
+        .content p {
+          margin-bottom: 17px;
+        }
+        .choice {
+          font-size: 14px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="index.html">doke</a
+      ><span class="edition">DESIGN STUDIES / 01—03</span
+      ><a
+        class="research"
+        href="https://github.com/ishaansathaye/doke/blob/design/living-systems-play/docs/play/README.md"
+        >Research & ideas ↗</a
+      >
+    </header>
+    <main>
+      <span class="eyebrow">THREE POSSIBLE FUTURES</span>
+      <h1>Less to read.<br />More to <em>bring to life.</em></h1>
+      <p class="lede">
+        A body you can play. A creature in your world.<br />A memory made from
+        your own marks.<br />Three sketches of what doke could become.
+      </p>
+      <div class="concepts">
+        <a class="card" href="body.html"
+          ><div class="visual">
+            <img
+              src="previews/body.webp"
+              alt="Luminous schematic nerves and organs inside a floating body"
+            /><span class="number">01</span>
+          </div>
+          <div class="content">
+            <span class="category">FOOD → BODY → SIGNAL</span>
+            <h2>After a Bite</h2>
+            <p>
+              Drop something in. Follow it inside.<br />Make a little chain
+              reaction.
+            </p>
+            <div class="entry"><span>Play the body</span><span>↗</span></div>
+          </div></a
+        >
+        <a class="card" href="creature.html"
+          ><div class="visual">
+            <img
+              src="previews/creature.webp"
+              alt="A translucent fictional creature navigating a hand-painted world"
+            /><span class="number">02</span>
+          </div>
+          <div class="content">
+            <span class="category">YOUR WORLD → ITS BEHAVIOR</span>
+            <h2>Little Stranger</h2>
+            <p>Draw its world. Move its food.<br />See what it does next.</p>
+            <div class="entry">
+              <span>Meet the creature</span><span>↗</span>
+            </div>
+          </div></a
+        >
+        <a class="card" href="echo.html"
+          ><div class="visual">
+            <img
+              src="previews/memory.webp"
+              alt="A luminous fabric holding and retrieving a personal drawn mark"
+            /><span class="number">03</span>
+          </div>
+          <div class="content">
+            <span class="category">YOUR MARK → A RETURNING TRACE</span>
+            <h2>Memory Loom</h2>
+            <p>
+              Leave a trace. Take some away.<br />See what a fragment brings
+              back.
+            </p>
+            <div class="entry"><span>Make a memory</span><span>↗</span></div>
+          </div></a
+        >
+      </div>
+      <div class="choice">
+        Which one makes you want to try something else?<small
+          >That is the decision to make before building a larger
+          simulation.</small
+        >
+      </div>
+      <div class="foot">
+        <p>
+          PLAYABLE DESIGN MOCKS · NOT THE PRODUCTION APP<br />Original visuals
+          and interaction rules. No accounts or uploads. Your input stays in
+          this page. Each mock explains what it actually computes.
+        </p>
+        <p>
+          SDR glow · Mouse, touch & keyboard<br />These sketches do not simulate
+          your personal brain or body.
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
