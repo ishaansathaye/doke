@@ -7,7 +7,8 @@
     "build": "bash tools/build.sh",
     "test:deployed": "node tests/deployed.mjs",
     "test:performance": "node tests/performance.mjs",
-    "format": "prettier --write public/app.js public/style.css public/index.html tests/*.mjs"
+    "test:experiment": "node tests/experiment.mjs",
+    "format": "prettier --write public/app.js public/experiment.js public/style.css public/index.html tests/*.mjs"
   },
   "devDependencies": {
     "playwright": "1.58.2",

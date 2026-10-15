@@ -4,7 +4,7 @@ This is the guide to using, developing and hosting doke.
 
 ## Explore
 
-The top navigation chooses **Brain**, **Synapse**, **Neural circuit** or **Messengers**. Each scene has its own lower dock. Drag to orbit, scroll or pinch to zoom, Shift-drag or right-drag to pan. Keyboard arrows rotate, +/− zoom, and Home resets the view. The ⋯ button opens display and camera tools.
+The top navigation chooses **Brain**, **Synapse**, **Neural circuit**, **Messengers** or **Experiment**. Each scene has its own lower dock. Drag to orbit, scroll or pinch to zoom, Shift-drag or right-drag to pan. Keyboard arrows rotate, +/− zoom, and Home resets the view. The ⋯ button opens display and camera tools.
 
 | Scene          | Lower controls                                                       | What to look for                                                                                                                                                          |
 | -------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -12,8 +12,19 @@ The top navigation chooses **Brain**, **Synapse**, **Neural circuit** or **Messe
 | Synapse        | Play/pause, four stages, Focus cleft, Inspect messenger, explanation | Follow packaging, release, receptor action and clearance. Selecting a stage starts that stage's animation clock at zero. Pausing freezes it; playing resumes immediately. |
 | Neural circuit | Play/pause, Send a signal, Tune the network, model evidence          | See the interaction of excitatory and inhibitory populations. Drive and coupling controls change the numerical model.                                                     |
 | Messengers     | Dopamine, glutamate's conjugate acid, GABA, explanation              | Rotate sourced molecular conformers. Oxygen has a muted warm accent; nitrogen a blue accent. Atom letters remain available without color.                                 |
+| Experiment     | Cue A/B/C, pairing order and gap, Probe, Pair ×8, Pause, Cancel, Reset | Compare the same cue before and after controlled spike pairing. Try an untouched cue or reverse the order. Contact size represents model efficacy. |
 
 All explanations use the floating panel on the **left**. About, source records, anatomy regions, activity stories, messenger explanations and model evidence open as named tabs. Reopening an item reuses its tab. Select an earlier tab to return; its reading position is preserved. The × button closes the current tab and returns to the document that opened it; the downward chevron hides the panel without discarding its tabs. Arrow keys, Home and End navigate the tab strip, which scrolls horizontally when needed. Only one document is visible, and tools automatically dismiss the reader on narrow screens. Scene changes hide the reader; its open tabs remain available. Animation updates do not replace a source being read.
+
+## Teach a pathway
+
+Open **Experiment**, or use `?mode=experiment`. Start with **Probe cue A**, then **Pair ×8** with the cue arriving first and a 10 ms gap. Probe A again; the default teaching model now crosses threshold. B and C remain controls until paired themselves. Reverse the order to weaken the selected connection, or use a 50 ms gap to investigate a smaller timing effect.
+
+Pairing imposes both spike times and holds the target at rest between them. Probing removes that control and computes a cue-only response with learning off. Each trial clears transient voltage and traces but retains weights. The first probe of each cue supplies its comparison marker; old probe results are labeled as historical when the connection changes. The **peak** is the largest pre-reset model voltage, not an action-potential waveform.
+
+Playback runs at 0.1× model time: one screen second advances 100 model milliseconds. Pause is immediate. Leaving the scene or hiding the page pauses an active trial; return and Resume explicitly. Cancel keeps changes already made and removes future events. Reset restores all weights and clears comparisons. State survives scene changes during this visit but is lost on reload. Reduced motion suppresses traveling pulses and flashes while explicit trials still update numerical results.
+
+The [research and next-phase specification](NEXT_PHASE.md) records equations, parameters, scientific limits, and the roadmap for synaptic recovery, modulation and later challenges.
 
 ## Neurons and scientific interpretation
 
@@ -25,7 +36,7 @@ Four activities retain their study-linked explanations: music/anticipation, rewa
 
 The synapse distinguishes calcium-associated release, receptor action and clearance. Dopamine uses a metabotropic illustration; glutamate and GABA show representative ionotropic mechanisms without claiming those are their only receptor families. Particle trajectories and teaching time are authored. PubChem coordinates represent individual molecular conformers, not molecular dynamics. The glutamate-related structure is **L-glutamic acid**, explicitly labeled as the conjugate acid rather than physiological glutamate protonation.
 
-The neural circuit is a Wilson–Cowan-inspired two-population rate model, integrated with a fixed 1 ms Heun step. Its twelve visible cell symbols stand for two populations, not twelve individually simulated neurons. Parameters are pedagogical, not fitted to human recordings. All 20 source records are available in the interface. Scientific material has editorial source review, not independent expert validation.
+The neural circuit is a Wilson–Cowan-inspired two-population rate model, integrated with a fixed 1 ms Heun step. Its twelve visible cell symbols stand for two populations, not twelve individually simulated neurons. Parameters are pedagogical, not fitted to human recordings. The separate Experiment uses three prescribed cue spike generators, a target-cell probe and three plastic connections. All 24 source records are available in the interface. Scientific material has editorial source review, not independent expert validation.
 
 ## Display and motion
 
@@ -64,6 +75,7 @@ cargo test -p doke-core --locked
 npm test
 node tests/refinement.mjs
 node tests/panels.mjs
+npm run test:experiment
 node tests/hdr.mjs
 npm run test:performance
 python3 tools/package_demo.py
@@ -73,6 +85,8 @@ node tests/portable.mjs
 `npm test` exercises anatomy, activities, sources, chemistry, numerical controls, detail tiers, mobile navigation and fallbacks. Refinement checks cover exclusive left panels, contextual docks, rendered-frame pause/resume in all four synapse stages, tissue geometry, color switching and mobile panel separation. HDR tests exercise an actual float16 GPU pipeline with the display-capability signal emulated. They do not measure physical display luminance.
 
 `tests/panels.mjs` covers About/source return paths, reading position, tab reuse, anatomy history, keyboard navigation, playback while reading evidence, and narrow-screen layout.
+
+`tests/experiment.mjs` exercises the actual baseline/pair/probe flow on WebGPU and WebGL2, an untouched cue, reversed pairing, frozen pause frames, scene retention, cancellation/reset, Wasm batching, evidence tabs, mobile keyboard controls and reduced motion. CI checks the numerical models, Wasm compilation, source references and JavaScript syntax; browser/GPU checks run locally with the generated assets.
 
 Generated JSON reports and screenshots live in `test-results/`. Performance numbers from any test are specific to its machine, viewport and browser. No universal frame-rate guarantee is implied.
 

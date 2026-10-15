@@ -1,3 +1,4 @@
+import { PathwayExperiment } from "./experiment.js";
 import { hdrCapable, configureHDR, HDRText, loadNative } from "./display.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
@@ -38,6 +39,7 @@ const state = {
   neuronAnchor: null,
   color: true,
 };
+let experiment;
 let atlas,
   content,
   renderer,
@@ -96,7 +98,7 @@ function about() {
   writeDetails(
     "about",
     "About",
-    `<div class="eyebrow">ABOUT DOKE</div><h2>A window into the brain.<br><em>With the evidence in view.</em></h2><p>Explore reference anatomy, follow everyday activities, and discover how cells and chemical messengers work together.</p><h3>Anatomy, activity and signaling</h3><p><b>Anatomy:</b> the Allen Human Reference Atlas 2020 provides a shared reference for the brain’s structures. The displayed regions group atlas labels; their boundaries are simplified teaching surfaces, not a scan of an individual.</p><p><b>Activities and synapses:</b> research findings guide the explanations of music, reward, vision, movement and chemical signaling. Glowing regions and traveling particles illustrate those explanations; they do not measure firing rates or chemical concentrations.</p><p><b>Neural circuit:</b> an excitatory–inhibitory population model inspired by Wilson–Cowan explores how interacting populations influence one another. Its parameters are educational, not fitted to a person’s brain.</p><h3>Follow a chemical messenger</h3><p>Synthesis, release, receptor action and clearance are distinct processes. A messenger’s effect depends on the receiving cell and receptor. Molecular structures come from PubChem; they represent individual conformers rather than the molecules’ motion inside a living synapse.</p><h3>Reference anatomy</h3><p>Allen Human Reference Atlas – 3D, 2020. Allen Institute for Brain Science; Ding et al. RRID:SCR_017764. <a href="${esc(atlas.source)}" target="_blank" rel="noopener noreferrer">Original atlas</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Adapted through teaching-region grouping, resampling, smoothing and surface simplification.</p>${evidence(["allen", "wilson", "bold", "neurotransmitters"])}`,
+    `<div class="eyebrow">ABOUT DOKE</div><h2>A window into the brain.<br><em>With the evidence in view.</em></h2><p>Explore reference anatomy, follow everyday activities, and discover how cells and chemical messengers work together.</p><h3>Anatomy, activity and signaling</h3><p><b>Anatomy:</b> the Allen Human Reference Atlas 2020 provides a shared reference for the brain’s structures. The displayed regions group atlas labels; their boundaries are simplified teaching surfaces, not a scan of an individual.</p><p><b>Activities and synapses:</b> research findings guide the explanations of music, reward, vision, movement and chemical signaling. Glowing regions and traveling particles illustrate those explanations; they do not measure firing rates or chemical concentrations.</p><p><b>Neural circuit:</b> an excitatory–inhibitory population model inspired by Wilson–Cowan explores how interacting populations influence one another. Its parameters are educational, not fitted to a person’s brain.</p><p><b>Timing experiment:</b> a controlled spike-pair protocol explores one model of synaptic plasticity. Pairing prescribes both spike times; a separate cue-only probe calculates the receiving cell’s response. The model captures selected timing effects, not a universal account of biological learning.</p><h3>Follow a chemical messenger</h3><p>Synthesis, release, receptor action and clearance are distinct processes. A messenger’s effect depends on the receiving cell and receptor. Molecular structures come from PubChem; they represent individual conformers rather than the molecules’ motion inside a living synapse.</p><h3>Reference anatomy</h3><p>Allen Human Reference Atlas – 3D, 2020. Allen Institute for Brain Science; Ding et al. RRID:SCR_017764. <a href="${esc(atlas.source)}" target="_blank" rel="noopener noreferrer">Original atlas</a> · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Adapted through teaching-region grouping, resampling, smoothing and surface simplification.</p>${evidence(["allen", "wilson", "bold", "neurotransmitters", "stdp-bi-poo", "stdp-model"])}`,
     { reference: true, reveal: true },
   );
 }
@@ -251,6 +253,7 @@ function renderPanelTabs() {
 function revisitPanelPage(key) {
   const page = panelPages.get(key);
   if (!page) return;
+  if (key === "experiment" && state.mode !== "experiment") openExperiment();
   if (key === "circuit" && state.mode !== "circuit") setTab("circuit");
   if (
     key.startsWith("molecule-") &&
@@ -359,17 +362,20 @@ function closePanelTab() {
   $("#panel-tabs [aria-selected=true]")?.focus();
 }
 function syncPanel() {
+  $("#panel-browse").hidden = state.mode === "experiment";
   const browse = document.body.dataset.explorer === "open",
     details = document.body.dataset.info === "open";
   $("#info-panel").hidden = !browse && !details;
   $("#panel-browse").textContent =
-    state.mode === "circuit"
-      ? "Controls"
-      : state.mode !== "atlas"
-        ? "Messengers"
-        : state.tab === "activities"
-          ? "Activities"
-          : "Anatomy";
+    state.mode === "experiment"
+      ? "Preparation"
+      : state.mode === "circuit"
+        ? "Controls"
+        : state.mode !== "atlas"
+          ? "Messengers"
+          : state.tab === "activities"
+            ? "Activities"
+            : "Anatomy";
   $("#browse-page").hidden = !browse;
   $("#details").hidden = !details;
   renderPanelTabs();
@@ -395,6 +401,8 @@ function openInfo(on = true) {
 }
 function setMode() {
   sceneSerial++;
+  if (state.mode === "experiment") experiment?.enter();
+  else experiment?.leave();
   const anatomy = state.mode === "atlas";
   document.body.dataset.scene = state.mode;
   canvas().style.visibility = "visible";
@@ -407,27 +415,31 @@ function setMode() {
   $$(".atlas-setting").forEach((el) => (el.hidden = !anatomy));
   canvas().setAttribute(
     "aria-label",
-    `${anatomy ? "Brain atlas" : state.mode === "molecule" ? "Chemical messenger structure" : state.mode === "synapse" ? "Chemical synapse" : "Neural circuit"}. Drag to orbit, scroll to zoom; arrow keys rotate, plus and minus zoom.`,
+    `${anatomy ? "Brain atlas" : state.mode === "molecule" ? "Chemical messenger structure" : state.mode === "synapse" ? "Chemical synapse" : state.mode === "experiment" ? "Four schematic neurons in a timing experiment" : "Neural circuit"}. Drag to orbit, scroll to zoom; arrow keys rotate, plus and minus zoom.`,
   );
   $(".scale-portal").hidden = !anatomy;
-  $("#micro-controls").hidden = anatomy;
-  $(".micro-caption").hidden = anatomy;
-  $("#scene-breadcrumb").hidden = anatomy;
+  $("#micro-controls").hidden = anatomy || state.mode === "experiment";
+  $(".micro-caption").hidden = anatomy || state.mode === "experiment";
+  $("#scene-breadcrumb").hidden = anatomy || state.mode === "experiment";
   $("#scene-mode").textContent =
-    state.mode === "circuit"
-      ? "A NETWORK OF SIGNALS · TEACHING MODEL"
-      : state.mode === "synapse"
-        ? "ACROSS THE SYNAPTIC CLEFT"
-        : state.mode === "molecule"
-          ? "MEET THE MESSENGER · PUBCHEM CONFORMER"
-          : state.activity && state.tab === "activities"
-            ? "NARRATIVE FLOW · NOT MEASURED AXONS"
-            : "THE HUMAN BRAIN";
+    state.mode === "experiment"
+      ? "TIMING → CONNECTION → RESPONSE"
+      : state.mode === "circuit"
+        ? "A NETWORK OF SIGNALS · TEACHING MODEL"
+        : state.mode === "synapse"
+          ? "ACROSS THE SYNAPTIC CLEFT"
+          : state.mode === "molecule"
+            ? "MEET THE MESSENGER · PUBCHEM CONFORMER"
+            : state.activity && state.tab === "activities"
+              ? "NARRATIVE FLOW · NOT MEASURED AXONS"
+              : "THE HUMAN BRAIN";
   $("#scale-tag").textContent = anatomy
     ? viewName()
-    : state.mode === "molecule"
-      ? "Structure, not dynamics"
-      : "Illustrative · not to scale";
+    : state.mode === "experiment"
+      ? "Schematic preparation · not a brain reconstruction"
+      : state.mode === "molecule"
+        ? "Structure, not dynamics"
+        : "Illustrative · not to scale";
   $("#scene-labels").innerHTML = "";
   delete $("#scene-labels").dataset.signature;
   $("#focus-cleft").dataset.focused = "false";
@@ -470,6 +482,9 @@ async function syncScene() {
       content.chemicals.findIndex((c) => c.id === state.chemical?.id),
     );
     renderer.micro_state(state.step, 0, 0);
+  } else if (state.mode === "experiment") {
+    renderer.experiment_scene();
+    experiment?.tick(0, renderer);
   } else if (state.mode === "circuit") {
     renderer.scene(2, 0);
     renderer.micro_state(0, 0.1, 0.1);
@@ -497,7 +512,7 @@ async function syncScene() {
   dirty = true;
 }
 function refreshMicro() {
-  if (state.mode === "atlas") return;
+  if (state.mode === "atlas" || state.mode === "experiment") return;
   const syn = state.mode === "synapse",
     mol = state.mode === "molecule";
   const stepsHTML = syn
@@ -596,8 +611,27 @@ function showMoleculeDetails() {
       { activate: false },
     );
 }
+function openExperiment() {
+  state.mode = "experiment";
+  state.playing = false;
+  state.circuitPlaying = false;
+  state.microPlaying = false;
+  setMode();
+  openExplorer(false);
+  openInfo(false);
+}
+function experimentInfo() {
+  writeDetails(
+    "experiment",
+    "Timing experiment",
+    `<div class="eyebrow">A CONTROLLED PREPARATION</div><h2>Same cue.<br><em>A different response.</em></h2><p>Three cue cells connect to a receiving cell. During pairing, both spike times are imposed. During a probe, the cue acts alone and learning is switched off.</p><h3>Try one change at a time</h3><p>Probe A to record a comparison. Pair it eight times with its signal arriving 10 ms before the target spikes. Probe A again, then test B or C as untouched controls. Reverse the pairing order to explore the opposite effect.</p><h3>What actually changes</h3><p>A bounded spike-timing rule updates connection efficacy. Input arriving before a target spike strengthens a connection in this model; reversing the order weakens it. Timing dependence varies across biological preparations, so this is one teaching rule, not a universal law.</p><p>The receiving cell follows a simplified leaky integrate-and-fire model during probes. Its voltage and threshold are educational parameters, not a recording from a person. Probe peaks are computed voltages; cue response comparisons reuse the same test input.</p><h3>Reading the scene</h3><p>Contact size represents model efficacy, not new anatomical growth. Paths and four cells are schematic. Traveling events follow the simulated axonal delay; glow and enlarged geometry make them visible. Playback runs at one tenth of model speed. Molecules, receptor chemistry and structural growth are not simulated here.</p><h3>A fair comparison</h3><p>Each test starts with transient voltage and timing traces reset while learned weights are retained. The first probe of each cue is the comparison marker; Reset clears it along with all weight changes. A cue you have not paired is an untouched control. Cancel removes future events but keeps changes already made.</p><p class="small-note">This is an experiment with a model, not a test of your memory, intelligence or brain health. State stays in this page and is lost on reload.</p>${evidence(["stdp-bi-poo", "stdp-model", "lif-model", "stdp-limits"])}`,
+    { reference: true, reveal: true },
+  );
+}
 function drawHotspots() {
   if (!renderer) return;
+  const compactExperiment =
+    state.mode === "experiment" && innerWidth >= 600 && innerHeight <= 560;
   let marks = [];
   if (
     state.mode === "atlas" &&
@@ -637,6 +671,12 @@ function drawHotspots() {
       { p: [-0.8, 0.85, 0], label: "Excitatory cells · E", info: true },
       { p: [0.8, 0.85, 0], label: "Inhibitory cells · I", info: true },
     ];
+  if (state.mode === "experiment" && renderer.experiment_anchor)
+    marks = [0, 1, 2, 3].map((id) => ({
+      p: Array.from(renderer.experiment_anchor(id)),
+      label: id === 3 ? "Receiving cell" : `Cue ${["A", "B", "C"][id]}`,
+      experimentCell: id,
+    }));
   if (state.mode === "molecule" && moleculeData?.id === state.chemical?.id)
     marks = moleculeData.atoms
       .map((a, i) => ({
@@ -654,10 +694,25 @@ function drawHotspots() {
       const p = renderer.project(...m.p);
       if (p[2] < 0 || p[2] > 1) return "";
       const x = p[0] / d,
-        y = p[1] / d;
-      if (x < 20 || x > innerWidth - 20 || y < 120 || y > innerHeight - 110)
+        y =
+          p[1] / d +
+          (m.experimentCell !== undefined
+            ? compactExperiment
+              ? 23
+              : innerWidth < 821
+                ? 27
+                : 44
+            : 0);
+      if (
+        x < 20 ||
+        x > innerWidth - 20 ||
+        y < 120 ||
+        y >
+          innerHeight -
+            (compactExperiment ? 50 : state.mode === "experiment" ? 230 : 110)
+      )
         return "";
-      return `<button class="hotspot ${m.atom !== undefined ? "atom-label" : ""}" style="left:${x}px;top:${y}px" ${m.region ? `data-region="${m.region}"` : m.step !== undefined ? `data-step="${m.step}"` : m.atom !== undefined ? `data-atom="${m.atom}" data-element="${m.element}"` : m.neuron ? "data-neuron-info" : "data-micro-info"}>${m.label}</button>`;
+      return `<button class="hotspot ${m.atom !== undefined ? "atom-label" : ""}" style="left:${x}px;top:${y}px" ${m.experimentCell !== undefined ? `data-experiment-cell="${m.experimentCell}"` : m.region ? `data-region="${m.region}"` : m.step !== undefined ? `data-step="${m.step}"` : m.atom !== undefined ? `data-atom="${m.atom}" data-element="${m.element}"` : m.neuron ? "data-neuron-info" : "data-micro-info"}>${m.label}</button>`;
     })
     .join("");
   const holder = $("#scene-labels");
@@ -1444,6 +1499,7 @@ function bind() {
     }
   });
   document.addEventListener("visibilitychange", () => {
+    if (document.hidden) experiment?.suspend();
     last = 0;
   });
   window.addEventListener("popstate", restoreRoute);
@@ -1489,7 +1545,10 @@ function bindCanvas() {
         );
       const region = atlas.regions.find((r) => r.index === n);
       if (state.mode === "atlas" && region) selectRegion(region.id);
-      else if (state.mode !== "atlas") openInfo(true);
+      else if (state.mode === "experiment") {
+        if (n >= 0 && n < 3) experiment.selectCue(n);
+        else if (n === 3) experimentInfo();
+      } else if (state.mode !== "atlas") openInfo(true);
     }
     pointers.delete(e.pointerId);
   };
@@ -1594,6 +1653,7 @@ function restoreRoute() {
   if (p.has("chemical")) selectChemical(p.get("chemical"));
   if (p.has("region")) selectRegion(p.get("region"));
   if (["whole", "deep", "cut"].includes(p.get("view"))) setView(p.get("view"));
+  if (p.get("mode") === "experiment") openExperiment();
   if (p.get("mode") === "molecule") openMolecule(p.get("chemical"));
   if (p.get("mode") === "synapse") {
     openSynapse();
@@ -1647,6 +1707,14 @@ async function boot() {
       return r.json();
     }),
   ]);
+  experiment = new PathwayExperiment($("#pathway-experiment"), {
+    invalidate: () => {
+      dirty = true;
+    },
+    explain: experimentInfo,
+    announce: toast,
+    reduced: () => state.reduced,
+  });
   bind();
   bindImmersive();
   renderLeft();
@@ -1678,6 +1746,7 @@ async function boot() {
     wasm = await import("./pkg/doke.js");
     await wasm.default();
     circuit = new wasm.Circuit();
+    experiment.attach(wasm);
     if (state.tab === "circuit") renderLeft();
     const forceGL =
       !navigator.gpu ||
@@ -1725,6 +1794,7 @@ async function boot() {
     gpuError = String(e);
     console.warn("3D view unavailable:", gpuError);
     renderer = null;
+    experiment?.attach(wasm);
     $("#scene-loading").innerHTML =
       '<img class="fallback-atlas" src="assets/fallback.png" alt="Reference brain surface, static preview"><div class="fallback-message"><p>Explore through the explanations.</p><span>LIVE 3D IS UNAVAILABLE ON THIS DEVICE</span><small>The anatomy list, activities, chemistry and sources remain available.</small></div>';
     $("#scene-loading").hidden = state.mode !== "atlas";
@@ -1742,6 +1812,8 @@ function frame(t) {
   const dt = last ? Math.min((t - last) / 1000, 0.1) : 0;
   last = t;
   if (!document.hidden) {
+    if (state.mode === "experiment" && experiment?.tick(dt, renderer))
+      dirty = true;
     if (state.playing && state.activity && state.mode === "atlas") {
       state.time = Math.min(
         state.activity.duration,
@@ -1937,6 +2009,8 @@ function bindImmersive() {
         setTab("explore");
         openExplorer(false);
         openInfo(false);
+      } else if (b.dataset.scene === "experiment") {
+        openExperiment();
       } else if (b.dataset.scene === "synapse") {
         openSynapse();
       } else if (b.dataset.scene === "molecule") {
@@ -1950,6 +2024,12 @@ function bindImmersive() {
         openInfo(false);
         refreshMicro();
       }
+    }
+    if (b.hasAttribute("data-experiment-cell")) {
+      if (+b.dataset.experimentCell < 3)
+        experiment.selectCue(+b.dataset.experimentCell);
+      else experimentInfo();
+      dirty = true;
     }
     if (b.hasAttribute("data-step")) chooseSynapseStep(+b.dataset.step);
     if (b.hasAttribute("data-micro-info") || b.hasAttribute("data-atom"))

@@ -74,7 +74,7 @@ export class HDRText {
     c.fillStyle = "white";
     c.textBaseline = "alphabetic";
     for (const el of document.querySelectorAll(
-      ".brand,#details h2,.micro-caption strong",
+      ".brand,#details h2,.micro-caption strong,.experiment-heading h1",
     )) {
       if (
         !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })

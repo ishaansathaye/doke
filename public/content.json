@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "reviewDate": "2026-09-06",
-  "review": "Editorial source review; not independent expert validation. Activity timing and intensity are authored.",
+  "version": "1.2.0",
+  "reviewDate": "2026-10-14",
+  "review": "Timing-experiment sources reviewed 2026-10-14; earlier lessons retain their source-specific scope. Editorial review, not independent expert validation. Activity timing and intensity are authored.",
   "sources": {
     "allen": {
       "title": "Allen Human Reference Atlas \u2013 3D, 2020",
@@ -172,6 +172,46 @@
       "url": "https://pubmed.ncbi.nlm.nih.gov/18270515/",
       "finding": "Pyramidal neurons have distinct apical and basal dendritic trees; dendritic structure participates in synaptic integration.",
       "limit": "The enlarged neural tissue window is procedural teaching geometry. Cell positions, density, contacts and flashes are not reconstructed from the atlas or calibrated to recordings."
+    },
+    "stdp-bi-poo": {
+      "title": "Synaptic modifications in cultured hippocampal neurons: dependence on spike timing, synaptic strength, and postsynaptic cell type",
+      "authors": "Bi & Poo \u00b7 Journal of Neuroscience",
+      "year": "1998",
+      "method": "Paired electrophysiological recordings and stimulation",
+      "species": "Cultured rat hippocampal neurons",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/9852584/",
+      "finding": "Repeated pre/post spike pairings changed glutamatergic synaptic efficacy with timing-dependent direction; initial strength and postsynaptic cell type also mattered.",
+      "limit": "A specific experimental preparation, not a universal rule for every synapse. doke uses an abstract imposed-spike pairing protocol and authored parameters; eight pairings are a teaching shortcut, not a reproduced biological learning rate."
+    },
+    "stdp-model": {
+      "title": "Neuronal Dynamics \u00a719.2: Models of Hebbian learning",
+      "authors": "Gerstner, Kistler, Naud & Paninski",
+      "year": "2014",
+      "method": "Mathematical model and author textbook",
+      "species": "Abstract spiking model",
+      "url": "https://neuronaldynamics.epfl.ch/online/Ch19.S2.html",
+      "finding": "Pair-based spike-timing-dependent plasticity can be expressed through decaying pre/post traces, with explicit pair selection and weight bounds.",
+      "limit": "doke uses additive all-to-all traces and hard bounds. Timing is referenced to presynaptic arrival. Pairing prescribes both spike trains; probes freeze learning and compute the target response. Weight is a dimensionless model efficacy, not anatomy, memory quality or a chemical concentration."
+    },
+    "lif-model": {
+      "title": "Neuronal Dynamics \u00a71.3: Integrate-and-fire models",
+      "authors": "Gerstner, Kistler, Naud & Paninski",
+      "year": "2014",
+      "method": "Mathematical model and author textbook",
+      "species": "Abstract point neuron",
+      "url": "https://neuronaldynamics.epfl.ch/online/Ch1.S3.html",
+      "finding": "Passive membrane leak, input integration, a threshold and reset provide a reduced description of spiking. Pulse input can be represented as a voltage jump.",
+      "limit": "No ion-channel waveform, spatial dendritic integration or receptor kinetics is calculated. doke parameters are pedagogical, not fitted to a human recording. Cell geometry, glow persistence and contact size are visual encodings."
+    },
+    "stdp-limits": {
+      "title": "Triplets of spikes in a model of spike timing-dependent plasticity",
+      "authors": "Pfister & Gerstner \u00b7 Journal of Neuroscience",
+      "year": "2006",
+      "method": "Model comparison with experimental plasticity protocols",
+      "species": "Computational model and experimental comparisons",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6674434/",
+      "finding": "Triplet interactions explain frequency and higher-order spike-pattern effects that basic pair-based rules cannot capture.",
+      "limit": "The first doke experiment deliberately uses a simpler pair rule. Its predictions should not be generalized to arbitrary activity patterns, all cell types or biological learning as a whole."
     },
     "structure-dopamine": {
       "title": "Dopamine \u2014 PubChem compound record",

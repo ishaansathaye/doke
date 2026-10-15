@@ -372,3 +372,94 @@ pub fn tissue(center: Vec3) -> Mesh {
     }
     m
 }
+
+/// Four pedagogical cells, with fixed topology matching the three-cue learning model.
+/// Coordinates describe an illustration, not a measured neural reconstruction.
+pub fn experiment_neuron(id: u32) -> Vec3 {
+    match id {
+        0 => Vec3::new(-1.12, 0.82, 0.02),
+        1 => Vec3::new(-1.28, 0., 0.18),
+        2 => Vec3::new(-1.12, -0.82, -0.04),
+        _ => Vec3::new(1.08, 0., 0.),
+    }
+}
+pub fn experiment_contact(edge: u32) -> Vec3 {
+    Vec3::new(0.75, (1. - edge.min(2) as f32) * 0.21, 0.12)
+}
+pub fn experiment_path(edge: u32, t: f32) -> Vec3 {
+    let a = experiment_neuron(edge.min(2)) + Vec3::new(0.10, 0., 0.03);
+    let d = experiment_contact(edge);
+    let b = a + Vec3::new(0.65, -a.y * 0.1, 0.10);
+    let c = d + Vec3::new(-0.68, a.y * 0.45, 0.12);
+    let t = t.clamp(0., 1.);
+    let s = 1. - t;
+    a * s.powi(3) + b * (3. * s * s * t) + c * (3. * s * t * t) + d * t.powi(3)
+}
+pub fn experiment() -> Mesh {
+    let mut m = Mesh::new();
+    for cell in 0..4 {
+        let center = experiment_neuron(cell);
+        let scale = if cell == 3 { 1.2 } else { 1. };
+        m.sphere(center, Vec3::new(0.125, 0.145, 0.10) * scale, cell, 15, 24);
+        // A quiet nucleus makes the soma read as a cell rather than a graph node.
+        m.sphere(
+            center + Vec3::new(-0.012, 0.012, 0.092) * scale,
+            Vec3::splat(0.038) * scale,
+            cell,
+            20,
+            14,
+        );
+        for branch in 0..7 {
+            let angle = branch as f32 * 2. * PI / 7. + cell as f32 * 0.47;
+            let outward = Vec3::new(angle.cos(), angle.sin(), (angle * 1.7).sin() * 0.32);
+            let length = (0.25 + 0.07 * (angle * 2.3).cos().abs()) * scale;
+            let bend = Vec3::new(-outward.y, outward.x, 0.25);
+            let root = center + outward * 0.085;
+            let mid = center + outward * length * 0.65 + bend * 0.018;
+            let tip = center + outward * length + bend * 0.035;
+            m.tube(&[center, root, mid, tip], 0.009 * scale, cell, 16);
+            for side in [-1., 1.] {
+                let twig = tip + outward * 0.10 * scale + bend * side * 0.075 * scale;
+                m.tube(&[mid.lerp(tip, 0.75), tip, twig], 0.004 * scale, cell, 16);
+                m.tube(
+                    &[twig, twig + outward * 0.055 + bend * side * 0.028],
+                    0.002,
+                    cell,
+                    16,
+                );
+            }
+            for spine in 0..3 {
+                let stem = mid.lerp(tip, spine as f32 / 3.);
+                let head = stem + bend * (if spine % 2 == 0 { 0.022 } else { -0.022 });
+                m.tube(&[stem, head], 0.002, cell, 16);
+                m.sphere(head, Vec3::splat(0.005), cell, 16, 5);
+            }
+        }
+    }
+    for edge in 0..3 {
+        let points = (0..=40)
+            .map(|i| experiment_path(edge, i as f32 / 40.))
+            .collect::<Vec<_>>();
+        m.tube(&points, 0.011, edge, 17);
+        let terminal = experiment_contact(edge);
+        m.sphere(terminal, Vec3::splat(0.026), edge, 18, 16);
+        // Separate postsynaptic spine and its dendritic stem, with a visible cleft.
+        let head = terminal + Vec3::X * 0.072;
+        m.sphere(head, Vec3::new(0.019, 0.032, 0.027), 3, 16, 12);
+        m.tube(
+            &[
+                head,
+                head + Vec3::new(0.07, -head.y * 0.18, -0.025),
+                experiment_neuron(3),
+            ],
+            0.009,
+            3,
+            16,
+        );
+    }
+    // Vertices stay static; model-derived positions and visibility arrive via uniforms.
+    for pulse in 0..16 {
+        m.sphere(Vec3::ZERO, Vec3::splat(0.026), pulse, 19, 9);
+    }
+    m
+}
