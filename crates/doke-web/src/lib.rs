@@ -196,8 +196,13 @@ impl BrainRenderer {
                 &wgpu::DeviceDescriptor {
                     label: Some("Brain renderer"),
                     required_features: wgpu::Features::empty(),
-                    required_limits: wgpu::Limits::downlevel_webgl2_defaults()
-                        .using_resolution(adapter.limits()),
+                    // The scene writes color and glow; asking for the default eight
+                    // attachments rejects valid WebGL adapters that expose fewer.
+                    required_limits: wgpu::Limits {
+                        max_color_attachments: 2,
+                        ..wgpu::Limits::downlevel_webgl2_defaults()
+                            .using_resolution(adapter.limits())
+                    },
                     memory_hints: wgpu::MemoryHints::MemoryUsage,
                 },
                 None,
