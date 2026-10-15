@@ -1,6 +1,8 @@
 //! Deterministic educational timelines and a separate, uncalibrated rate model.
 use serde::{Deserialize, Serialize};
 
+pub mod plasticity;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Model {
     pub e: f64,
