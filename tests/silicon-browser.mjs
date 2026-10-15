@@ -57,7 +57,7 @@ async function ready(page, url = appUrl.href) {
   assert.match(
     await page.locator("#render-status").textContent(),
     requestedBackend === "webgl" ? /\bGl\b/ : /BrowserWebGpu/,
-    "The requested 3D renderer initialized; numerical fallback alone is insufficient",
+    `The requested 3D renderer initialized; numerical fallback alone is insufficient. Renderer details: ${await page.locator("#loading").textContent()}. Page errors: ${errors.join("; ")}`,
   );
 }
 
