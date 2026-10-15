@@ -546,6 +546,42 @@ mod tests {
     }
 
     #[test]
+    fn cancellation_keeps_only_updates_that_have_actually_occurred() {
+        for (gap, stop_ms, completed, changed) in [
+            (10, 100.0, 0, false),
+            (-10, 99.0, 0, false),
+            (-10, 100.0, 1, true),
+        ] {
+            let mut model = TimingModel::default();
+            model.start_training(0, gap, 8).unwrap();
+            model.advance(stop_ms).unwrap();
+            assert_eq!(model.completed_pairs, completed);
+            assert_eq!(model.weights[0] != INITIAL_WEIGHT, changed);
+            let weight = model.weights[0];
+            model.cancel();
+            model.advance(250.0).unwrap();
+            assert_eq!(model.weights[0], weight);
+            assert_eq!(model.spike_counts, [0; 4]);
+        }
+
+        // In all-to-all STDP, a later pre arrival already depresses efficacy
+        // against the previous post trace, before this pair's target stimulus.
+        let mut model = TimingModel::default();
+        model.start_training(0, 10, 8).unwrap();
+        model.advance(250.0).unwrap();
+        let after_first_pair = model.weights[0];
+        model.advance(50.0).unwrap();
+        assert_eq!(model.completed_pairs, 1);
+        let at_second_arrival = model.weights[0];
+        let expected_depression = A_MINUS * (-190.0 / TAU_TRACE_MS).exp();
+        assert!((after_first_pair - at_second_arrival - expected_depression).abs() < 1e-12);
+        model.cancel();
+        model.advance(250.0).unwrap();
+        assert_eq!(model.weights[0], at_second_arrival);
+        assert_eq!(model.weights[1..], [INITIAL_WEIGHT; 2]);
+    }
+
+    #[test]
     fn invalid_inputs_are_atomic_and_active_trials_cannot_be_overwritten() {
         let mut model = TimingModel::default();
         let baseline = model.snapshot();
