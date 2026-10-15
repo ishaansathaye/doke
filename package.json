@@ -7,7 +7,8 @@
     "build": "bash tools/build.sh",
     "test:deployed": "node tests/deployed.mjs",
     "test:performance": "node tests/performance.mjs",
-    "format": "prettier --write public/app.js public/style.css public/index.html tests/*.mjs"
+    "format": "prettier --write public/app.js public/style.css public/index.html tests/*.mjs",
+    "test:silicon": "node tests/hardware-catalog.mjs && node tests/silicon-wasm.mjs && node tests/silicon-browser.mjs"
   },
   "devDependencies": {
     "playwright": "1.58.2",

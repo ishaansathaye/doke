@@ -1,6 +1,6 @@
 # doke
 
-A floating, interactive brain explorer built with Rust, WebAssembly and wgpu. Explore reference anatomy, an enlarged neural tissue window, chemical synapses, a neural circuit and molecular messengers. Mostly grayscale, with restrained color accents and adaptive HDR.
+A floating explorer of brains and silicon, built with Rust, WebAssembly and wgpu. Paint an input and follow it through CPU, GPU and tensor models, or inject packets into a switch ASIC model. Explore the human brain through reference anatomy, neural tissue, synapses, circuits and molecular messengers. Mostly grayscale, with restrained color accents and adaptive HDR.
 
 ![A short tour of doke: brain anatomy, activity playback, enlarged neurons, synaptic signaling, neural circuits, molecular messengers and scientific source tabs.](docs/media/doke-demo.gif)
 
@@ -19,6 +19,14 @@ Open [localhost:4173](http://localhost:4173). Rendering and simulation run in th
 
 The [doke guide](docs/GUIDE.md) covers controls, scientific interpretation, builds, verification and hosting. It is the single maintained project guide.
 
+## Inside silicon
+
+Open **Silicon** in the top navigation. Paint an 8 × 8 image, step the computation, change memory layout, or block a switch destination. The schematic responds to the actual Rust model. Curated AMD, NVIDIA, Google TPU and Cisco references provide source-linked product facts. The teaching model is separate from those specifications: its ticks do not predict a commercial chip’s speed.
+
+![The GPU teaching model running a painted input through memory and arithmetic lanes.](docs/media/silicon.webp)
+
+The [silicon research and roadmap](docs/SILICON.md) explains the evidence, modeling boundaries and planned iterations.
+
 ## What is calculated
 
 Brain geometry derives from the Allen Human Reference Atlas; molecule coordinates come from PubChem. Activity highlights, enlarged neurons, synaptic contacts and traveling particles illustrate supported concepts. They are not reconstructed individual cells or measured firing/chemical concentrations. The simplified neural circuit integrates population dynamics in Rust. Source records and scientific limitations are available in the interface.
@@ -27,7 +35,7 @@ Brain geometry derives from the Allen Human Reference Atlas; molecule coordinate
 
 | Directory          | Purpose                                              |
 | ------------------ | ---------------------------------------------------- |
-| `crates/doke-core` | Activity envelopes and numerical E/I model           |
+| `crates/doke-core` | Brain activity, E/I dynamics and silicon models           |
 | `crates/doke-web`  | Rust rendering, camera, procedural cells, shaders    |
 | `public`           | Floating interface, source records, runtime assets   |
 | `tools`            | Asset generation, validation, builds and deployment  |

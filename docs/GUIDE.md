@@ -15,6 +15,16 @@ The top navigation chooses **Brain**, **Synapse**, **Neural circuit** or **Messe
 
 All explanations use the floating panel on the **left**. About, source records, anatomy regions, activity stories, messenger explanations and model evidence open as named tabs. Reopening an item reuses its tab. Select an earlier tab to return; its reading position is preserved. The × button closes the current tab and returns to the document that opened it; the downward chevron hides the panel without discarding its tabs. Arrow keys, Home and End navigate the tab strip, which scrolls horizontally when needed. Only one document is visible, and tools automatically dismiss the reader on narrow screens. Scene changes hide the reader; its open tabs remain available. Animation updates do not replace a source being read.
 
+## Silicon
+
+Choose **Silicon ↗** in the brain navigation, or open `silicon.html`. CPU, GPU and Tensor process the same painted 8 × 8 image using a fixed difference filter. Run animates execution; Step advances one declared model tick; ⇥ calculates the completed result. Drag or use arrow keys to orbit; scroll or +/− zoom. Select a block to inspect its current state. Source records stay in the same floating tab panel.
+
+Change Packed to Strided on GPU to see memory-sector traffic change while the answer stays the same. Toggle the CPU’s tiny cache to expose operand reuse. Tensor shows operands passing through a 4 × 4 array. In Switch ASIC, block A, inject traffic to A and B, then compare FIFO with per-destination VOQ. Queue changes preserve packets; the 32-packet capacity includes in-flight transfers. Reset clears the experiment.
+
+Reference selections show documented product facts. The small models demonstrate mechanisms, not proprietary layouts or timing. Model ticks, bytes and packet counts describe the explicit teaching rules. They are not benchmarks, die floorplans, a CPU instruction emulator or an execution trace captured on the named product. The [research and roadmap](SILICON.md) records the primary sources and next steps.
+
+The standalone silicon page does not need generated anatomy. For a quick hardware-only preview, build Wasm with `cargo build -p doke-web --target wasm32-unknown-unknown --release --locked`, run the matching `wasm-bindgen` command from `tools/build.sh`, then serve `public/`. Use the complete setup below for the human brain and all original scenes.
+
 ## Neurons and scientific interpretation
 
 The optional tissue window contains four procedural branching neurons, dendritic spines, axonal terminals, receiving processes and visible contact gaps. It occupies a localized area of the reference brain and is off initially. The cells are deliberately enlarged; **their positions, numbers, shapes and connectivity do not come from the atlas**. Flashing particles illustrate signaling and are not computed action potentials. This presentation draws on the structural distinctions discussed in [Spruston's review of pyramidal neurons](https://pubmed.ncbi.nlm.nih.gov/18270515/).
@@ -60,6 +70,9 @@ With the local server running:
 
 ```sh
 cargo test -p doke-core --locked
+node tests/hardware-catalog.mjs
+node tests/silicon-wasm.mjs
+DOKE_URL=http://127.0.0.1:4173 node tests/silicon-browser.mjs
 .venv/bin/python tools/validate_assets.py
 npm test
 node tests/refinement.mjs
