@@ -22,6 +22,9 @@ struct Uniform {
     activity: [[f32; 4]; 64],
     detail: [f32; 4],
     style: [f32; 4],
+    experiment_cells: [[f32; 4]; 4],
+    experiment_edges: [[f32; 4]; 3],
+    experiment_pulses: [[f32; 4]; 16],
 }
 struct Targets {
     scene: wgpu::TextureView,
@@ -495,6 +498,119 @@ impl BrainRenderer {
         self.load_mesh(&mesh.bytes())?;
         Ok(())
     }
+    /// Load a fixed four-cell teaching illustration. Activity comes from the model.
+    pub fn experiment_scene(&mut self) -> Result<(), JsValue> {
+        self.state.params = [0., 0., 4., 0.];
+        self.state.flags = [-1., 0., 2., 0.];
+        self.state.detail = [0.; 4];
+        self.state.experiment_cells = [[0.; 4]; 4];
+        self.state.experiment_edges = [[0.; 4]; 3];
+        self.state.experiment_pulses = [[0.; 4]; 16];
+        self.target = Vec3::ZERO;
+        self.yaw = -0.08;
+        self.pitch = 0.06;
+        self.distance = 6.0;
+        self.load_mesh(&scenes::experiment().bytes())
+    }
+    /// Update the illustration from an actual numerical snapshot. No animation clock
+    /// creates spikes: packets only exist between a cue spike and its model arrival.
+    pub fn experiment_state(&mut self, json: &str) -> Result<(), JsValue> {
+        let data: serde_json::Value =
+            serde_json::from_str(json).map_err(|e| JsValue::from_str(&e.to_string()))?;
+        let time = data["time_ms"]
+            .as_f64()
+            .ok_or_else(|| JsValue::from_str("Missing model time"))?;
+        if !time.is_finite() {
+            return Err(JsValue::from_str("Invalid model time"));
+        }
+        self.state.experiment_cells = [[0.; 4]; 4];
+        self.state.experiment_edges = [[0.; 4]; 3];
+        self.state.experiment_pulses = [[0.; 4]; 16];
+        let reduced = data["reduced_motion"].as_bool().unwrap_or(false);
+        let selected = data["ui_selected_cue"].as_u64();
+        let delay = data["axon_delay_ms"]
+            .as_f64()
+            .unwrap_or(doke_core::plasticity::AXON_DELAY_MS as f64)
+            .max(1.);
+        for cell in 0..4 {
+            // Voltage relative to rest; display values are normalized, not concentrations.
+            let voltage = data["voltages_mv"][cell]
+                .as_f64()
+                .unwrap_or(doke_core::plasticity::REST_MV);
+            let flash = data["last_spike_ms"][cell]
+                .as_f64()
+                .map(|at| {
+                    let age = time - at;
+                    if (0.0..=12.0).contains(&age) && !reduced {
+                        (1. - age / 12.) as f32
+                    } else {
+                        0.
+                    }
+                })
+                .unwrap_or(0.);
+            self.state.experiment_cells[cell] = [
+                ((voltage - doke_core::plasticity::REST_MV)
+                    / (doke_core::plasticity::THRESHOLD_MV - doke_core::plasticity::REST_MV))
+                    .clamp(0., 1.) as f32,
+                flash,
+                if selected == Some(cell as u64) {
+                    1.
+                } else {
+                    0.
+                },
+                0.,
+            ];
+        }
+        for edge in 0..3 {
+            let weight = data["weights"][edge].as_f64().unwrap_or(0.).clamp(0., 1.) as f32;
+            let flash = data["last_arrival_ms"][edge]
+                .as_f64()
+                .map(|at| {
+                    let age = time - at;
+                    if (0.0..=12.0).contains(&age) && !reduced {
+                        (1. - age / 12.) as f32
+                    } else {
+                        0.
+                    }
+                })
+                .unwrap_or(0.);
+            self.state.experiment_edges[edge] = [
+                weight,
+                flash,
+                if selected == Some(edge as u64) {
+                    1.
+                } else {
+                    0.
+                },
+                0.,
+            ];
+        }
+        let mut slot = 0;
+        if let Some(events) = data["events"].as_array() {
+            for event in events {
+                if event["kind"].as_str() != Some("spike") {
+                    continue;
+                }
+                let edge = event["cell"].as_u64().unwrap_or(4) as u32;
+                let age = time - event["time_ms"].as_f64().unwrap_or(-100.);
+                if !reduced && edge < 3 && (0.0..delay).contains(&age) && slot < 16 {
+                    let p = scenes::experiment_path(edge, (age / delay) as f32);
+                    self.state.experiment_pulses[slot] = [p.x, p.y, p.z, 1.];
+                    slot += 1;
+                }
+            }
+        }
+        Ok(())
+    }
+    /// IDs 0–3 are cell centers; 4–6 are the three presynaptic contacts.
+    pub fn experiment_anchor(&self, id: u32) -> Vec<f32> {
+        let p = if id < 4 {
+            scenes::experiment_neuron(id)
+        } else {
+            scenes::experiment_contact((id - 4).min(2))
+        };
+        p.to_array().to_vec()
+    }
     pub fn anatomy(&mut self) {
         self.state.params[2] = 0.;
     }
@@ -601,7 +717,9 @@ impl BrainRenderer {
         if self.state.params[2] > 0. {
             let synapse = self.state.params[2] == 1.;
             self.target = Vec3::new(0., if synapse { 0.4 } else { 0. }, 0.);
-            self.distance = if synapse {
+            self.distance = if self.state.params[2] == 4. {
+                6.0
+            } else if synapse {
                 5.6
             } else if self.state.params[2] == 2. {
                 4.5
@@ -751,8 +869,40 @@ impl BrainRenderer {
             0.02,
             30.,
         ) * Mat4::look_at_rh(self.eye, self.target, Vec3::Y);
-        if portrait_micro {
+        let compact_experiment = if self.state.params[2] == 4. {
+            web_sys::window().and_then(|window| {
+                let width = window.inner_width().ok()?.as_f64()? as f32;
+                let height = window.inner_height().ok()?.as_f64()? as f32;
+                (width >= 600. && height <= 560.).then_some((width, height))
+            })
+        } else {
+            None
+        };
+        if let Some((width, height)) = compact_experiment {
+            // Match the short-landscape layout: a 365px dock sits 12px from
+            // the right edge. Fit the illustration into the remaining plot,
+            // below its heading and above the camera controls. Use CSS pixels
+            // so Retina/DPR changes cannot alter the chosen composition.
+            let left = 20.;
+            let right = (width - 389.).max(left + 80.);
+            let top = 125.;
+            let bottom = (height - 62.).max(top + 60.);
+            let scale = ((right - left) / (height * 1.02))
+                .min((bottom - top) / (height * 0.76))
+                .min(1.);
+            let center = Vec3::new(
+                (left + right) / width - 1.,
+                1. - (top + bottom) / height,
+                0.,
+            );
+            self.matrix = Mat4::from_translation(center)
+                * Mat4::from_scale(Vec3::new(scale, scale, 1.))
+                * self.matrix;
+        } else if portrait_micro {
             self.matrix = Mat4::from_translation(Vec3::new(0., 0.14, 0.)) * self.matrix;
+        } else if self.state.params[2] == 4. {
+            // Leave breathing room above the floating experiment dock.
+            self.matrix = Mat4::from_translation(Vec3::new(0., 0.06, 0.)) * self.matrix;
         }
         self.state.vp = self.matrix.to_cols_array_2d();
         self.state.eye = [self.eye.x, self.eye.y, self.eye.z, 1.];
@@ -946,4 +1096,41 @@ impl Circuit {
 #[wasm_bindgen]
 pub fn engine_version() -> String {
     "Brain · Rust / wgpu 24 · 0.1.0".into()
+}
+
+/// Independent timing assay; the population-rate Circuit remains unchanged.
+#[wasm_bindgen]
+pub struct TimingExperiment {
+    state: doke_core::plasticity::TimingModel,
+}
+#[wasm_bindgen]
+impl TimingExperiment {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self {
+            state: Default::default(),
+        }
+    }
+    pub fn train(&mut self, cue: u32, gap_ms: i32, pairs: u32) -> Result<(), JsValue> {
+        self.state
+            .start_training(cue as usize, gap_ms, pairs)
+            .map_err(JsValue::from_str)
+    }
+    pub fn probe(&mut self, cue: u32) -> Result<(), JsValue> {
+        self.state
+            .start_probe(cue as usize)
+            .map_err(JsValue::from_str)
+    }
+    pub fn advance(&mut self, dt_ms: f64) -> Result<(), JsValue> {
+        self.state.advance(dt_ms).map_err(JsValue::from_str)
+    }
+    pub fn cancel(&mut self) {
+        self.state.cancel();
+    }
+    pub fn reset(&mut self) {
+        self.state.reset();
+    }
+    pub fn snapshot(&self) -> Result<String, JsValue> {
+        serde_json::to_string(&self.state.snapshot()).map_err(|e| JsValue::from_str(&e.to_string()))
+    }
 }

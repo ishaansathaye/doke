@@ -1,4 +1,4 @@
-struct Uniforms { vp:mat4x4<f32>,eye:vec4<f32>,params:vec4<f32>,flags:vec4<f32>,activity:array<vec4<f32>,64>,detail:vec4<f32>,style:vec4<f32> };
+struct Uniforms { vp:mat4x4<f32>,eye:vec4<f32>,params:vec4<f32>,flags:vec4<f32>,activity:array<vec4<f32>,64>,detail:vec4<f32>,style:vec4<f32>,experiment_cells:array<vec4<f32>,4>,experiment_edges:array<vec4<f32>,3>,experiment_pulses:array<vec4<f32>,16> };
 @group(0) @binding(0) var<uniform> u:Uniforms;
 struct VertexOut { @builtin(position) position:vec4<f32>, @location(0) world:vec3<f32>,@location(1) normal:vec3<f32>,@location(2) @interpolate(flat) region:u32,@location(3) @interpolate(flat) kind:u32 };
 fn neuron(i:u32)->vec3<f32>{let a=f32(i%6u)*6.283185/6.;return vec3(select(0.78,-0.78,i<6u),cos(a)*0.65,sin(a)*0.65);}
@@ -23,6 +23,8 @@ fn lens()->vec3<f32>{
  if(k==6.){let t=fract(time*0.7+r*0.13);pos+=vec3((f32(id%4u)-1.5)*0.38,0.68-t*0.22,0.18);}
  if(k==8.){let t=fract(time*0.35+r*0.17);let x=(f32(id%6u)-2.5)*0.27;pos+=vec3(x+select(0.,sin(t*4.+r)*0.1,u.activity[60].w==0.),-0.42-t*0.24,0.47);}
  if(k==11.){let t=fract(time*0.65+f32(id%3u)/3.);let drift=vec3(0.012*sin(t*3.14159),-t*0.065,t*0.070);pos+=vec3(-drift.z,drift.y,drift.x);}
+ if(k==18.){pos+=n*u.experiment_edges[min(id,2u)].x*0.025;}
+ if(k==19.){pos+=u.experiment_pulses[min(id,15u)].xyz;}
  var o:VertexOut;o.position=u.vp*vec4(pos,1.);o.world=pos;o.normal=n;o.region=id;o.kind=u32(k);
  if(k==14.){let aperture=lens();o.position=vec4(aperture.xy+p.xy*vec2(aperture.z/u.style.y,aperture.z),0.99999,1.);o.world=u.detail.xyz;o.normal=p;}
  return o;
@@ -32,6 +34,28 @@ fn shade(v:VertexOut)->FragmentOut {
  if(u.params.z==0. && v.kind<3u && u.detail.w>0.){
   let aperture=lens();let clip=u.vp*vec4(v.world,1.);
   if(length((clip.xy/clip.w-aperture.xy)*vec2(u.style.y,1.))<aperture.z){discard;}
+ }
+ if(v.kind>=15u){
+  let cell=u.experiment_cells[min(v.region,3u)];let edge=u.experiment_edges[min(v.region,2u)];
+  if(v.kind==19u&&u.experiment_pulses[min(v.region,15u)].w<0.5){discard;}
+  let n=normalize(v.normal);let view=normalize(u.eye.xyz-v.world);
+  let key=max(dot(n,normalize(vec3(-0.45,0.8,0.9))),0.);
+  let rim=pow(max(0.,1.-abs(dot(n,view))),2.4);
+  let spec=pow(max(dot(n,normalize(view+normalize(vec3(-0.45,0.8,0.9)))),0.),40.);
+  var light=0.055+key*0.30+rim*0.24+spec*0.15;
+  var emission=0.025+cell.y*(0.35+rim*0.7);
+  var tint=vec3(0.88,0.94,0.95);
+  if(u.style.x<0.5){tint=vec3(1.);}
+  if(v.kind==15u){light+=cell.x*0.12+cell.y*0.45+cell.z*0.13;}
+  if(v.kind==16u){light=0.07+key*0.24+rim*0.16;emission=cell.y*0.25;}
+  if(v.kind==20u){light=0.04+key*0.08+rim*0.08;emission=cell.y*0.08;}
+  if(v.kind==17u||v.kind==18u){
+   light=0.075+key*0.14+rim*0.12+edge.x*0.30;
+   emission=edge.x*0.10+edge.y*0.7+edge.z*0.07;
+   if(u.style.x>0.5){tint=mix(vec3(0.83,0.89,0.92),vec3(0.64,0.90,0.83),edge.x);}
+  }
+  if(v.kind==19u){light=1.8+key*0.3;emission=1.5;tint=vec3(1.);}
+  var result:FragmentOut;result.color=vec4(tint*light,1.);result.glow=vec4(tint*emission,1.);return result;
  }
  if(v.kind==14u){var o:FragmentOut;let edge=smoothstep(0.975,0.997,length(v.normal.xy));o.color=vec4(vec3(0.018+edge*0.12),1.);o.glow=vec4(vec3(edge*0.02),1.);return o;}
  if(v.kind==2u){discard;}

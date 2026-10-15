@@ -24,7 +24,14 @@ try {
       null,
       { timeout: 90000 },
     );
-    for (const scene of ["atlas", "tissue", "synapse", "circuit", "native"]) {
+    for (const scene of [
+      "atlas",
+      "tissue",
+      "synapse",
+      "circuit",
+      "experiment",
+      "native",
+    ]) {
       if (scene === "tissue") await p.locator("#neuron-layer").click();
       else if (scene !== "native")
         await p.locator(`#scene-navigation [data-scene="${scene}"]`).click();
@@ -39,6 +46,8 @@ try {
         );
         await p.locator("#settings-button").click();
       }
+      if (scene === "experiment")
+        await p.locator('[data-experiment-action="train"]').click();
       await p.waitForTimeout(1000);
       const frames = await p.evaluate(async () => {
         const arr = [];

@@ -2,6 +2,8 @@
 
 A floating, interactive brain explorer built with Rust, WebAssembly and wgpu. Explore reference anatomy, an enlarged neural tissue window, chemical synapses, a neural circuit and molecular messengers. Mostly grayscale, with restrained color accents and adaptive HDR.
 
+**New: Teach a pathway.** Probe a cue, pair precisely timed signals, then test whether its connection changed. The experiment calculates spike timing, synaptic efficacy and the receiving cell's response. Try a reversed order or an untouched cue as a control. See the [preview](docs/media/pathway-preview.webp) and [research and next-phase plan](docs/NEXT_PHASE.md).
+
 ![A short tour of doke: brain anatomy, activity playback, enlarged neurons, synaptic signaling, neural circuits, molecular messengers and scientific source tabs.](docs/media/doke-demo.gif)
 
 *A 24-second tour of the real app, captured with SDR glow. [Recording instructions](docs/GUIDE.md#recording-a-demo).*
@@ -23,11 +25,13 @@ The [doke guide](docs/GUIDE.md) covers controls, scientific interpretation, buil
 
 Brain geometry derives from the Allen Human Reference Atlas; molecule coordinates come from PubChem. Activity highlights, enlarged neurons, synaptic contacts and traveling particles illustrate supported concepts. They are not reconstructed individual cells or measured firing/chemical concentrations. The simplified neural circuit integrates population dynamics in Rust. Source records and scientific limitations are available in the interface.
 
+The separate **Experiment** scene uses controlled spike-pair training and a learning-frozen integrate-and-fire probe. Its events and efficacy changes are computed; cell shapes, contact sizes and slowed light trails are visual encodings. Parameters are pedagogical, not fitted to a person's brain.
+
 ## Source map
 
 | Directory          | Purpose                                              |
 | ------------------ | ---------------------------------------------------- |
-| `crates/doke-core` | Activity envelopes and numerical E/I model           |
+| `crates/doke-core` | Activity envelopes, E/I dynamics and spike-timing plasticity |
 | `crates/doke-web`  | Rust rendering, camera, procedural cells, shaders    |
 | `public`           | Floating interface, source records, runtime assets   |
 | `tools`            | Asset generation, validation, builds and deployment  |

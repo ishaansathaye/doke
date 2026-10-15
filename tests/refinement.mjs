@@ -58,7 +58,7 @@ try {
   await p.goto(base);
   await ready(p);
   assert.equal(await p.locator(".hero-copy").count(), 0);
-  assert.equal(await p.locator("#scene-navigation button").count(), 4);
+  assert.equal(await p.locator("#scene-navigation button").count(), 5);
   await p.locator('.explorer-dock [data-tab="explore"]').click();
   await p.locator("#region-search").fill("thalamus");
   await p.locator('#region-list [data-region="thalamus"]').click();

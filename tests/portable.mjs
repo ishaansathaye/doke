@@ -43,7 +43,8 @@ const server = http.createServer((req, res) => {
   );
   res.end(fs.readFileSync(p));
 });
-await new Promise((ok) => server.listen(4175, "127.0.0.1", ok));
+await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
+const base = `http://127.0.0.1:${server.address().port}/doke/`;
 const b = await chromium.launch({
   executablePath:
     process.env.CHROME_PATH ||
@@ -60,13 +61,21 @@ try {
   p.on("response", (r) => {
     if (r.status() >= 400) errors.push(`${r.status()} ${r.url()}`);
   });
-  await p.goto("http://127.0.0.1:4175/doke/");
+  await p.goto(base);
   await p.waitForFunction(
     () => document.documentElement.dataset.ready === "true",
     null,
     { timeout: 90000 },
   );
   assert.match(await p.locator("#render-stats").textContent(), /BrowserWebGpu/);
+  await p.locator('#scene-navigation [data-scene="experiment"]').click();
+  await p.locator('[data-experiment-action="probe"]').click();
+  await p.waitForFunction(() =>
+    document
+      .querySelector('[data-cue-response="0"]')
+      .textContent.includes("no spike"),
+  );
+  assert.match(await p.locator('[data-cue-weight="0"]').textContent(), /0\.32/);
   await p.locator('#scene-navigation [data-scene="synapse"]').click();
   await p.locator("#inspect-molecule").click();
   await p.waitForFunction(

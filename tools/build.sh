@@ -16,7 +16,7 @@ python3 - <<'PY'
 from pathlib import Path
 import gzip,json,hashlib
 p=Path('public')
-for f in [p/'pkg/doke_bg.wasm',p/'pkg/doke.js',p/'app.js',p/'display.js',p/'style.css',p/'content.json']:
+for f in [p/'pkg/doke_bg.wasm',p/'pkg/doke.js',p/'app.js',p/'experiment.js',p/'display.js',p/'style.css',p/'content.json']:
  with (f.parent/(f.name+'.gz')).open('wb') as out:
   out.write(gzip.compress(f.read_bytes(),compresslevel=9,mtime=0))
 manifest={str(f.relative_to(p)):hashlib.sha256(f.read_bytes()).hexdigest() for f in p.rglob('*') if f.is_file() and f.name!='release.json'}

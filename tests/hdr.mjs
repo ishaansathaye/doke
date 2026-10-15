@@ -1,6 +1,7 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+fs.mkdirSync("test-results/experiment", { recursive: true });
 const b = await chromium.launch({
   executablePath:
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -27,7 +28,7 @@ try {
           }
         : original(q);
   });
-  await p.goto("http://127.0.0.1:4173/");
+  await p.goto(process.env.DOKE_URL || "http://127.0.0.1:4173/");
   await p.waitForFunction(
     () => document.documentElement.dataset.ready === "true",
     null,
@@ -110,13 +111,30 @@ try {
   );
   await p.waitForTimeout(1000);
   await p.screenshot({ path: "test-results/v03-hdr-molecule.png" });
+  await p.locator('#scene-navigation [data-scene="experiment"]').click();
+  await p.locator('[data-experiment-action="probe"]').click();
+  await p.waitForFunction(
+    () => !document.querySelector('[data-experiment-action="probe"]').disabled,
+  );
+  assert.equal(
+    await p.evaluate(
+      () =>
+        document
+          .querySelector("#brain-canvas")
+          .getContext("webgpu")
+          .getConfiguration().toneMapping.mode,
+    ),
+    "extended",
+  );
+  assert.ok(await p.locator(".experiment-heading h1").isVisible());
+  await p.screenshot({ path: "test-results/experiment/hdr.png" });
   assert.deepEqual(errors, []);
   const report = {
     status: "passed",
     ...config,
     errors,
     scope:
-      "Capability signal emulated to exercise real rgba16float extended canvas, HDR text, resize and SDR switch. No photometric HDR-screen validation.",
+      "Capability signal emulated to exercise real rgba16float extended canvas, HDR text, resize, SDR switch and the timing experiment. No photometric HDR-screen validation.",
   };
   fs.writeFileSync(
     "test-results/hdr-results.json",
