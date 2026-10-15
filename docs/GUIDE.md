@@ -25,6 +25,10 @@ Reference selections show documented product facts. The small models demonstrate
 
 The standalone silicon page does not need generated anatomy. For a quick hardware-only preview, build Wasm with `cargo build -p doke-web --target wasm32-unknown-unknown --release --locked`, run the matching `wasm-bindgen` command from `tools/build.sh`, then serve `public/`. Use the complete setup below for the human brain and all original scenes.
 
+**Together ↗** opens the same input beside the actual human reference atlas. Its four-stage visual-anatomy guide has separate Play, Next and Reset controls. The 16-second guide clock is authored reading pace, not a neural response time. Painting updates the shared stimulus thumbnail; it does not claim to calculate a person's brain response. On a phone, switch between Silicon and Human brain above the scene. Moving between those mobile views pauses the scene being left. Evidence and anatomical selections use the same left-hand tabs as the hardware sources. Switch ASIC remains a packet-routing experiment and does not process the image.
+
+For comparison checks, generate the anatomy assets first and run `DOKE_URL=http://127.0.0.1:4173 node tests/comparison-browser.mjs`. This exercises both actual canvases, independent clocks, shared inputs, source navigation and mobile layouts. Missing anatomy retains the source-led guide and displays an error rather than substituting invented geometry.
+
 ## Neurons and scientific interpretation
 
 The optional tissue window contains four procedural branching neurons, dendritic spines, axonal terminals, receiving processes and visible contact gaps. It occupies a localized area of the reference brain and is off initially. The cells are deliberately enlarged; **their positions, numbers, shapes and connectivity do not come from the atlas**. Flashing particles illustrate signaling and are not computed action potentials. This presentation draws on the structural distinctions discussed in [Spruston's review of pyramidal neurons](https://pubmed.ncbi.nlm.nih.gov/18270515/).

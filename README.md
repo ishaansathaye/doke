@@ -27,6 +27,10 @@ Open **Silicon** in the top navigation. Paint an 8 × 8 image, step the computat
 
 The [silicon research and roadmap](docs/SILICON.md) explains the evidence, modeling boundaries and planned iterations.
 
+Choose **Together ↗** for the same image alongside the existing human atlas. The source-led brain guide and numerical silicon model have independent clocks; this is a comparison of mechanisms, not a brain-versus-chip speed benchmark.
+
+![The actual human reference atlas alongside the interactive silicon model.](docs/media/brain-and-silicon.webp)
+
 ## What is calculated
 
 Brain geometry derives from the Allen Human Reference Atlas; molecule coordinates come from PubChem. Activity highlights, enlarged neurons, synaptic contacts and traveling particles illustrate supported concepts. They are not reconstructed individual cells or measured firing/chemical concentrations. The simplified neural circuit integrates population dynamics in Rust. Source records and scientific limitations are available in the interface.

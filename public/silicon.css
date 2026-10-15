@@ -949,3 +949,333 @@ footer {
     transition: none !important;
   }
 }
+
+/* Two independently controlled worlds, using the existing reference atlas. */
+.compare-mode {
+  background: #000;
+}
+.compare-mode #silicon-stage {
+  left: 145px;
+  right: 50%;
+  top: 200px;
+  bottom: 240px;
+}
+.compare-mode .chip-heading {
+  position: fixed;
+  top: 112px;
+  left: 32px;
+  max-width: calc(50% - 220px);
+}
+.compare-mode .view-tools {
+  position: fixed;
+  top: 115px;
+  right: calc(50% + 24px);
+}
+.compare-mode .view-tools button {
+  min-width: 30px;
+  padding: 6px 9px;
+}
+.compare-mode .scene-note {
+  display: none;
+}
+#brain-stage {
+  position: fixed;
+  top: 215px;
+  bottom: 405px;
+  left: 52%;
+  right: 24px;
+}
+#brain-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+#comparison-heading {
+  position: fixed;
+  top: 114px;
+  left: 55%;
+  right: 35px;
+  pointer-events: none;
+}
+#comparison-heading h1 {
+  font-size: 32px;
+  font-weight: 450;
+  letter-spacing: -1px;
+  margin: 14px 0 11px;
+}
+#comparison-heading p {
+  font: 11px var(--mono);
+  color: var(--muted);
+}
+#brain-stimulus {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  opacity: 0.85;
+}
+#brain-guide {
+  position: fixed;
+  bottom: 238px;
+  left: 55%;
+  right: 38px;
+  max-width: 600px;
+  z-index: 4;
+}
+#brain-guide .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.6px;
+}
+#brain-guide h2 {
+  font-size: 23px;
+  font-weight: 450;
+  letter-spacing: -0.4px;
+  margin: 10px 0;
+}
+#brain-guide p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #b7c4c5;
+  margin: 0 0 12px;
+  min-height: 60px;
+  max-width: 550px;
+}
+.guide-controls {
+  display: flex;
+  gap: 4px;
+}
+.guide-controls button {
+  font-size: 11px;
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+}
+.guide-controls button:first-child {
+  color: #deeeee;
+  background: #b7d5d51a;
+}
+#compare-mechanisms {
+  font-size: 10px;
+  color: #adc6c8;
+  padding: 10px 0 0;
+}
+.compare-mode .input-card {
+  width: 132px;
+  padding: 10px;
+  top: 257px;
+  left: 24px;
+}
+.compare-mode #input-tile {
+  width: 110px;
+  height: 110px;
+}
+.compare-mode .card-heading .eyebrow {
+  font-size: 7px;
+  letter-spacing: 0.1px;
+}
+.compare-mode .input-caption {
+  display: block;
+  font-size: 7px;
+  margin: 7px 0;
+}
+.compare-mode .input-caption span:last-child {
+  display: none;
+}
+.compare-mode .input-card .small {
+  display: none;
+}
+.compare-mode .input-card select {
+  font-size: 9px;
+}
+.compare-mode .output-card {
+  left: 24px;
+  right: auto;
+  top: 520px;
+  width: 132px;
+  text-align: left;
+}
+.compare-mode .output-card canvas {
+  margin: 12px 0 8px;
+  width: 88px;
+  height: 88px;
+}
+.compare-mode #packet-card {
+  width: 180px;
+}
+.compare-mode #packet-card h2 {
+  font-size: 20px;
+}
+.compare-mode .inspector {
+  top: 235px;
+  bottom: 245px;
+}
+#comparison-views {
+  display: none;
+}
+@media (max-width: 1050px) and (min-width: 701px) {
+  .compare-mode #silicon-stage {
+    left: 100px;
+  }
+  .compare-mode .chip-heading {
+    max-width: calc(50% - 80px);
+  }
+  .compare-mode .chip-heading select {
+    font-size: 25px;
+  }
+  .compare-mode .view-tools {
+    top: 207px;
+  }
+  #comparison-heading {
+    left: 54%;
+  }
+  #comparison-heading h1 {
+    font-size: 28px;
+  }
+  #brain-stimulus {
+    width: 34px;
+    height: 34px;
+    top: 36px;
+  }
+  #brain-guide {
+    left: 54%;
+    right: 24px;
+  }
+  #brain-guide h2 {
+    font-size: 20px;
+  }
+  #brain-guide p {
+    font-size: 11px;
+  }
+  .guide-controls button {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+  .compare-mode .input-card {
+    left: 18px;
+    width: 112px;
+  }
+  .compare-mode #input-tile {
+    width: 90px;
+    height: 90px;
+  }
+  .compare-mode .output-card {
+    left: 18px;
+    top: 470px;
+  }
+}
+@media (max-width: 700px) {
+  #comparison-views {
+    position: fixed;
+    display: flex;
+    top: 114px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-bottom: 1px solid var(--line);
+    z-index: 8;
+    white-space: nowrap;
+  }
+  #comparison-views button {
+    font-size: 11px;
+    padding: 7px 18px;
+    color: var(--muted);
+    border-radius: 0;
+  }
+  #comparison-views [aria-pressed="true"] {
+    color: white;
+    border-bottom: 1px solid #daeeee;
+  }
+  .compare-mode #silicon-stage {
+    inset: 0;
+  }
+  .compare-mode .chip-heading {
+    top: 170px;
+    left: 22px;
+    max-width: calc(100% - 100px);
+  }
+  .compare-mode .view-tools {
+    top: 174px;
+    right: 16px;
+  }
+  .compare-mode .input-card {
+    top: 275px;
+    left: 16px;
+    width: 118px;
+  }
+  .compare-mode #input-tile {
+    width: 96px;
+    height: 96px;
+  }
+  .compare-mode .output-card {
+    top: 285px;
+    left: auto;
+    right: 17px;
+    width: 85px;
+    text-align: right;
+  }
+  .compare-mode .output-card canvas {
+    width: 68px;
+    height: 68px;
+    margin-left: auto;
+  }
+  .compare-mode .inspector {
+    top: 230px;
+    bottom: 228px;
+  }
+  #brain-stage {
+    top: 235px;
+    bottom: 310px;
+    left: 0;
+    right: 0;
+  }
+  #comparison-heading {
+    top: 170px;
+    left: 24px;
+    right: 24px;
+  }
+  #comparison-heading h1 {
+    font-size: 27px;
+    margin: 12px 0;
+  }
+  #comparison-heading .eyebrow {
+    font-size: 8px;
+    letter-spacing: 0.8px;
+  }
+  #comparison-heading p {
+    font-size: 9px;
+  }
+  #brain-stimulus {
+    width: 42px;
+    height: 42px;
+  }
+  #brain-guide {
+    bottom: 52px;
+    left: 24px;
+    right: 24px;
+  }
+  #brain-guide h2 {
+    font-size: 22px;
+  }
+  #brain-guide p {
+    font-size: 12px;
+    min-height: 90px;
+  }
+  .compare-mode[data-comparison-view="silicon"] #brain-stage,
+  .compare-mode[data-comparison-view="silicon"] #comparison-heading,
+  .compare-mode[data-comparison-view="silicon"] #brain-guide {
+    display: none;
+  }
+  .compare-mode[data-comparison-view="brain"] #silicon-stage,
+  .compare-mode[data-comparison-view="brain"] .input-card,
+  .compare-mode[data-comparison-view="brain"] #output-card,
+  .compare-mode[data-comparison-view="brain"] .bottom-area {
+    display: none;
+  }
+  .compare-mode[data-comparison-view="brain"] .inspector {
+    top: 155px;
+    bottom: 55px;
+  }
+  .compare-mode[data-comparison-view="brain"] footer span:first-child {
+    font-size: 0;
+  }
+}

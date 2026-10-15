@@ -37,6 +37,22 @@ const names = {
   switch: "PACKET SWITCHING",
 };
 const tickRates = { cpu: 150, gpu: 18, tensor: 24, switch: 4 };
+const comparing = new URLSearchParams(location.search).get("compare") === "1";
+let comparisonContent;
+const comparisonSources = new Map();
+if (comparing) {
+  document.body.classList.add("compare-mode");
+  document.body.dataset.comparisonView = "silicon";
+  for (const id of [
+    "brain-stage",
+    "comparison-heading",
+    "comparison-views",
+    "brain-guide",
+  ])
+    $("#" + id).hidden = false;
+  $$(".worlds a").forEach((a) => a.removeAttribute("aria-current"));
+  $("#compare-link").setAttribute("aria-current", "page");
+}
 
 function pattern(id) {
   return Array.from({ length: 64 }, (_, i) => {
@@ -279,6 +295,13 @@ function changeFamily(value) {
   setProfile($("#chip-profile").value);
   if (family === "switch")
     $("#scene-note").textContent = "Block one output. Let the others through.";
+  if (comparing) {
+    $("#brain-stimulus").hidden = family === "switch";
+    $("#comparison-heading .eyebrow").textContent =
+      family === "switch"
+        ? "MOVING DATA · DIFFERENT MECHANISMS"
+        : "SAME IMAGE · DIFFERENT MECHANISMS";
+  }
   history.replaceState(
     null,
     "",
@@ -325,6 +348,65 @@ function closePanel() {
 }
 function sourceButton(s) {
   return `<button class="source-link" data-source="${escape(s.id)}">${escape(s.title)} ↗</button>`;
+}
+function comparisonSourceButton(s) {
+  comparisonSources.set(s.id, s);
+  return `<button class="source-link" data-comparison-source="${escape(s.id)}">${escape(s.title)} ↗</button>`;
+}
+function showComparisonSource(id) {
+  const s = comparisonSources.get(id);
+  if (!s) return;
+  showPanel(
+    "comparison-source:" + id,
+    `${s.authors.split(" ")[0]} ${s.year}`,
+    `<div class="eyebrow">FOLLOW THE EVIDENCE</div><h2>${escape(s.title)}</h2><p>${escape(s.authors)} · ${escape(s.year)}</p><dl><dt>Method and scope</dt><dd>${escape(s.method)} · ${escape(s.species)}</dd></dl><h3>What the source supports</h3><p>${escape(s.finding)}</p><p class="limit">${escape(s.limit)}</p><a href="${escape(s.url)}" target="_blank" rel="noopener noreferrer">Open the original source ↗</a>`,
+  );
+}
+function showMechanisms() {
+  if (!comparisonContent) return;
+  const mechanisms = comparisonContent.mechanisms.filter((m) =>
+    [family, "human"].includes(m.id),
+  );
+  const ids = [...new Set(mechanisms.flatMap((m) => m.sources))];
+  showPanel(
+    "comparison",
+    "Compare",
+    `<div class="eyebrow">COMPARE THE MECHANISMS</div><h2>What moves. What changes.</h2><p>${escape(comparisonContent.input.scope)}</p>${mechanisms.map((m) => `<h3>${escape(m.label)}</h3><dl><dt>Work</dt><dd>${escape(m.unit)}</dd><dt>Organization</dt><dd>${escape(m.organization)}</dd><dt>State</dt><dd>${escape(m.state)}</dd></dl><p>${escape(m.tradeoff)}</p><p class="limit">${escape(m.limit)}</p>`).join("")}<h3>Follow the evidence</h3>${ids.map((id) => comparisonSourceButton({ id, ...comparisonContent.sources[id] })).join("")}`,
+  );
+}
+async function startComparison() {
+  $("#compare-mechanisms").onclick = showMechanisms;
+  $$("button[data-comparison-view]").forEach((b) => {
+    b.onclick = () => {
+      const view = b.dataset.comparisonView;
+      document.body.dataset.comparisonView = view;
+      closePanel();
+      if (view === "brain") pause();
+      else window.dokeBrainComparison?.pause();
+      $$("button[data-comparison-view]").forEach((el) =>
+        el.setAttribute("aria-pressed", String(el === b)),
+      );
+      dirty = true;
+    };
+  });
+  window.addEventListener("doke-comparison-evidence", (event) => {
+    const p = event.detail.panel;
+    showPanel(
+      p.id,
+      p.title,
+      `<div class="eyebrow">${escape(p.eyebrow)}</div><h2>${escape(p.title)}</h2>${p.paragraphs.map((t) => `<p>${escape(t)}</p>`).join("")}<h3>Follow the evidence</h3>${p.sources.map(comparisonSourceButton).join("")}`,
+    );
+  });
+  try {
+    const response = await fetch("comparison.json");
+    if (!response.ok) throw Error("Comparison content unavailable");
+    comparisonContent = await response.json();
+    const { initBrainComparison } = await import("./brain-comparison.js");
+    await initBrainComparison(wasm);
+  } catch (error) {
+    $("#brain-guide-copy").textContent =
+      `The comparison could not open: ${error.message || error}`;
+  }
 }
 function showReference() {
   showPanel(
@@ -628,6 +710,9 @@ function bind() {
   $("#inspection").onclick = (e) => {
     const b = e.target.closest("[data-source]");
     if (b) showSource(b.dataset.source);
+    const comparisonSource = e.target.closest("[data-comparison-source]");
+    if (comparisonSource)
+      showComparisonSource(comparisonSource.dataset.comparisonSource);
   };
   $("#settings").onclick = () => {
     $("#display-settings").hidden = !$("#display-settings").hidden;
@@ -792,6 +877,7 @@ async function boot() {
   }
   document.documentElement.dataset.ready = "true";
   requestAnimationFrame(frame);
+  if (comparing && wasm) startComparison();
 }
 window.dokeSilicon = {
   snapshot: () => (snap ? structuredClone(snap) : null),

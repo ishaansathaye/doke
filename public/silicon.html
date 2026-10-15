@@ -18,7 +18,8 @@
       <a class="brand" href="./">doke<span>◦</span></a>
       <nav class="worlds" aria-label="World">
         <a href="./">Human brain</a
-        ><a href="silicon.html" aria-current="page">Silicon</a>
+        ><a href="silicon.html" aria-current="page">Silicon</a
+        ><a href="silicon.html?compare=1" id="compare-link">Together ↗</a>
       </nav>
       <button id="reference" class="quiet">Reference & evidence ↗</button>
     </header>
@@ -52,6 +53,53 @@
         <div class="scene-note" id="scene-note">
           Your input. Every read. Every result.
         </div>
+      </section>
+      <section
+        id="brain-stage"
+        hidden
+        aria-label="Reference human brain alongside silicon"
+      >
+        <canvas id="brain-canvas"></canvas>
+      </section>
+      <div id="comparison-heading" hidden>
+        <div class="eyebrow">SAME IMAGE · DIFFERENT MECHANISMS</div>
+        <h1>The human brain</h1>
+        <p>Reference anatomy · a guide to seeing</p>
+        <canvas
+          id="brain-stimulus"
+          width="128"
+          height="128"
+          aria-label="Shared input image"
+        ></canvas>
+      </div>
+      <div
+        id="comparison-views"
+        hidden
+        role="group"
+        aria-label="Comparison view"
+      >
+        <button data-comparison-view="silicon" aria-pressed="true">
+          Silicon
+        </button>
+        <button data-comparison-view="brain" aria-pressed="false">
+          Human brain
+        </button>
+      </div>
+      <section id="brain-guide" hidden aria-label="Independent anatomy guide">
+        <div class="eyebrow" id="brain-guide-time">
+          Guide time · authored pacing
+        </div>
+        <h2 id="brain-guide-title">Opening the reference atlas…</h2>
+        <p id="brain-guide-copy">
+          Follow visual landmarks in the existing brain explorer.
+        </p>
+        <div class="guide-controls">
+          <button id="brain-guide-play" disabled>Play guide</button
+          ><button id="brain-guide-next" disabled>Next</button
+          ><button id="brain-guide-reset" disabled>Reset</button
+          ><button id="brain-guide-evidence" disabled>Evidence ↗</button>
+        </div>
+        <button id="compare-mechanisms">Compare the mechanisms ↗</button>
       </section>
       <section id="input-card" class="glass input-card" aria-label="Input tile">
         <div class="card-heading">

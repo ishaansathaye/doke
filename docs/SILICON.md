@@ -2,6 +2,8 @@
 
 Research and implementation proposal, 14 October 2026. This direction keeps the existing human brain explorer and adds a silicon world with the same floating presentation, zoom, inspection and light. Earlier proposals in PRs #1–#3 are not dependencies and remain unmerged.
 
+The first four review increments are implemented in [research #4](https://github.com/ishaansathaye/doke/pull/4), [Rust models #5](https://github.com/ishaansathaye/doke/pull/5), [3D explorer #6](https://github.com/ishaansathaye/doke/pull/6), and the following brain-comparison branch. The six later increments below remain proposals. Screenshots in the README are captures of the working implementation.
+
 ## The experience
 
 Choose a CPU, GPU, tensor accelerator or packet-switch reference. Put something into it. Follow the resulting work into storage, scheduling, arithmetic or queues. Change one condition and see the computed consequence. Open the existing human brain beside it to ask how biological information processing differs.
