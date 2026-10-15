@@ -1,3 +1,5 @@
+mod chip;
+mod dataflow;
 mod scenes;
 use bytemuck::{Pod, Zeroable};
 use glam::{Mat4, Vec3, Vec4};
@@ -22,6 +24,8 @@ struct Uniform {
     activity: [[f32; 4]; 64],
     detail: [f32; 4],
     style: [f32; 4],
+    flow_from: [[f32; 4]; 32],
+    flow_to: [[f32; 4]; 32],
 }
 struct Targets {
     scene: wgpu::TextureView,
@@ -495,6 +499,38 @@ impl BrainRenderer {
         self.load_mesh(&mesh.bytes())?;
         Ok(())
     }
+    /// Original functional schematic, sharing the atlas camera and HDR pipeline.
+    pub fn chip_scene(&mut self, json: &str) -> Result<(), JsValue> {
+        let mesh = chip::mesh(json).map_err(JsValue::from_str)?;
+        self.state.params = [0., 0., 4., 0.];
+        self.state.flags = [-1., 0., 2., 0.];
+        self.state.detail = [0.; 4];
+        self.state.activity = [[0.; 4]; 64];
+        self.state.flow_from = [[0.; 4]; 32];
+        self.state.flow_to = [[0.; 4]; 32];
+        self.tissue_buffers = None;
+        self.target = Vec3::ZERO;
+        self.yaw = -0.25;
+        self.pitch = 0.82;
+        self.distance = 9.5;
+        self.load_mesh(&mesh.bytes())
+    }
+    /// Up to 32 real transfer markers: start xyz, end xyz, interpolation fraction.
+    pub fn chip_flows(&mut self, data: &[f32]) -> Result<(), JsValue> {
+        if data.len() > 224
+            || data.len() % 7 != 0
+            || data.iter().any(|x| !x.is_finite() || x.abs() > 8.)
+        {
+            return Err(JsValue::from_str("Invalid transfer positions"));
+        }
+        self.state.flow_from = [[0.; 4]; 32];
+        self.state.flow_to = [[0.; 4]; 32];
+        for (i, f) in data.chunks_exact(7).enumerate() {
+            self.state.flow_from[i] = [f[0], f[1], f[2], 1.];
+            self.state.flow_to[i] = [f[3], f[4], f[5], f[6].clamp(0., 1.)];
+        }
+        Ok(())
+    }
     pub fn anatomy(&mut self) {
         self.state.params[2] = 0.;
     }
@@ -591,13 +627,21 @@ impl BrainRenderer {
         self.pitch = (self.pitch + dy).clamp(-1.45, 1.45);
     }
     pub fn zoom(&mut self, delta: f32) {
-        self.distance = (self.distance * delta.exp()).clamp(0.65, 7.);
+        self.distance = (self.distance * delta.exp())
+            .clamp(0.65, if self.state.params[2] == 4. { 15. } else { 7. });
     }
     pub fn pan(&mut self, dx: f32, dy: f32) {
         let right = Vec3::new(self.yaw.cos(), 0., -self.yaw.sin());
         self.target += right * (-dx * self.distance) + Vec3::Y * (dy * self.distance);
     }
     pub fn view(&mut self, preset: u32) {
+        if self.state.params[2] == 4. {
+            self.target = Vec3::ZERO;
+            self.distance = 9.5;
+            self.yaw = -0.25;
+            self.pitch = 0.82;
+            return;
+        }
         if self.state.params[2] > 0. {
             let synapse = self.state.params[2] == 1.;
             self.target = Vec3::new(0., if synapse { 0.4 } else { 0. }, 0.);
@@ -690,7 +734,12 @@ impl BrainRenderer {
         let mut focused_hit = false;
         for tri in self.cpu_i.chunks_exact(3) {
             let a = self.cpu_v[tri[0] as usize];
-            if a.kind == 2. || (a.kind == 0. && self.state.flags[1] == 1.) {
+            if a.kind == 2.
+                || a.kind == 16.
+                || a.kind == 17.
+                || a.kind == 18.
+                || (a.kind == 0. && self.state.flags[1] == 1.)
+            {
                 continue;
             }
             let v0 = Vec3::from(a.p);
@@ -751,7 +800,10 @@ impl BrainRenderer {
             0.02,
             30.,
         ) * Mat4::look_at_rh(self.eye, self.target, Vec3::Y);
-        if portrait_micro {
+        if self.state.params[2] == 4. {
+            let shift = if portrait_micro { -0.03 } else { 0.10 };
+            self.matrix = Mat4::from_translation(Vec3::new(0., shift, 0.)) * self.matrix;
+        } else if portrait_micro {
             self.matrix = Mat4::from_translation(Vec3::new(0., 0.14, 0.)) * self.matrix;
         }
         self.state.vp = self.matrix.to_cols_array_2d();
