@@ -1,0 +1,159 @@
+{
+  "version": "1.0.0",
+  "title": "Same image, different mechanisms",
+  "summary": "Change an image. Follow the numbers through silicon, then explore the anatomy of seeing.",
+  "input": {
+    "width": 8,
+    "height": 8,
+    "label": "Your image",
+    "operation": "C = A \u00d7 B",
+    "description": "The image supplies matrix A. A derivative filter supplies matrix B. CPU and GPU models calculate the same filtered output C.",
+    "scope": "Filtering reveals changes in pixel values. It does not identify an object. The brain view is a source-guided illustration, not a calculation of your perception."
+  },
+  "brain": {
+    "label": "Human anatomy \u00b7 illustrative pathway",
+    "timingLabel": "Guide time \u00b7 authored pacing",
+    "scope": "Highlights guide your attention through reference anatomy. Their timing, brightness and connections are illustrative. Unlit areas are not inactive.",
+    "durationSeconds": 16,
+    "stages": [
+      {
+        "id": "anatomy",
+        "startSeconds": 0,
+        "endSeconds": 4,
+        "title": "Find the visual landmarks",
+        "text": "Start at the occipital surface. This broad atlas grouping helps you locate visual anatomy; it does not resolve individual visual areas or predict a response to your drawing.",
+        "regions": ["visual"],
+        "sources": ["atlas"]
+      },
+      {
+        "id": "patterns",
+        "startSeconds": 4,
+        "endSeconds": 8,
+        "title": "Look across a pattern",
+        "text": "A human fMRI study found distinguishable responses to visual categories across ventral temporal cortex. Several anatomical landmarks are shown here to introduce that distributed organization.",
+        "regions": ["fusiform", "inferior-temporal"],
+        "sources": ["vision"]
+      },
+      {
+        "id": "overlap",
+        "startSeconds": 8,
+        "endSeconds": 12,
+        "title": "One region, many contributions",
+        "text": "The study's category information extended beyond the most strongly responding patches. A whole gyrus is not a dedicated face detector, and these highlights are not the original measured patterns.",
+        "regions": ["fusiform", "inferior-temporal", "middle-temporal"],
+        "sources": ["vision"]
+      },
+      {
+        "id": "measurement",
+        "startSeconds": 12,
+        "endSeconds": 16,
+        "title": "Ask what was measured",
+        "text": "The study measured fMRI responses, not individual action potentials. Follow the evidence to distinguish anatomical context, measured signals and the numerical filter running on the silicon side.",
+        "regions": ["visual", "fusiform", "inferior-temporal"],
+        "sources": ["vision", "bold"]
+      }
+    ]
+  },
+  "mechanisms": [
+    {
+      "id": "cpu",
+      "label": "CPU",
+      "unit": "Arithmetic work and memory accesses",
+      "organization": "A scheduler gives ready work to available execution resources.",
+      "state": "Operands, partial results and memory contents",
+      "tradeoff": "More execution capacity helps only when operands and independent work are available.",
+      "limit": "A simplified work scheduler, not an instruction-level reproduction of a particular CPU. Model ticks are not measured chip cycles.",
+      "sources": ["cpu-issue"]
+    },
+    {
+      "id": "gpu",
+      "label": "GPU",
+      "unit": "Groups of arithmetic lanes",
+      "organization": "Many threads perform related work; their memory addresses and active lanes matter.",
+      "state": "Per-thread values, lane masks and shared memory resources",
+      "tradeoff": "Regular work can fill lanes efficiently. Divergent paths and scattered accesses can reduce useful work per issued operation.",
+      "limit": "This teaching schedule does not reproduce every GPU, or measure the GPU displaying this page.",
+      "sources": ["gpu-simt"]
+    },
+    {
+      "id": "human",
+      "label": "Human brain",
+      "unit": "Biological signals studied at different scales",
+      "organization": "Visual representations involve distributed, overlapping activity across tissue.",
+      "state": "The atlas provides anatomical context; this guide does not calculate a neural state.",
+      "tradeoff": "Different measurements reveal different aspects of the system. Regional fMRI patterns are not individual spikes.",
+      "limit": "No equivalent CPU clock, FLOPS score, energy per image or predicted human response is inferred.",
+      "sources": ["vision", "bold"]
+    }
+  ],
+  "evidenceSourceIds": [
+    "vision",
+    "vision-timing",
+    "bold",
+    "atlas",
+    "cpu-issue",
+    "gpu-simt"
+  ],
+  "sources": {
+    "atlas": {
+      "title": "Allen Human Reference Atlas \u2013 3D, 2020",
+      "authors": "Ding and colleagues \u00b7 Allen Institute",
+      "year": "2020",
+      "method": "Anatomical reference atlas",
+      "species": "Human reference template",
+      "url": "https://download.alleninstitute.org/informatics-archive/allen_human_reference_atlas_3d_2020/version_1/README.pdf",
+      "finding": "The reference provides anatomical labels from which doke's teaching surfaces are derived.",
+      "limit": "These grouped surfaces are neither an individual's scan nor a measurement of functional activation."
+    },
+    "vision": {
+      "title": "Distributed and overlapping representations of faces and objects in ventral temporal cortex",
+      "authors": "Haxby et al. \u00b7 Science",
+      "year": "2001",
+      "method": "Human fMRI experiment",
+      "species": "Human",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11577229/",
+      "finding": "Category-related response patterns were distributed and overlapping; information remained outside the maximally responding regions.",
+      "limit": "The atlas highlights are explanatory landmarks, not the study's voxel patterns or an image-recognition model."
+    },
+    "vision-timing": {
+      "title": "Speed of processing in the human visual system",
+      "authors": "Thorpe, Fize & Marlot \u00b7 Nature",
+      "year": "1996",
+      "method": "Go/no-go categorization and event-related potentials",
+      "species": "Human",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/8632824/",
+      "finding": "In an animal-categorization task with photographs displayed for 20 ms, a no-go-related ERP difference emerged around 150 ms after image onset.",
+      "limit": "This is a task-specific electrical measurement, not button-response time, a brain clock or the timing of this guide. It does not calibrate a brain-versus-chip race."
+    },
+    "bold": {
+      "title": "Neurophysiological investigation of the basis of the fMRI signal",
+      "authors": "Logothetis et al. \u00b7 Nature",
+      "year": "2001",
+      "method": "Simultaneous electrophysiology and BOLD fMRI",
+      "species": "Nonhuman primate",
+      "url": "https://www.nature.com/articles/35084005",
+      "finding": "In the studied visual-cortex conditions, local field potentials predicted the BOLD response better than multi-unit spiking output.",
+      "limit": "BOLD cannot be read as a direct count of outgoing spikes. The relationship depends on the preparation and measurement."
+    },
+    "cpu-issue": {
+      "title": "The Issue Unit",
+      "authors": "RISCV-BOOM documentation",
+      "year": "Reference",
+      "method": "Open processor architecture documentation",
+      "species": "Hardware",
+      "url": "https://docs.boom-core.org/en/latest/sections/issue-units.html",
+      "finding": "BOOM's issue logic considers operand readiness and available execution resources.",
+      "limit": "This supports the scheduling principle. Doke's generic work scheduler is not a BOOM emulator or a timing model for commercial CPUs."
+    },
+    "gpu-simt": {
+      "title": "CUDA C++ Programming Guide \u00b7 SIMT Architecture",
+      "authors": "NVIDIA",
+      "year": "2023 \u00b7 CUDA 12.2",
+      "method": "Published GPU programming and architecture documentation",
+      "species": "Hardware",
+      "url": "https://docs.nvidia.com/cuda/archive/12.2.0/cuda-c-programming-guide/index.html#simt-architecture",
+      "finding": "CUDA groups threads into warps; execution paths and memory-access organization affect how work proceeds.",
+      "limit": "This is documentation for a particular GPU programming family. Doke uses a reduced teaching schedule, not a device-specific performance prediction."
+    }
+  }
+}

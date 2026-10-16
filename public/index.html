@@ -3,302 +3,196 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#080808" />
+    <meta name="theme-color" content="#050606" />
     <meta
       name="description"
-      content="An interactive, source-grounded atlas of the human brain. Explore anatomy, follow activities, and discover how neural signaling works."
+      content="Look inside a processor and the human brain. Explore architecture, follow a value through an executable model, and compare how information moves."
     />
     <title>doke</title>
-    <link rel="icon" href="favicon.ico?v=1" sizes="16x16 32x32 48x48" />
-    <link rel="icon" href="favicon.svg?v=1" type="image/svg+xml" sizes="any" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="silicon.css" />
   </head>
-  <body>
-    <a class="skip-link" href="#details">Skip to explanation</a>
+  <body data-world="gpu" data-level="processor">
+    <a class="skip" href="#run">Skip to controls</a>
     <header>
-      <a class="brand" href="./" aria-label="doke home"
-        >doke<span class="brand-orbit">◦</span></a
-      >
-      <nav id="scene-navigation" aria-label="Scale of exploration">
-        <button data-scene="atlas" class="active">Brain</button><span>·</span
-        ><button data-scene="synapse">Synapse</button><span>·</span
-        ><button data-scene="circuit">Neural circuit</button><span>·</span
-        ><button data-scene="molecule">Messengers</button>
+      <a class="brand" href="./" aria-label="doke home">doke<span>◦</span></a>
+      <nav class="worlds" aria-label="Explore">
+        <select id="hardware" aria-label="Select hardware">
+          <option value="" hidden>Select hardware</option>
+          <optgroup label="CPU">
+            <option value="ryzen-9950x">Ryzen 9 9950X · CPU</option>
+          </optgroup>
+          <optgroup label="GPU">
+            <option value="rtx-5090" selected>RTX 5090 · GPU</option>
+            <option value="h100-sxm">H100 SXM · GPU</option>
+          </optgroup>
+          <optgroup label="Tensor / NPU">
+            <option value="tpu-v1">Google TPU v1 · NPU</option>
+          </optgroup>
+          <optgroup label="Network ASIC">
+            <option value="silicon-one-g200">Cisco G200 · ASIC</option>
+          </optgroup></select
+        ><button data-world="brain">Human brain</button>
       </nav>
-      <nav class="explorer-dock" aria-label="Explore content">
-        <button data-tab="explore">⌕ <span>Anatomy</span></button
-        ><button data-tab="activities">↝ <span>Activities</span></button
-        ><button id="neuron-layer" aria-pressed="false">
-          ⌁ <span>Neurons</span>
+      <div class="header-actions">
+        <button id="compare-toggle" aria-pressed="false">
+          Compare brain <span>↗</span></button
+        ><button
+          id="settings-toggle"
+          aria-label="Display and reference settings"
+        >
+          ⋯
         </button>
-      </nav>
-      <button id="about-button" class="quiet">About <span>↗</span></button>
+      </div>
     </header>
     <main>
-      <section id="info-panel" aria-label="Information" hidden>
-        <div class="panel-toolbar">
-          <div id="panel-tabs" role="tablist" aria-label="Information pages">
-            <button id="panel-browse" role="tab" aria-controls="browse-page">
-              Browse
-            </button>
-          </div>
-          <button
-            id="close-tab"
-            aria-label="Close current tab"
-            title="Close current tab"
-          >
-            ×
-          </button>
-          <button
-            id="close-panel"
-            aria-label="Close information"
-            title="Hide information panel"
-          >
-            ⌄
-          </button>
-        </div>
-      </section>
-      <aside
-        class="left-panel"
-        id="browse-page"
-        role="tabpanel"
-        aria-label="Explorer"
+      <section
+        id="chip-stage"
+        class="stage"
+        aria-label="Processor architecture"
       >
-        <div class="panel-heading">
-          <span id="drawer-title">Explore</span
-          ><button id="close-explorer" aria-label="Close explorer">×</button>
-        </div>
-        <div id="left-content">
-          <label class="search"
-            ><span>⌕</span
-            ><input
-              id="region-search"
-              placeholder="Find a brain region"
-              aria-label="Find a brain region"
-            /><kbd>/</kbd></label
-          >
-          <div class="list-title">
-            <span>ANATOMY</span><span id="region-count">37 STRUCTURES</span>
-          </div>
-          <div id="region-list" class="region-list"></div>
-        </div>
-        <div class="left-foot">
-          <span class="status-dot"></span> SOURCED FROM THE ALLEN ATLAS
-          <span>↗</span>
-        </div>
-      </aside>
-      <section class="stage" aria-label="Interactive brain atlas">
-        <div class="stage-top">
-          <span id="scene-mode">ANATOMICAL ATLAS</span
-          ><span class="scale-tag" id="scale-tag">Whole brain</span>
-        </div>
         <canvas
-          id="brain-canvas"
+          id="chip-canvas"
           tabindex="0"
-          aria-label="3D human brain. Drag to rotate, scroll to zoom, or use the anatomy list and view buttons."
-        ></canvas
-        ><canvas id="overlay-canvas" aria-hidden="true"></canvas>
-        <div id="scene-loading" class="scene-loading">
-          <div class="loader-orbit"></div>
-          <p>Loading the reference atlas.</p>
-          <span>LOADING HUMAN ANATOMY</span>
-        </div>
-        <div id="scene-labels"></div>
-        <div class="scale-portal">
-          <span>CHANGE YOUR PERSPECTIVE</span
-          ><button data-scene="synapse">Into a synapse <b>↘</b></button>
-        </div>
-        <div id="micro-controls" hidden>
-          <button
-            id="micro-play"
-            class="round-control"
-            aria-label="Pause animation"
-          >
-            Ⅱ
-          </button>
-          <div id="micro-steps"></div>
-          <button id="focus-cleft">Focus cleft ⊕</button
-          ><button id="inspect-molecule">Inspect messenger ↗</button
-          ><button id="micro-info">How this works ⓘ</button>
-        </div>
-        <div class="micro-caption" hidden>
-          <span class="eyebrow" id="micro-kicker"></span
-          ><strong id="micro-title"></strong>
-          <p id="micro-description"></p>
-        </div>
-        <div id="scene-breadcrumb" hidden>
-          <button data-scene="atlas">Brain</button><span> / </span
-          ><button data-scene="synapse">Synapse</button
-          ><span id="molecule-crumb"></span>
-        </div>
-        <div id="load-progress" hidden>
-          <span></span><progress max="1" value="0"></progress
-          ><button id="cancel-detail">Cancel</button>
-        </div>
-
-        <div class="orientation" hidden>
-          <span>S</span>
-          <div>＋</div>
-          <span id="orientation-label">L · ANTERIOR · R</span>
-        </div>
-        <div class="stage-tools">
-          <div class="segmented">
-            <button id="view-whole" class="active" title="Whole brain">
-              Whole</button
-            ><button id="view-deep" title="Reveal deep structures">
-              Inside</button
-            ><button id="view-cut" title="Cutaway">Cutaway</button>
-          </div>
-          <button id="zoom-in" class="icon-button" aria-label="Zoom in">
-            +</button
-          ><button id="zoom-out" class="icon-button" aria-label="Zoom out">
-            −</button
-          ><button id="reset-view" class="icon-button" aria-label="Reset view">
-            ⟲</button
-          ><button
-            id="settings-button"
-            class="icon-button"
-            aria-label="View settings"
-          >
-            ⋯
-          </button>
-        </div>
-        <div class="scene-hint">
-          DRAG TO ROTATE <span>·</span> SCROLL TO ZOOM <span>·</span> CLICK TO
-          DISCOVER
-        </div>
-        <div id="view-settings" class="floating-panel" hidden>
-          <h3>Make it your view</h3>
-          <label
-            >Light<select id="light-mode">
-              <option value="auto">Adaptive / HDR when available</option>
-              <option value="sdr">SDR glow</option>
-              <option value="quiet">Quiet light</option>
-            </select></label
-          >
-          <p id="hdr-status" class="small-note">Detecting display…</p>
-          <label class="atlas-setting"
-            >Hemisphere<select id="hemisphere">
-              <option value="0">Both</option>
-              <option value="2">Left</option>
-              <option value="3">Right</option>
-            </select></label
-          ><label class="atlas-setting"
-            >Camera<select id="camera-preset">
-              <option value="0">Perspective</option>
-              <option value="1">Left lateral</option>
-              <option value="2">Right lateral</option>
-              <option value="3">Superior</option>
-              <option value="4">Posterior</option>
-              <option value="5">Deep perspective</option>
-            </select></label
-          ><label
-            >Glow<input
-              id="glow-control"
-              type="range"
-              min="0"
-              max="3"
-              step="0.1"
-              value="1.5" /></label
-          ><label class="atlas-setting"
-            >Detail<select id="quality">
-              <option value="auto">Balanced</option>
-              <option value="fine">Fine · 2.1M triangles</option>
-              <option value="high">Native · 0.5 mm</option>
-              <option value="low">Low power</option>
-            </select></label
-          ><label class="check"
-            ><input type="checkbox" id="subtle-colors" checked />Subtle color
-            accents</label
-          ><label class="check"
-            ><input type="checkbox" id="reduced-motion" />Reduce motion</label
-          ><label class="check"
-            ><input type="checkbox" id="show-paths" checked />Show schematic
-            connections</label
-          >
-          <div class="pan-controls" aria-label="Pan view">
-            <button data-pan="-1,0" aria-label="Pan left">←</button
-            ><button data-pan="0,1" aria-label="Pan up">↑</button
-            ><button data-pan="0,-1" aria-label="Pan down">↓</button
-            ><button data-pan="1,0" aria-label="Pan right">→</button>
-          </div>
-          <small id="render-stats">Connecting renderer…</small>
-        </div>
-        <div id="cut-control" hidden>
-          <label
-            >Cutaway depth<input
-              id="cut-depth"
-              type="range"
-              min="-0.8"
-              max="0.8"
-              step="0.01"
-              value="0"
-          /></label>
-        </div>
+          aria-label="Interactive processor. Drag to orbit, Shift-drag to pan, pinch or scroll to zoom, click a component to inspect, double click a core to enter. Arrow keys orbit, plus and minus zoom, Home resets."
+        ></canvas>
+        <div id="chip-labels" aria-hidden="true"></div>
       </section>
-      <button id="close-info" aria-label="Close explanation">×</button>
-      <aside class="right-panel" id="details" role="tabpanel" tabindex="-1">
-        <div class="eyebrow">A CLOSER LOOK</div>
-        <h2>The human<br /><em>brain.</em></h2>
-        <p>
-          A landscape of specialized structures, working together. Select a
-          region to uncover its place in the network.
+      <section
+        id="brain-stage"
+        class="stage"
+        hidden
+        aria-label="Human reference brain"
+      >
+        <canvas id="brain-canvas" tabindex="0"></canvas>
+        <div id="brain-loading" role="status">Opening the atlas…</div>
+      </section>
+      <div class="scene-heading">
+        <div id="eyebrow" class="eyebrow">INSIDE THE GPU</div>
+        <h1 id="scene-title" data-hdr>RTX 5090</h1>
+        <p id="scene-description">
+          170 streaming multiprocessors. Start with one.
         </p>
-        <div class="divider"></div>
-        <div class="metric-pair">
-          <div><strong>36</strong><span>VISIBLE REGIONS</span></div>
-          <div><strong>141</strong><span>ATLAS LABELS</span></div>
-        </div>
-        <div class="note">
-          <span class="eyebrow">START WITH A FEELING</span>
-          <h3>Why does music<br />move us?</h3>
-          <p>Follow anticipation into the experience of a musical peak.</p>
-          <button class="primary" id="start-music">
-            Explore the activity <span>↗</span>
-          </button>
-        </div>
-        <p class="small-note">
-          Real atlas anatomy. Evidence-led explanations. Illustrative
-          activity—not a personal brain recording.
-        </p>
-      </aside>
-    </main>
-    <footer id="timeline">
-      <div class="timeline-title">
-        <span class="eyebrow" id="timeline-kicker">FOLLOW A SIGNAL</span
-        ><strong id="timeline-name"
-          >Choose an activity to bring the atlas to life</strong
-        >
+        <nav id="depth-nav" aria-label="Level of detail">
+          <button data-level="processor" aria-current="step">Processor</button
+          ><span>›</span><button data-level="core">Inside an SM</button
+          ><span>›</span><button data-level="execution">Follow a value</button>
+        </nav>
       </div>
-      <button id="play" class="play-button" aria-label="Play activity">
-        ▶
+      <div id="brain-label" hidden>
+        <span class="eyebrow">HUMAN REFERENCE ATLAS</span>
+        <h2>The human brain</h2>
+        <canvas
+          id="brain-stimulus"
+          width="128"
+          height="128"
+          aria-label="Same input image; no predicted neural response"
+        ></canvas>
+      </div>
+      <div class="view-tools" aria-label="Camera">
+        <button id="zoom-in" aria-label="Zoom in">+</button
+        ><button id="zoom-out" aria-label="Zoom out">−</button
+        ><button id="reset-camera" aria-label="Reset view">↺</button>
+      </div>
+      <button id="level-enter" class="enter-cue">
+        Explore one SM <span>↘</span>
       </button>
-      <div class="time-track">
-        <div id="chapter-ticks"></div>
-        <input
-          id="playhead"
-          type="range"
-          min="0"
-          max="60"
-          step="0.05"
-          value="0"
-          aria-label="Activity playhead"
-        />
-        <div class="time-labels">
-          <span id="elapsed">00:00</span
-          ><span id="chapter-caption">Explore at your own pace</span
-          ><span id="duration">01:00</span>
+      <div id="hover-label" aria-hidden="true"></div>
+      <div id="loading" role="status">Preparing the view…</div>
+      <aside
+        id="reader"
+        class="glass"
+        hidden
+        aria-label="Information and controls"
+      >
+        <div class="reader-top">
+          <div
+            id="reader-tabs"
+            role="tablist"
+            aria-label="Open information"
+          ></div>
+          <button id="reader-close" aria-label="Close panel">×</button>
+        </div>
+        <div id="inspection" tabindex="0"></div>
+      </aside>
+      <aside
+        id="settings"
+        class="glass"
+        hidden
+        aria-label="Display and reference settings"
+      >
+        <label
+          >Image clarity<select id="resolution">
+            <option value="balanced">Balanced</option>
+            <option value="sharp" selected>Sharp</option>
+            <option value="ultra">Ultra</option>
+          </select></label
+        >
+        <label
+          >Light<select id="light-mode">
+            <option value="auto">Adaptive HDR</option>
+            <option value="sdr">SDR glow</option>
+            <option value="quiet">Quiet</option>
+          </select></label
+        >
+        <label
+          ><span>Reduce motion</span><input type="checkbox" id="reduce-motion"
+        /></label>
+        <label
+          >Brain surface<select id="brain-quality">
+            <option value="overview">Overview · 270k triangles</option>
+            <option value="fine">Fine · 2.1m triangles</option>
+            <option value="native">Native · 5.1m triangles</option>
+          </select></label
+        >
+        <p id="quality-status" class="muted"></p>
+        <p id="light-status" class="muted"></p>
+        <button id="about">Sources & model boundaries ↗</button>
+      </aside>
+      <div id="brain-guide" hidden>
+        <div class="guide-heading">
+          <span id="brain-guide-time" class="eyebrow">GUIDE TIME</span>
+          <h2 id="brain-guide-title">Find the visual landmarks</h2>
+        </div>
+        <p id="brain-guide-copy" hidden></p>
+        <div class="guide-controls">
+          <button id="brain-guide-play">Play guide</button
+          ><button id="brain-guide-next">Next</button
+          ><button id="brain-guide-reset" aria-label="Reset guide">↺</button
+          ><button id="brain-guide-evidence">Timing & parts ↗</button>
+        </div>
+        <canvas id="guide-stimulus" width="1" height="1" hidden></canvas>
+      </div>
+      <div id="dock" class="glass">
+        <div id="compute-controls">
+          <button id="run" class="primary" disabled>
+            Follow a value <span>↗</span></button
+          ><button id="step" hidden aria-label="Advance one model tick">
+            Step</button
+          ><button id="reset" hidden aria-label="Reset computation">↺</button
+          ><span class="divider"></span><button id="input-toggle">Input</button
+          ><button id="explain">Explain this view</button
+          ><span id="run-summary" class="muted"></span>
+        </div>
+        <div id="brain-controls" hidden>
+          <button id="anatomy" class="primary">Explore anatomy</button
+          ><button id="brain-cutaway">Look inside</button
+          ><button id="brain-vision">How we see</button
+          ><button id="brain-evidence">Evidence ↗</button>
         </div>
       </div>
-      <button id="restart" class="quiet" aria-label="Restart activity">↺</button
-      ><select id="speed" aria-label="Playback speed">
-        <option value="0.5">0.5×</option>
-        <option value="1" selected>1×</option>
-        <option value="1.5">1.5×</option>
-        <option value="2">2×</option>
-      </select>
+      <div id="comparison-mobile" hidden>
+        <button data-comparison-view="chip" aria-pressed="true">
+          Processor</button
+        ><button data-comparison-view="brain">Brain</button>
+      </div>
+      <div id="toast" role="status" aria-live="polite"></div>
+    </main>
+    <footer>
+      <span id="scene-note"
+        >Original functional schematic · source-linked architecture</span
+      ><span id="render-status"></span>
     </footer>
-    <div id="toast" role="status" aria-live="polite"></div>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="silicon.js"></script>
   </body>
 </html>

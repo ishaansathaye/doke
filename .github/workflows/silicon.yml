@@ -1,0 +1,44 @@
+name: Silicon and brain
+on: [pull_request]
+permissions:
+  contents: read
+jobs:
+  sources-and-models:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+      - run: node tests/hardware-catalog.mjs
+      - run: node tests/architecture.mjs
+      - run: node tests/timescales.mjs
+      - run: python3 tools/check_content.py
+      - run: cargo test -p doke-core --locked
+  browser-and-wasm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22"
+      - run: rustup target add wasm32-unknown-unknown
+      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - run: cargo build -p doke-web --target wasm32-unknown-unknown --release --locked
+      - run: wasm-bindgen target/wasm32-unknown-unknown/release/doke_web.wasm --target web --out-dir public/pkg --out-name doke
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/silicon-wasm.mjs
+      - name: Exercise rendered dataflow and controls
+        run: |
+          python3 -m http.server 4181 --bind 127.0.0.1 --directory public > /tmp/doke-preview.log 2>&1 &
+          DOKE_SERVER_PID=$!
+          trap 'kill "$DOKE_SERVER_PID"' EXIT
+          DOKE_SKIP_BRAIN=1 node tests/focused-browser.mjs
+          DOKE_SKIP_BRAIN=1 node tests/hardware-expansion.mjs
+          node tests/interaction-review.mjs

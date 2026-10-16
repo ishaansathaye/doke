@@ -1,0 +1,216 @@
+{
+  "version": "2.0.0",
+  "scope": "Reference anatomy and source-guided visual pathway. Not a model of individual perception or neural activity.",
+  "regions": {
+    "motor": {
+      "summary": "On the frontal side of the central sulcus, the precentral gyrus includes primary motor cortex. It participates in control of voluntary movement.",
+      "sources": ["allen", "brain"]
+    },
+    "prefrontal": {
+      "summary": "These frontal gyri participate in planning, working memory and cognitive control. Their contributions depend on the task and their interactions with other regions.",
+      "sources": ["allen", "brain"]
+    },
+    "inferior-frontal": {
+      "summary": "Inferior frontal regions participate in language and control processes. A broad anatomical gyrus is not identical to a functional language area.",
+      "sources": ["allen", "brain"]
+    },
+    "orbitofrontal": {
+      "summary": "Orbital frontal regions participate in evaluating outcomes and guiding decisions in context. Valuation is distributed across several interacting structures.",
+      "sources": ["allen", "brain"]
+    },
+    "somatosensory": {
+      "summary": "The postcentral gyrus includes primary somatosensory cortex, which processes information about the body. The atlas does not resolve a particular finger representation.",
+      "sources": ["allen", "brain"]
+    },
+    "parietal": {
+      "summary": "Superior parietal regions participate in spatial processing and coordination of sensory information with action.",
+      "sources": ["allen", "brain"]
+    },
+    "inferior-parietal": {
+      "summary": "The angular and supramarginal gyri sit at an association-cortex crossroads. Their roles include integration across sensory and cognitive domains.",
+      "sources": ["allen", "brain"]
+    },
+    "precuneus": {
+      "summary": "A medial parietal region involved in several internally directed and spatial processes. It participates in distributed networks rather than a single isolated function.",
+      "sources": ["allen", "yeo"]
+    },
+    "superior-temporal": {
+      "summary": "Superior temporal regions participate in auditory processing. This teaching group also includes adjacent temporal landmarks named in the atlas.",
+      "sources": ["allen", "brain"]
+    },
+    "middle-temporal": {
+      "summary": "A temporal association region. The atlas defines its anatomical boundary; functional patterns can span it and neighboring cortex.",
+      "sources": ["allen"]
+    },
+    "inferior-temporal": {
+      "summary": "Part of the broader ventral visual system involved in object representations. Information is distributed across overlapping response patterns.",
+      "sources": ["allen", "vision"]
+    },
+    "fusiform": {
+      "summary": "The fusiform gyrus lies on the ventral temporal-occipital surface. It participates in visual recognition; the entire gyrus is not a dedicated \u201cface center.\u201d",
+      "sources": ["allen", "vision"]
+    },
+    "auditory": {
+      "summary": "Heschl\u2019s gyrus is an important auditory landmark on the superior temporal plane. It becomes easier to inspect when the surrounding cortex is hidden.",
+      "sources": ["allen", "brain"]
+    },
+    "visual": {
+      "summary": "Occipital structures participate in visual processing. This grouped mesh contains several anatomical labels and does not delineate every visual area.",
+      "sources": ["allen", "brain"]
+    },
+    "insula": {
+      "summary": "The insula lies within the lateral sulcus, beneath surrounding cortex. Its broad roles include integration of bodily and sensory information.",
+      "sources": ["allen", "brain"]
+    },
+    "anterior-cingulate": {
+      "summary": "Anterior cingulate regions participate in control, motivation and affect-related processes. Activity here does not establish one specific emotion.",
+      "sources": ["allen", "brain"]
+    },
+    "posterior-cingulate": {
+      "summary": "Posterior medial cortex participates in intrinsic functional networks. Its involvement changes with task and context.",
+      "sources": ["allen", "yeo"]
+    },
+    "parahippocampal": {
+      "summary": "These medial temporal gyri neighbor the hippocampus. This is an anatomical grouping, not a claim of a single memory pathway.",
+      "sources": ["allen"]
+    },
+    "hippocampus": {
+      "summary": "The hippocampus participates in forming and organizing memories, in interaction with a wider medial temporal and cortical system.",
+      "sources": ["allen", "brain"]
+    },
+    "amygdala": {
+      "summary": "An anatomically complex set of nuclei in the medial temporal lobe. It participates in learning and the relevance of stimuli, beyond any one emotion.",
+      "sources": ["allen", "brain"]
+    },
+    "caudate": {
+      "summary": "A striatal structure with head, body and tail. In the music study, caudate responses were associated with anticipation of peak emotion.",
+      "sources": ["allen", "music"]
+    },
+    "putamen": {
+      "summary": "A striatal structure involved in basal ganglia circuits, including those concerned with action.",
+      "sources": ["allen", "basal"]
+    },
+    "accumbens": {
+      "summary": "Part of the ventral striatum. The music study associated this region with peak pleasurable responses; this does not make it a universal pleasure meter.",
+      "sources": ["allen", "music"]
+    },
+    "pallidum": {
+      "summary": "The internal and external pallidal segments participate in basal ganglia circuits. This teaching mesh groups both segments.",
+      "sources": ["allen", "basal"]
+    },
+    "thalamus": {
+      "summary": "A collection of nuclei that relay and regulate information in interactions with cortex and other structures. This mesh groups multiple atlas nuclei.",
+      "sources": ["allen", "brain"]
+    },
+    "hypothalamus": {
+      "summary": "A small, diverse region involved in bodily regulation and neuroendocrine functions. Its nuclei have distinct roles that are not resolved by a single global activity value.",
+      "sources": ["allen", "brain"]
+    },
+    "basal-forebrain": {
+      "summary": "An anatomical teaching group combining basal forebrain, septal and neighboring atlas labels. Individual cell populations and projections have different signaling roles.",
+      "sources": ["allen"]
+    },
+    "substantia-nigra": {
+      "summary": "A midbrain structure participating in basal ganglia circuits. Dopaminergic neurons are associated with its pars compacta; the atlas mesh does not separate all cell types.",
+      "sources": ["allen", "basal"]
+    },
+    "midbrain": {
+      "summary": "This teaching group combines midbrain tegmental and orienting structures. It is not a cell-specific dopamine source map.",
+      "sources": ["allen"]
+    },
+    "cerebellum": {
+      "summary": "The cerebellum contributes to coordination and learning of movement, alongside broader cognitive roles. It interacts with systems outside the cerebellum.",
+      "sources": ["allen", "brain"]
+    },
+    "pons": {
+      "summary": "The pons is part of the brainstem. This mesh combines atlas subdivisions and a connecting cerebellar peduncle for anatomical context.",
+      "sources": ["allen"]
+    },
+    "medulla": {
+      "summary": "The medulla contains systems involved in autonomic regulation and pathways between brain and body. The displayed group includes adjacent labeled hindbrain tissue.",
+      "sources": ["allen", "brain"]
+    },
+    "callosum": {
+      "summary": "The corpus callosum is a major white matter connection between the cerebral hemispheres. A bundle is not a single axon or a single signal.",
+      "sources": ["allen", "brain"]
+    },
+    "white-matter": {
+      "summary": "White matter contains axonal pathways. Its dense internal atlas mesh is omitted from rendering to keep deeper structures visible.",
+      "sources": ["allen"]
+    },
+    "olfactory": {
+      "summary": "This group contains the olfactory bulb, anterior olfactory nucleus and nearby olfactory cortical labels. Its boundaries come from the atlas ontology.",
+      "sources": ["allen"]
+    },
+    "subthalamic": {
+      "summary": "A small nucleus participating in basal ganglia circuitry. Its role depends on its connections and activity patterns.",
+      "sources": ["allen", "basal"]
+    },
+    "other-deep": {
+      "summary": "Context group: claustrum, habenular nuclei, pineal body and zona incerta. They are separate anatomical structures with different functions, grouped only for this overview.",
+      "sources": ["allen"]
+    }
+  },
+  "sources": {
+    "allen": {
+      "title": "Allen Human Reference Atlas \u2013 3D, 2020",
+      "authors": "Ding and colleagues \u00b7 Allen Institute",
+      "year": "2020",
+      "method": "Anatomical atlas",
+      "species": "Human reference template",
+      "url": "https://download.alleninstitute.org/informatics-archive/allen_human_reference_atlas_3d_2020/version_1/README.pdf",
+      "finding": "An anatomical parcellation of the ICBM 2009b symmetric reference. The rendered meshes are derived from labeled voxels.",
+      "limit": "A symmetric reference atlas, not a scan of you. Teaching groups combine atlas labels; they are not functional parcels."
+    },
+    "music": {
+      "title": "Anatomically distinct dopamine release during anticipation and experience of peak emotion to music",
+      "authors": "Salimpoor et al. \u00b7 Nature Neuroscience",
+      "year": "2011",
+      "method": "PET + fMRI",
+      "species": "Human",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/21217764/",
+      "finding": "The study reported striatal dopamine release during intensely pleasurable music, with caudate involvement during anticipation and nucleus accumbens involvement during peak responses.",
+      "limit": "Selected listeners and stimuli. PET release inference and complementary fMRI responses do not provide a universal second-by-second dopamine concentration."
+    },
+    "vision": {
+      "title": "Distributed and overlapping representations of faces and objects in ventral temporal cortex",
+      "authors": "Haxby et al. \u00b7 Science",
+      "year": "2001",
+      "method": "fMRI",
+      "species": "Human",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11577229/",
+      "finding": "Faces and objects elicited discriminable, distributed patterns in ventral temporal cortex. Information was not restricted to the maximally responding patch.",
+      "limit": "Broad atlas gyri stand in for the study\u2019s patterns. Display intensity and stage timing are authored; they are not the original fMRI values."
+    },
+    "brain": {
+      "title": "Physiology, Brain",
+      "authors": "NCBI Bookshelf \u00b7 StatPearls",
+      "year": "Reference",
+      "method": "Anatomy and physiology reference",
+      "species": "Human",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK551718/",
+      "finding": "Brain functions arise through interacting cortical, subcortical, cerebellar and brainstem systems.",
+      "limit": "Short region descriptions are introductory summaries, not exhaustive or exclusive functional assignments."
+    },
+    "basal": {
+      "title": "Neuroanatomy, Basal Ganglia",
+      "authors": "NCBI Bookshelf \u00b7 StatPearls",
+      "year": "Reference",
+      "method": "Anatomy reference",
+      "species": "Human",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK537141/",
+      "finding": "Basal ganglia participate in circuits related to action, learning and cognition, through interactions with cortex and thalamus.",
+      "limit": "Individual pathways contain cell-type and receptor-specific effects that a regional atlas does not resolve."
+    },
+    "yeo": {
+      "title": "The organization of the human cerebral cortex estimated by intrinsic functional connectivity",
+      "authors": "Yeo et al. \u00b7 Journal of Neurophysiology",
+      "year": "2011",
+      "method": "Resting-state functional connectivity",
+      "species": "Human",
+      "url": "https://surfer.nmr.mgh.harvard.edu/pub/articles/2011/2011_-_Yeo_et_al._-_Journal_of_neurophysiology.pdf",
+      "finding": "Large-scale cortical networks can be estimated from patterns of functional connectivity.",
+      "limit": "Network membership does not imply a unique mental function or a directed anatomical connection."
+    }
+  }
+}

@@ -8,5 +8,4 @@ DOKE_PYTHON="${DOKE_PYTHON:-.venv/bin/python}"
 "$DOKE_PYTHON" tools/fix_normals.py
 "$DOKE_PYTHON" tools/native_atlas.py
 "$DOKE_PYTHON" tools/pack_fine.py
-"$DOKE_PYTHON" tools/molecules.py
 "$DOKE_PYTHON" tools/validate_assets.py

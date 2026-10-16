@@ -74,14 +74,14 @@ export class HDRText {
     c.fillStyle = "white";
     c.textBaseline = "alphabetic";
     for (const el of document.querySelectorAll(
-      ".brand,#details h2,.micro-caption strong",
+      ".brand,[data-hdr],#inspection h2",
     )) {
       if (
         !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })
       )
         continue;
       c.save();
-      const panel = el.closest("#details");
+      const panel = el.closest("#inspection");
       if (panel) {
         const bounds = panel.getBoundingClientRect();
         c.beginPath();

@@ -1,41 +1,35 @@
 # doke
 
-A floating, interactive brain explorer built with Rust, WebAssembly and wgpu. Explore reference anatomy, an enlarged neural tissue window, chemical synapses, a neural circuit and molecular messengers. Mostly grayscale, with restrained color accents and adaptive HDR.
+Look inside CPUs, GPUs, a tensor processor, a network ASIC and the human brain. A floating 3D explorer with source-linked architecture, close-up execution, and an input you can change.
 
-![A short tour of doke: brain anatomy, activity playback, enlarged neurons, synaptic signaling, neural circuits, molecular messengers and scientific source tabs.](docs/media/doke-demo.gif)
+Start with the whole processor, open a core or streaming multiprocessor, then follow one value through actual operand reads and arithmetic. Choose Ryzen 9 9950X, RTX 5090, H100 SXM, Google TPU v1 or Cisco Silicon One G200 from one hardware selector. These are original functional schematics, not physical die floorplans.
 
-*A 24-second tour of the real app, captured with SDR glow. [Recording instructions](docs/GUIDE.md#recording-a-demo).*
+The Rust models compute editable matrix transforms or route packets through queues. Inspect returned operands, cache residency, requested GPU sectors and each completed product. Model ticks are authored teaching time, not vendor cycles or chip benchmarks. The human reference atlas remains available on its own or alongside the chip, with sourced anatomy and a visual-processing guide. A shared logarithmic time scale compares documented chip clock periods with human physiological measurements; their conditions and limits are one click away.
+
+![Inside an RTX Blackwell streaming multiprocessor](docs/media/compute-explorer.webp)
 
 ## Run locally
 
-Follow the [first-time setup](docs/GUIDE.md#building-from-a-fresh-clone) to install the tools and generate the anatomy assets. Then:
+See the [setup guide](docs/GUIDE.md#build-and-run) for first-time dependencies and anatomy generation. After setup:
 
 ```sh
 bash tools/build.sh
 python3 tools/serve.py
 ```
 
-Open [localhost:4173](http://localhost:4173). Rendering and simulation run in the browser; the server serves static files.
+Open [localhost:4173](http://localhost:4173). Everything runs in the browser; hosting only serves static files.
 
-The [doke guide](docs/GUIDE.md) covers controls, scientific interpretation, builds, verification and hosting. It is the single maintained project guide.
+- [Guide](docs/GUIDE.md): controls, builds, verification and hosting.
+- [Architecture and model scope](docs/SILICON.md): sources, what is calculated, and next steps.
 
-## What is calculated
+## Repository
 
-Brain geometry derives from the Allen Human Reference Atlas; molecule coordinates come from PubChem. Activity highlights, enlarged neurons, synaptic contacts and traveling particles illustrate supported concepts. They are not reconstructed individual cells or measured firing/chemical concentrations. The simplified neural circuit integrates population dynamics in Rust. Source records and scientific limitations are available in the interface.
+| Path               | Purpose                                                           |
+| ------------------ | ----------------------------------------------------------------- |
+| `crates/doke-core` | Deterministic execution models and bounded snapshots              |
+| `crates/doke-web`  | Rust/Wasm rendering, geometry, camera and HDR                     |
+| `public`           | Interface, source records, anatomy metadata and runtime assets    |
+| `tools`            | Reproducible anatomy generation, validation, builds and packaging |
+| `tests`            | Source, geometry, execution, browser and static-hosting checks    |
 
-## Source map
-
-| Directory          | Purpose                                              |
-| ------------------ | ---------------------------------------------------- |
-| `crates/doke-core` | Activity envelopes and numerical E/I model           |
-| `crates/doke-web`  | Rust rendering, camera, procedural cells, shaders    |
-| `public`           | Floating interface, source records, runtime assets   |
-| `tools`            | Asset generation, validation, builds and deployment  |
-| `tests`            | Browser, playback, HDR, fallbacks and hosting checks |
-| `docs/GUIDE.md`    | Usage, development and publishing guide              |
-
-## Repository contents and attribution
-
-Generated Wasm, anatomy binaries, downloaded source data, packaged builds, test screenshots, historical working notes and private deployment settings are excluded from Git. Keep the required fallback image, local fonts, source metadata and third-party notices: they are part of the application.
-
-Atlas attribution is in [the asset notice](public/assets/NOTICE.md), font licenses in `public/fonts/`, and Rust dependency notices in `public/licenses/`. A license for doke's original source code has not been selected; third-party licenses apply to their respective material.
+Generated Wasm, anatomy binaries, downloads, packaged builds, raw screenshots and local deployment settings are ignored. Retain the [atlas notice](public/assets/NOTICE.md), font licenses and dependency notices when distributing the app. A license for doke's original source has not yet been selected; third-party materials retain their respective licenses.

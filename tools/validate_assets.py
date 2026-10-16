@@ -34,9 +34,4 @@ for name in ['brain.bin','brain-high.bin','native']:
  h=hashlib.sha256(b).hexdigest()
  if name=='brain.bin':assert h==a['meshHash']
  report[name]={'sha256':h,'vertices':n,'triangles':ni//3,'positiveVolumeGroups':len(volumes),'bytes':len(b)}
-for molecule in (p/'molecules').glob('*.json'):
- data=json.loads(molecule.read_text());atoms=data['atoms'];bonds=data['bonds']
- assert all(a['element'] in ['C','H','O','N'] and all(np.isfinite(a[c]) for c in ['x','y','z']) for a in atoms)
- assert all(0<=b[0]<len(atoms) and 0<=b[1]<len(atoms) and b[2] in [1,2,3] for b in bonds)
- report[molecule.name]={'cid':data['cid'],'atoms':len(atoms),'bonds':len(bonds)}
 Path('test-results').mkdir(exist_ok=True);Path('test-results/asset-results.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))

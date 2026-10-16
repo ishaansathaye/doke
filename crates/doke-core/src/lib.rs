@@ -1,4 +1,7 @@
 //! Deterministic educational timelines and a separate, uncalibrated rate model.
+pub mod fabric;
+pub mod silicon;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

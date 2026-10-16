@@ -1,4 +1,4 @@
-struct Uniforms { vp:mat4x4<f32>,eye:vec4<f32>,params:vec4<f32>,flags:vec4<f32>,activity:array<vec4<f32>,64>,detail:vec4<f32>,style:vec4<f32> };
+struct Uniforms { vp:mat4x4<f32>,eye:vec4<f32>,params:vec4<f32>,flags:vec4<f32>,activity:array<vec4<f32>,256>,detail:vec4<f32>,style:vec4<f32>,flow_from:array<vec4<f32>,32>,flow_to:array<vec4<f32>,32> };
 @group(0) @binding(0) var<uniform> u:Uniforms;
 struct VertexOut { @builtin(position) position:vec4<f32>, @location(0) world:vec3<f32>,@location(1) normal:vec3<f32>,@location(2) @interpolate(flat) region:u32,@location(3) @interpolate(flat) kind:u32 };
 fn neuron(i:u32)->vec3<f32>{let a=f32(i%6u)*6.283185/6.;return vec3(select(0.78,-0.78,i<6u),cos(a)*0.65,sin(a)*0.65);}
@@ -23,6 +23,7 @@ fn lens()->vec3<f32>{
  if(k==6.){let t=fract(time*0.7+r*0.13);pos+=vec3((f32(id%4u)-1.5)*0.38,0.68-t*0.22,0.18);}
  if(k==8.){let t=fract(time*0.35+r*0.17);let x=(f32(id%6u)-2.5)*0.27;pos+=vec3(x+select(0.,sin(t*4.+r)*0.1,u.activity[60].w==0.),-0.42-t*0.24,0.47);}
  if(k==11.){let t=fract(time*0.65+f32(id%3u)/3.);let drift=vec3(0.012*sin(t*3.14159),-t*0.065,t*0.070);pos+=vec3(-drift.z,drift.y,drift.x);}
+ if(k==16.){pos+=mix(u.flow_from[min(id,31u)].xyz,u.flow_to[min(id,31u)].xyz,u.flow_to[min(id,31u)].w);}
  var o:VertexOut;o.position=u.vp*vec4(pos,1.);o.world=pos;o.normal=n;o.region=id;o.kind=u32(k);
  if(k==14.){let aperture=lens();o.position=vec4(aperture.xy+p.xy*vec2(aperture.z/u.style.y,aperture.z),0.99999,1.);o.world=u.detail.xyz;o.normal=p;}
  return o;
@@ -35,6 +36,7 @@ fn shade(v:VertexOut)->FragmentOut {
  }
  if(v.kind==14u){var o:FragmentOut;let edge=smoothstep(0.975,0.997,length(v.normal.xy));o.color=vec4(vec3(0.018+edge*0.12),1.);o.glow=vec4(vec3(edge*0.02),1.);return o;}
  if(v.kind==2u){discard;}
+ if(v.kind==16u&&u.flow_from[min(v.region,31u)].w<0.5){discard;}
  if(v.kind==0u&&u.flags.y==1.){discard;}
  if((u.flags.y==2.||u.params.y==2.)&&v.world.x>0.){discard;}
  if((u.flags.y==3.||u.params.y==3.)&&v.world.x<0.){discard;}
@@ -47,7 +49,7 @@ fn shade(v:VertexOut)->FragmentOut {
  let rim=pow(1.-abs(dot(n,view)),2.8);
  let spec=pow(max(dot(n,normalize(view+normalize(vec3(-0.4,0.85,0.7)))),0.),48.);
  let selected=select(0.,1.,abs(f32(v.region)-u.flags.x)<0.1);
- var a=u.activity[min(v.region,63u)].x;
+ var a=u.activity[min(v.region,255u)].x;
  if(u.params.z==1.){a=select(0.06,0.55,v.region==u32(u.params.w)+2u);}
  if(u.params.z==3.){a=0.22;}
  let particle=(v.kind>=4u&&v.kind<=8u)||v.kind==11u;
@@ -66,7 +68,12 @@ fn shade(v:VertexOut)->FragmentOut {
   if(v.kind==13u){tint=vec3(0.42,0.65,1.);}
   if(u.params.z==1.&&(v.kind==4u||v.kind==7u)){tint=vec3(1.,0.79,0.50);if(u.activity[60].w==1.){tint=vec3(0.58,0.90,0.78);}if(u.activity[60].w==2.){tint=vec3(0.79,0.69,1.);}}
  }
+ if(v.kind==15u){light=0.09+lambert*0.26+rim*0.15+spec*0.10+a*0.65+selected*0.2;emissive=a*0.7+selected*0.18;if(u.style.x>0.5){tint=mix(vec3(0.9,0.96,1.),vec3(0.56,0.9,0.92),a);}}
+ if(v.kind==16u){light=1.8;emissive=2.6;tint=vec3(0.72,0.94,1.);}
+ if(v.kind==17u){light=0.14+lambert*0.09;emissive=0.012;}
+ if(v.kind==19u){light=0.15+lambert*0.28+fill*0.08+spec*0.28+selected*0.08;emissive=0.;tint=vec3(0.72,0.82,0.86);}
+ if(v.kind==18u){light=0.018+lambert*0.03+rim*0.065;emissive=0.;}
  var out:FragmentOut;out.color=vec4(tint*light,1.);out.glow=vec4(tint*emissive,1.);return out;
 }
 @fragment fn fs(v:VertexOut)->FragmentOut{return shade(v);}
-@fragment fn fs_focus(v:VertexOut)->FragmentOut{if(u.activity[min(v.region,63u)].x<=0.01&&abs(f32(v.region)-u.flags.x)>0.1){discard;}return shade(v);}
+@fragment fn fs_focus(v:VertexOut)->FragmentOut{if(u.activity[min(v.region,255u)].x<=0.01&&abs(f32(v.region)-u.flags.x)>0.1){discard;}return shade(v);}

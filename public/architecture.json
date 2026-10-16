@@ -1,0 +1,1952 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-15",
+  "scope": "Documented architectural structure alongside separately identified educational arithmetic and packet models. Original schematic positions do not represent physical floorplans. Published clocks and bandwidths are reference quantities; model ticks do not predict chip timing, and no neural equivalence is implied.",
+  "sources": {
+    "amd-9950x": {
+      "title": "AMD Ryzen 9 9950X specifications",
+      "url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-9-9950x.html",
+      "locator": "General specifications: cores, threads, caches, package die count"
+    },
+    "amd-zen5-smt": {
+      "title": "AMD EPYC and SMT: Zen 5 core diagram",
+      "url": "https://www.amd.com/content/dam/amd/en/documents/epyc-business-docs/white-papers/amd-epyc-smt-technology-brief.pdf",
+      "locator": "April 2025, page 8: core front end, execution pipelines and memory subsystem",
+      "scope": "Zen 5 core mechanisms; server package details do not describe Ryzen."
+    },
+    "amd-zen5-ccd": {
+      "title": "AMD EPYC 9005 architecture overview",
+      "url": "https://www.amd.com/content/dam/amd/en/documents/epyc-technical-docs/user-guides/58462_amd-epyc-9005-tg-architecture-overview.pdf",
+      "locator": "April 2025, page 4, Figure 2-3: classic Zen 5 core complex",
+      "scope": "Documents the classic 8-core Zen 5 complex. EPYC package counts and I/O are not Ryzen specifications."
+    },
+    "amd-small-gemm": {
+      "title": "AMD AOCL-BLAS: small matrix multiplication",
+      "url": "https://www.amd.com/en/developer/resources/technical-articles/2025/aocl-blas-boosting-gemm-performance-for-small-matrices-.html",
+      "locator": "Instruction-level parallelism, independent accumulators and instruction-cache pressure"
+    },
+    "boom-fetch": {
+      "title": "Berkeley BOOM: instruction fetch",
+      "url": "https://docs.boom-core.org/en/latest/sections/instruction-fetch-stage.html",
+      "locator": "The front-end, fetch buffer and redirect behavior",
+      "scope": "Open CPU mechanism reference, not a description of proprietary Zen implementation."
+    },
+    "boom-rename": {
+      "title": "Berkeley BOOM: register renaming",
+      "url": "https://docs.boom-core.org/en/latest/sections/rename-stage.html",
+      "locator": "The purpose of renaming; physical register file; busy table",
+      "scope": "Generic out-of-order mechanism reference, not Zen register-file implementation."
+    },
+    "boom-issue": {
+      "title": "Berkeley BOOM: instruction issue",
+      "url": "https://docs.boom-core.org/en/latest/sections/issue-units.html",
+      "locator": "Issue slots, select logic and wake-up",
+      "scope": "Explains readiness and resource constraints. Its scheduling policy is not attributed to AMD."
+    },
+    "boom-retire": {
+      "title": "Berkeley BOOM: reorder buffer and retirement",
+      "url": "https://docs.boom-core.org/en/latest/sections/reorder-buffer.html",
+      "locator": "Opening description and Commit Stage",
+      "scope": "Mechanism reference, not a Zen reorder-buffer simulation."
+    },
+    "boom-loadstore": {
+      "title": "Berkeley BOOM: load/store unit",
+      "url": "https://docs.boom-core.org/en/latest/sections/load-store-unit.html",
+      "locator": "Load queue, store queue and memory ordering",
+      "scope": "Generic mechanism reference. Doke does not implement BOOM or Zen memory ordering."
+    },
+    "nvidia-blackwell": {
+      "title": "NVIDIA RTX Blackwell GPU Architecture",
+      "url": "https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf",
+      "locator": "Pages 8–12, Figures 4–6; page 46, RTX 5090 product table",
+      "scope": "RTX GB20x graphics architecture, distinct from data-center Blackwell."
+    },
+    "nvidia-5090": {
+      "title": "NVIDIA GeForce RTX 5090 specifications",
+      "url": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/",
+      "locator": "Full specs: GPU engine and memory specifications"
+    },
+    "nvidia-hopper": {
+      "title": "NVIDIA Hopper Architecture In-Depth",
+      "url": "https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/",
+      "locator": "H100 SXM5 configuration, Figure 3 and Figure 4",
+      "scope": "SXM5 configuration: not the full GH100 diagram or PCIe variant. Preliminary performance tables are not used."
+    },
+    "cuda-model": {
+      "title": "CUDA Programming Guide: programming model",
+      "url": "https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html",
+      "locator": "Sections 1.2.2.1–1.2.2.2: blocks, grids, warps and SIMT"
+    },
+    "cuda-hardware": {
+      "title": "CUDA Programming Guide: hardware execution",
+      "url": "https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/advanced-kernel-programming.html",
+      "locator": "Sections 3.2.2.1–3.2.2.2: SIMT and hardware multithreading"
+    },
+    "cuda-memory": {
+      "title": "CUDA Best Practices Guide: memory optimization",
+      "url": "https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html",
+      "locator": "Sections 10.2.1 and 10.2.3: coalesced global access and shared memory"
+    },
+    "cuda-registers": {
+      "title": "NVIDIA: register cache for warp-centric programs",
+      "url": "https://developer.nvidia.com/blog/register-cache-warp-cuda/",
+      "locator": "Memory hierarchy and register-cache design"
+    },
+    "cuda-sectors": {
+      "title": "NVIDIA: global memory access in CUDA",
+      "url": "https://developer.nvidia.com/blog/unlock-gpu-performance-global-memory-access-in-cuda/",
+      "locator": "Global Memory Coalescing, Figures 1–2; transaction and sector discussion"
+    },
+    "hopper-tuning": {
+      "title": "NVIDIA Hopper Tuning Guide",
+      "url": "https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html",
+      "locator": "Sections 1.4.1.1 and 1.4.2: occupancy and memory hierarchy"
+    },
+    "blackwell-tuning": {
+      "title": "NVIDIA Blackwell Tuning Guide",
+      "url": "https://docs.nvidia.com/cuda/blackwell-tuning-guide/index.html",
+      "locator": "Compute capability 12.0 limits, contrasted with 10.0",
+      "scope": "Only compute capability 12.0 limits apply to RTX 5090."
+    },
+    "google-tpu-v1-paper": {
+      "title": "Jouppi et al.: In-Datacenter Performance Analysis of a Tensor Processing Unit",
+      "url": "https://arxiv.org/pdf/1704.04760",
+      "locator": "ISCA 2017, pages 3–4, Figures 1 and 4; page 5, Table 2; page 15, dataflow comparison",
+      "scope": "First-generation TPU used for inference. Its weight-stationary array differs from doke’s output-stationary teaching array."
+    },
+    "google-tpu-v1-explained": {
+      "title": "Google: An in-depth look at the first TPU",
+      "url": "https://cloud.google.com/blog/products/ai-machine-learning/an-in-depth-look-at-googles-first-tensor-processing-unit-tpu?hl=en",
+      "locator": "Quantization, systolic array, CISC instructions and 700 MHz operation",
+      "scope": "First TPU generation, not TPU v4 or current Cloud TPU hardware."
+    },
+    "cisco-g200": {
+      "title": "Cisco Silicon One G200 data sheet",
+      "url": "https://www.cisco.com/c/en/us/solutions/collateral/silicon-one/silicon-one-g200-ds.html",
+      "locator": "February 2026: Product overview; Table 1; Figure 2 functional block diagram; Features",
+      "scope": "Public G200 functions and interface totals. Does not disclose a die floorplan, internal stage count, clock rate or exact buffer capacity."
+    },
+    "cisco-voq": {
+      "title": "Cisco Silicon One QoS: virtual output queues",
+      "url": "https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-9500-series-switches/catalyst-9500x-9600x-qos-q200-wp.html",
+      "locator": "VOQ queuing model, credit requests and scheduling",
+      "scope": "Mechanism explanation on named Q200-based Catalyst platforms. Their capacity, buffering, arbitration and timing are not G200 specifications."
+    },
+    "p4-psa": {
+      "title": "P4 Portable Switch Architecture, version 1.2",
+      "url": "https://p4.org/wp-content/uploads/sites/53/p4-spec/docs/PSA-v1.2.html",
+      "locator": "Section 1, Figure 1: parsing, ingress decisions, buffering and egress; sections 6.2–6.4: packet paths",
+      "scope": "Open functional description of a programmable switch. Does not assert G200 implements PSA or uses this physical pipeline."
+    },
+    "nvidia-hgx-specifications": {
+      "title": "NVIDIA HGX reference architecture: GPU specifications",
+      "url": "https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory-h100-h200-b200/latest/components.html",
+      "locator": "Table 1: H100 SXM memory per GPU and GPU bandwidth",
+      "scope": "H100 SXM 80 GB variant. Memory bandwidth is not a compute clock or an end-to-end latency."
+    }
+  },
+  "profiles": {
+    "ryzen-9950x": {
+      "family": "cpu",
+      "name": "AMD Ryzen 9 9950X",
+      "architecture": "Zen 5",
+      "counts": {
+        "cores": 16,
+        "threads": 32,
+        "package_dies": 3,
+        "logical_core_groups": 2,
+        "cores_per_logical_group": 8
+      },
+      "facts": [
+        {
+          "label": "Cores / threads",
+          "value": "16 / 32",
+          "sources": [
+            "amd-9950x"
+          ]
+        },
+        {
+          "label": "L1 instruction / data per Zen 5 core",
+          "value": "32 KiB / 48 KiB",
+          "sources": [
+            "amd-zen5-smt"
+          ]
+        },
+        {
+          "label": "L2 per core / aggregate L3",
+          "value": "1 MiB / 64 MB",
+          "sources": [
+            "amd-zen5-smt",
+            "amd-9950x"
+          ]
+        }
+      ],
+      "topology_note": "The two eight-core groups are a functional interpretation combining the 9950X product totals with AMD’s documented classic Zen 5 core complex. No physical die coordinates or interconnect distances are asserted.",
+      "sources": [
+        "amd-9950x",
+        "amd-zen5-ccd",
+        "amd-zen5-smt"
+      ],
+      "hidden_blocks": [],
+      "timing": {
+        "kind": "clock",
+        "hz": 4300000000,
+        "label": "4.3 GHz base clock",
+        "sourceIds": [
+          "amd-9950x"
+        ],
+        "scope": "Published base frequency. Actual core frequency varies with operating conditions. Its reciprocal is a reference clock period, not instruction latency or model-tick duration."
+      }
+    },
+    "rtx-5090": {
+      "family": "gpu",
+      "name": "NVIDIA GeForce RTX 5090",
+      "architecture": "RTX Blackwell",
+      "counts": {
+        "sms": 170,
+        "partitions_per_sm": 4,
+        "cuda_cores_per_sm": 128,
+        "tensor_cores_per_sm": 4,
+        "rt_cores_per_sm": 1,
+        "warp_lanes": 32
+      },
+      "facts": [
+        {
+          "label": "Enabled SMs",
+          "value": "170",
+          "sources": [
+            "nvidia-blackwell"
+          ]
+        },
+        {
+          "label": "L2 / combined L1 and shared per SM",
+          "value": "96 MB / 128 KB",
+          "sources": [
+            "nvidia-blackwell"
+          ]
+        },
+        {
+          "label": "Register storage per SM",
+          "value": "256 KB",
+          "sources": [
+            "nvidia-blackwell"
+          ]
+        },
+        {
+          "label": "Device memory",
+          "value": "32 GB GDDR7",
+          "sources": [
+            "nvidia-5090"
+          ]
+        }
+      ],
+      "topology_note": "170 enabled SMs in a logical grid. Full GB202 has 192 SMs; the grid does not infer which physical units are enabled. The SM view is based on Figure 5, not a physical floorplan.",
+      "sources": [
+        "nvidia-blackwell",
+        "nvidia-5090",
+        "blackwell-tuning"
+      ],
+      "hidden_blocks": [],
+      "timing": {
+        "kind": "clock",
+        "hz": 2010000000,
+        "label": "2.01 GHz base clock",
+        "sourceIds": [
+          "nvidia-5090"
+        ],
+        "scope": "NVIDIA reference base frequency. Operating frequency varies; one cycle is not one completed CUDA instruction or one model tick."
+      }
+    },
+    "h100-sxm": {
+      "family": "gpu",
+      "name": "NVIDIA H100 SXM5",
+      "architecture": "Hopper",
+      "counts": {
+        "sms": 132,
+        "partitions_per_sm": 4,
+        "cuda_cores_per_sm": 128,
+        "tensor_cores_per_sm": 4,
+        "rt_cores_per_sm": 0,
+        "warp_lanes": 32
+      },
+      "facts": [
+        {
+          "label": "Enabled SMs",
+          "value": "132",
+          "sources": [
+            "nvidia-hopper"
+          ]
+        },
+        {
+          "label": "L2 / combined L1 and shared per SM",
+          "value": "50 MB / 256 KB",
+          "sources": [
+            "nvidia-hopper",
+            "hopper-tuning"
+          ]
+        },
+        {
+          "label": "Registers per SM",
+          "value": "65,536 × 32-bit",
+          "sources": [
+            "hopper-tuning"
+          ]
+        },
+        {
+          "label": "Device memory",
+          "value": "80 GB HBM3",
+          "sources": [
+            "nvidia-hopper"
+          ]
+        }
+      ],
+      "topology_note": "132 enabled SMs for the SXM5 configuration. Full GH100 has 144 and the PCIe product differs. The SM structure is a functional diagram; device-specific instruction and memory behavior is not emulated.",
+      "sources": [
+        "nvidia-hopper",
+        "hopper-tuning",
+        "nvidia-hgx-specifications"
+      ],
+      "hidden_blocks": [
+        "ray"
+      ],
+      "timing": {
+        "kind": "bandwidth",
+        "bytesPerSecond": 3350000000000,
+        "label": "3.35 TB/s memory bandwidth",
+        "sourceIds": [
+          "nvidia-hgx-specifications"
+        ],
+        "scope": "Published H100 SXM memory bandwidth, using decimal TB/s. This is aggregate data movement capacity, not a clock frequency, memory latency or measured application throughput."
+      }
+    },
+    "tpu-v1": {
+      "family": "tensor",
+      "name": "Google TPU v1",
+      "shortName": "TPU v1",
+      "architecture": "First-generation Tensor Processing Unit",
+      "counts": {
+        "array_rows": 256,
+        "array_columns": 256,
+        "macs": 65536,
+        "model_rows": 4,
+        "model_columns": 4
+      },
+      "facts": [
+        {
+          "label": "Documented matrix array",
+          "value": "256 × 256 · 65,536 8-bit MACs",
+          "sources": [
+            "google-tpu-v1-paper"
+          ]
+        },
+        {
+          "label": "Unified buffer / accumulators",
+          "value": "24 MiB / 4 MiB",
+          "sources": [
+            "google-tpu-v1-paper"
+          ]
+        },
+        {
+          "label": "External weight storage",
+          "value": "8 GiB DDR3",
+          "sources": [
+            "google-tpu-v1-paper"
+          ]
+        },
+        {
+          "label": "Original use",
+          "value": "Neural-network inference",
+          "sources": [
+            "google-tpu-v1-paper"
+          ]
+        }
+      ],
+      "topology_note": "An original functional schematic of the published first-generation TPU. The visible cell texture and array window are representative, not a depiction of all 65,536 MACs or actual die coordinates. Execution opens a separate 4 × 4 output-stationary integer model; the documented TPU keeps weights in the array instead.",
+      "sources": [
+        "google-tpu-v1-paper",
+        "google-tpu-v1-explained"
+      ],
+      "hidden_blocks": [],
+      "timing": {
+        "kind": "clock",
+        "hz": 700000000,
+        "label": "700 MHz documented clock",
+        "sourceIds": [
+          "google-tpu-v1-paper",
+          "google-tpu-v1-explained"
+        ],
+        "scope": "The 2017 paper’s first-generation inference TPU. Its clock period is a hardware reference; doke’s 4 × 4 output-stationary model is not this 256 × 256 weight-stationary implementation and its ticks are not TPU cycles."
+      }
+    },
+    "silicon-one-g200": {
+      "family": "switch",
+      "name": "Cisco Silicon One G200",
+      "shortName": "Silicon One G200",
+      "architecture": "Programmable network switching processor",
+      "counts": {
+        "serdes": 512,
+        "ethernet_macs": 512,
+        "model_ingresses": 3,
+        "model_egresses": 3
+      },
+      "facts": [
+        {
+          "label": "Published switching bandwidth",
+          "value": "51.2 Tbps, full-duplex",
+          "sources": [
+            "cisco-g200"
+          ]
+        },
+        {
+          "label": "Network interfaces",
+          "value": "512 × 112G SerDes · 512 Ethernet MACs",
+          "sources": [
+            "cisco-g200"
+          ]
+        },
+        {
+          "label": "Example switch configurations",
+          "value": "64 × 800GE to 512 × 100GE",
+          "sources": [
+            "cisco-g200"
+          ]
+        },
+        {
+          "label": "Packet storage",
+          "value": "Fully shared on-chip buffer",
+          "sources": [
+            "cisco-g200"
+          ]
+        }
+      ],
+      "topology_note": "Public G200 functions are arranged as an original functional schematic, not a physical die or a disclosed stage-by-stage G200 pipeline. Execution is a three-input, three-output teaching switch with a 32-packet shared capacity and rotating grants. These counts and rules are authored model parameters, not G200 specifications.",
+      "sources": [
+        "cisco-g200",
+        "cisco-voq",
+        "p4-psa"
+      ],
+      "hidden_blocks": [],
+      "timing": {
+        "kind": "throughput",
+        "bitsPerSecond": 51200000000000,
+        "label": "51.2 Tbps, full-duplex",
+        "sourceIds": [
+          "cisco-g200"
+        ],
+        "scope": "Cisco’s published aggregate switching bandwidth, preserving its full-duplex convention. Not a processor clock, packet latency or guarantee of application throughput; no conversion to clock period or model ticks is made."
+      }
+    }
+  },
+  "families": {
+    "cpu": {
+      "name": "Inside a CPU",
+      "overview": "Follow instructions and their data through one core. Then pull back to see how cores share a chip.",
+      "levels": [
+        {
+          "id": "processor",
+          "title": "Processor",
+          "description": "Sixteen cores, cache groups and the connection to memory."
+        },
+        {
+          "id": "core",
+          "title": "One core",
+          "description": "The front end, execution units and nearby storage."
+        },
+        {
+          "id": "execution",
+          "title": "Execution",
+          "description": "The actual operands, waiting requests and sums in this small computation."
+        }
+      ],
+      "blocks": {
+        "processor": {
+          "title": "Processor package",
+          "summary": "One package contains several cooperating pieces of silicon.",
+          "detail": [
+            "The Ryzen 9 9950X specification lists 16 cores, 32 threads and three package dies. Its aggregate cache capacities are 16 MB L2 and 64 MB L3.",
+            "The scene is a navigable functional map. Tile size, position, trace length and glow do not measure physical die area or electrical delay."
+          ],
+          "path": [
+            "CPU",
+            "Processor",
+            "Processor package"
+          ],
+          "sources": [
+            "amd-9950x"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "ccd": {
+          "title": "Core complex",
+          "summary": "Nearby cores share their last-level cache.",
+          "detail": [
+            "AMD documents a classic Zen 5 complex as eight cores sharing 32 MB of L3. The two groups here explain that cache locality.",
+            "This grouped arrangement is an interpretation of public architecture and product facts, not a reproduction of a photographed Ryzen floorplan. Open a core to explore its functional parts."
+          ],
+          "path": [
+            "CPU",
+            "Processor",
+            "Core complex"
+          ],
+          "sources": [
+            "amd-zen5-ccd",
+            "amd-9950x"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "core": {
+          "title": "CPU core",
+          "summary": "A core overlaps the work needed to execute a program.",
+          "detail": [
+            "Fetching instructions, waiting for data and doing arithmetic can overlap. Having several execution units helps only when independent work is ready.",
+            "In the running example, each output is an eight-term dot product. Different outputs are independent; the next addition within one output must use that output’s previous sum."
+          ],
+          "path": [
+            "CPU",
+            "Processor",
+            "CPU core"
+          ],
+          "sources": [
+            "boom-issue",
+            "amd-small-gemm"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "io": {
+          "title": "I/O and memory connection",
+          "summary": "The processor connects its cores to the rest of the system.",
+          "detail": [
+            "The package includes communication and memory interfaces alongside the compute cores. System memory stores far more than the small on-chip caches.",
+            "The visible connector is an orientation landmark. This model does not simulate DDR5 commands, PCIe traffic, inter-die arbitration or the integrated graphics engine."
+          ],
+          "path": [
+            "CPU",
+            "Processor",
+            "I/O and memory connection"
+          ],
+          "sources": [
+            "amd-9950x"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "memory": {
+          "title": "Main memory",
+          "summary": "The backing store for the input matrices and result.",
+          "detail": [
+            "A load identifies a byte address. When the needed data is unavailable nearby, the processor must obtain it through the memory hierarchy.",
+            "Here, an input value occupies four modeled bytes. Follow a request to see its matrix coordinate, address and destination. Transfer times are authored model ticks."
+          ],
+          "path": [
+            "CPU",
+            "Execution",
+            "Main memory"
+          ],
+          "sources": [
+            "boom-loadstore"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "memory"
+          ],
+          "modeled": true,
+          "modelNote": "Simulates addressed reads and completed transfers; no DRAM controller or measured nanoseconds."
+        },
+        "l3": {
+          "title": "Shared L3 cache",
+          "summary": "The last on-chip cache before more distant storage.",
+          "detail": [
+            "The 9950X has 64 MB of L3 in total. The grouped view illustrates separate sharing domains rather than one equally local pool for all cores.",
+            "L3 is architectural context here. The executable example has one deliberately small cache, so an animated teaching-cache request must not be read as measured Ryzen L3 activity."
+          ],
+          "path": [
+            "CPU",
+            "Processor",
+            "Shared L3 cache"
+          ],
+          "sources": [
+            "amd-9950x",
+            "amd-zen5-ccd"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "l2": {
+          "title": "Private L2 cache",
+          "summary": "More nearby capacity for one core.",
+          "detail": [
+            "AMD’s Zen 5 diagram places a 1 MiB unified L2 behind the instruction and data caches. Unified means both kinds of content can use it.",
+            "This landmark lets you trace the hierarchy without filling the screen with every cache line. The running example does not implement a separate L2 replacement policy."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Private L2 cache"
+          ],
+          "sources": [
+            "amd-zen5-smt"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "l1i": {
+          "title": "Instruction cache",
+          "summary": "Instructions are data too, with their own nearby store.",
+          "detail": [
+            "The core front end fetches instruction bytes from its L1 instruction cache. AMD’s Zen 5 diagram labels this store 32 KiB.",
+            "The image-processing example begins with already-defined operations. It does not fetch an x86 binary, so this block remains explanatory rather than producing invented fetch events."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Instruction cache"
+          ],
+          "sources": [
+            "amd-zen5-smt",
+            "boom-fetch"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "l1d": {
+          "title": "Data cache",
+          "summary": "Keep recently used data close to the arithmetic.",
+          "detail": [
+            "The Zen 5 core diagram shows a 48 KiB L1 data cache. Cache storage is separate from the registers consumed directly by arithmetic.",
+            "Doke’s cache experiment is much smaller: four 64-byte lines. Repeating a resident access can hit; filling a fifth distinct line can evict an older one. This size makes reuse visible."
+          ],
+          "path": [
+            "CPU",
+            "Execution",
+            "Data cache"
+          ],
+          "sources": [
+            "amd-zen5-smt"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "cache"
+          ],
+          "modeled": true,
+          "modelNote": "The active four-line teaching cache is not the physical 48 KiB L1D."
+        },
+        "fetch": {
+          "title": "Instruction fetch",
+          "summary": "Bring the next part of the program into the core.",
+          "detail": [
+            "The front end supplies instructions to later stages. A redirect changes where fetching continues, for example after resolving a branch.",
+            "Think of a loop as instructions plus the data those instructions touch. The present model follows the data and operation dependencies; it does not simulate instruction-fetch bandwidth."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Instruction fetch"
+          ],
+          "sources": [
+            "boom-fetch"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "branch": {
+          "title": "Branch prediction",
+          "summary": "Choose a likely next instruction path before it is known.",
+          "detail": [
+            "Prediction keeps the front end supplied across branches. A wrong path must be discarded when the branch is resolved.",
+            "No random flashes stand in for predictions here. The matrix task has a fixed operation sequence and the simulator does not implement a branch predictor or recovery penalty."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Branch prediction"
+          ],
+          "sources": [
+            "boom-fetch",
+            "amd-zen5-smt"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "decode": {
+          "title": "Instruction decode",
+          "summary": "Turn encoded instructions into internal work.",
+          "detail": [
+            "Zen 5 has two four-wide decode paths in AMD’s core diagram. These are instruction-processing resources, not eight independent CPU cores.",
+            "A matrix element is not an instruction: reading it, multiplying it and adding the product are distinct actions. This explorer exposes those actions without claiming to decode x86 bytes."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Instruction decode"
+          ],
+          "sources": [
+            "amd-zen5-smt"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "uop-cache": {
+          "title": "Operation cache",
+          "summary": "Reuse decoded work on a repeated instruction path.",
+          "detail": [
+            "AMD’s core diagram includes an operation cache feeding the front end. It is distinct from caches that hold matrix values.",
+            "Changing input pixels changes data, not necessarily the loop’s instructions. The operation-cache landmark helps separate those concepts; its contents and hits are not modeled."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Operation cache"
+          ],
+          "sources": [
+            "amd-zen5-smt"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "rename": {
+          "title": "Register renaming",
+          "summary": "Separate a reused register name from its successive values.",
+          "detail": [
+            "Renaming assigns different physical storage to different writes of a logical register. This removes false dependencies caused only by reusing a name.",
+            "It cannot remove a true dependency: if a sum needs a previous product, that product must still arrive. The example tracks such value readiness but does not implement a rename table."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Register renaming"
+          ],
+          "sources": [
+            "boom-rename"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "scheduler": {
+          "title": "Issue scheduler",
+          "summary": "Choose an operation whose inputs are ready.",
+          "detail": [
+            "An issue queue holds waiting operations. Selection needs both ready operands and a suitable execution resource; merely having many operations queued is not enough.",
+            "Watch a dot product wait for its loads while another output progresses. The experiment’s bounded issue rule is visible in the live state and can be single-stepped."
+          ],
+          "path": [
+            "CPU",
+            "Execution",
+            "Issue scheduler"
+          ],
+          "sources": [
+            "boom-issue"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "scheduler"
+          ],
+          "modeled": true,
+          "modelNote": "Simulates readiness and bounded issue; no claim to reproduce Zen’s scheduling policy."
+        },
+        "registers": {
+          "title": "Operand registers",
+          "summary": "Values wait close to the units that consume them.",
+          "detail": [
+            "Physical registers hold working values and supply execution units. They are not the same storage as cache lines.",
+            "The live view shows actual loaded operands and accumulated sums for the small task. It uses model slots rather than claiming each slot is a particular Ryzen hardware register."
+          ],
+          "path": [
+            "CPU",
+            "Execution",
+            "Operand registers"
+          ],
+          "sources": [
+            "boom-rename"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "registers"
+          ],
+          "modeled": true,
+          "modelNote": "Displays actual operand state; register renaming and finite physical-register allocation are not modeled."
+        },
+        "integer": {
+          "title": "Integer execution",
+          "summary": "Compute a result once its required inputs arrive.",
+          "detail": [
+            "Arithmetic units perform operations selected by the scheduler. Different operation types can require different resources.",
+            "For one output, multiply A[row,k] by B[k,column], then add that product to the partial sum. Repeat for k = 0 through 7. Independent output chains can overlap."
+          ],
+          "path": [
+            "CPU",
+            "Execution",
+            "Integer execution"
+          ],
+          "sources": [
+            "boom-issue",
+            "amd-small-gemm"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "compute"
+          ],
+          "modeled": true,
+          "modelNote": "Computes exact signed integer products and sums under educational timing rules."
+        },
+        "vector": {
+          "title": "Vector and floating-point execution",
+          "summary": "One instruction can operate on several numeric elements.",
+          "detail": [
+            "Vector instructions describe multiple elements together. Efficient matrix code also keeps independent accumulators to avoid one long dependency chain.",
+            "These units explain how optimized software can differ from the scalar teaching task. The current computation does not issue AVX-512 instructions or predict vector throughput."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Vector and floating-point execution"
+          ],
+          "sources": [
+            "amd-small-gemm",
+            "amd-zen5-smt"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "loadstore": {
+          "title": "Load/store machinery",
+          "summary": "Connect the program’s addresses to data movement.",
+          "detail": [
+            "Loads retrieve values; stores make values available in memory. Real out-of-order processors track their ordering and possible address overlap.",
+            "The model follows read addresses and output transfers. It merges simultaneous misses for an outstanding cache line, but does not implement speculative memory ordering or store forwarding."
+          ],
+          "path": [
+            "CPU",
+            "Execution",
+            "Load/store machinery"
+          ],
+          "sources": [
+            "boom-loadstore"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "memory",
+            "cache"
+          ],
+          "modeled": true,
+          "modelNote": "Actual model requests are visible; no vendor load/store queue or coherence simulation."
+        },
+        "retire": {
+          "title": "Retirement",
+          "summary": "Finish architectural work in a controlled order.",
+          "detail": [
+            "Execution completion and retirement are different. An out-of-order core can finish younger work early while waiting to commit older instructions safely.",
+            "Doke marks an output valid after its result transfer completes. That completion flag is not a simulated x86 reorder-buffer commit or an exception guarantee."
+          ],
+          "path": [
+            "CPU",
+            "One core",
+            "Retirement"
+          ],
+          "sources": [
+            "boom-retire"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "output": {
+          "title": "Output values",
+          "summary": "The computed image becomes available value by value.",
+          "detail": [
+            "Each completed value is the exact result of the model’s matrix operation. The result view distinguishes available values from unfinished work.",
+            "For the adjacent-difference filter, the first column equals its input value. Each later column subtracts the input immediately to its left. Changing execution order must preserve those answers."
+          ],
+          "path": [
+            "CPU",
+            "Execution",
+            "Output values"
+          ],
+          "sources": [
+            "amd-small-gemm"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "output"
+          ],
+          "modeled": true,
+          "modelNote": "Output validity follows completed model stores, never a decorative animation timer."
+        }
+      }
+    },
+    "gpu": {
+      "name": "Inside a GPU",
+      "overview": "Find one multiprocessor among many, open its execution partitions, and follow the work of 32 threads.",
+      "levels": [
+        {
+          "id": "processor",
+          "title": "Processor",
+          "description": "Many streaming multiprocessors share an L2 cache and device memory."
+        },
+        {
+          "id": "core",
+          "title": "One SM",
+          "description": "Schedulers, registers, arithmetic units and shared storage."
+        },
+        {
+          "id": "execution",
+          "title": "One warp",
+          "description": "Thirty-two logical lanes, their addresses and partial sums."
+        }
+      ],
+      "blocks": {
+        "processor": {
+          "title": "GPU processor",
+          "summary": "Many multiprocessors cooperate on a large pool of work.",
+          "detail": [
+            "The reference view shows 170 enabled SMs for RTX 5090 or 132 for H100 SXM5. Full-die diagrams can show more units than the shipping product enables.",
+            "Each tile represents one documented SM, arranged for exploration. The grid is not a die photograph, and the small live task does not claim to occupy every tile."
+          ],
+          "path": [
+            "GPU",
+            "Processor",
+            "GPU processor"
+          ],
+          "sources": [
+            "nvidia-blackwell",
+            "nvidia-hopper"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "gpc": {
+          "title": "Processing cluster",
+          "summary": "SMs are organized into larger groups.",
+          "detail": [
+            "NVIDIA’s architecture hierarchy groups streaming multiprocessors into graphics processing clusters. Program threads are separately organized into blocks and grids.",
+            "A logical grid of clickable SMs helps you find and enter a unit. Its rows do not claim the undocumented enabled-unit placement of a particular retail GPU."
+          ],
+          "path": [
+            "GPU",
+            "Processor",
+            "Processing cluster"
+          ],
+          "sources": [
+            "cuda-model"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "sm": {
+          "title": "Streaming multiprocessor",
+          "summary": "A local home for many resident threads.",
+          "detail": [
+            "An SM combines scheduling, register storage, arithmetic and shared storage. Threads from one thread block run on one SM.",
+            "Open an SM to separate its structure from the 32 logical lanes of one warp. A CUDA core is an arithmetic resource; a lane is one thread’s position in a scheduled group."
+          ],
+          "path": [
+            "GPU",
+            "Processor",
+            "Streaming multiprocessor"
+          ],
+          "sources": [
+            "cuda-model"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "dispatch": {
+          "title": "Work distribution",
+          "summary": "Turn a launched grid into work assigned to SMs.",
+          "detail": [
+            "A kernel launch defines a grid of thread blocks. Hardware can assign independent blocks to available SMs in different orders.",
+            "The eight-by-eight teaching output needs only 64 logical threads: two warps. Increasing the reference chip’s SM count does not magically turn that small task into a measured full-device benchmark."
+          ],
+          "path": [
+            "GPU",
+            "Processor",
+            "Work distribution"
+          ],
+          "sources": [
+            "cuda-model"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "instruction-cache": {
+          "title": "Instruction storage",
+          "summary": "Threads need the operations as well as the operands.",
+          "detail": [
+            "The documented SM diagrams include instruction storage near the scheduler and dispatch resources.",
+            "The live model starts from a defined load–multiply–accumulate sequence. It does not run a compiled CUDA kernel or simulate instruction-cache hits and misses."
+          ],
+          "path": [
+            "GPU",
+            "One SM",
+            "Instruction storage"
+          ],
+          "sources": [
+            "nvidia-blackwell",
+            "nvidia-hopper"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "partition": {
+          "title": "SM execution partition",
+          "summary": "A repeating group of execution resources within an SM.",
+          "detail": [
+            "The selected reference SM uses four execution partitions with local scheduling, registers and arithmetic, alongside shared resources.",
+            "Repeated geometry makes that organization visible at close range. A hardware partition is not the same thing as one permanent warp; scheduling can reuse its resources for many warps."
+          ],
+          "path": [
+            "GPU",
+            "One SM",
+            "SM execution partition"
+          ],
+          "sources": [
+            "nvidia-blackwell",
+            "nvidia-hopper",
+            "cuda-hardware"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "warp-scheduler": {
+          "title": "Warp scheduler",
+          "summary": "Issue a ready instruction for a group of threads.",
+          "detail": [
+            "A scheduler selects a ready warp and issues its next instruction. Another resident warp can progress while the first waits for data.",
+            "Here two logical warps retain work in flight under a simple issue rule. Pausing stops their state. The highlighted group is the displayed warp, not a measurement of all real SM schedulers."
+          ],
+          "path": [
+            "GPU",
+            "One warp",
+            "Warp scheduler"
+          ],
+          "sources": [
+            "cuda-hardware"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "scheduler"
+          ],
+          "modeled": true,
+          "modelNote": "Simulates two educational warps; vendor scheduling and occupancy are not reproduced."
+        },
+        "registers": {
+          "title": "Register file",
+          "summary": "Each thread keeps its own working values.",
+          "detail": [
+            "Thread-private register values remain on chip while warps wait. Register demand can constrain how many warps fit on an SM.",
+            "Inspect a lane to see its actual operands and partial sum. These model values are not a dump of physical GPU registers, and the example does not simulate register spilling."
+          ],
+          "path": [
+            "GPU",
+            "One warp",
+            "Register file"
+          ],
+          "sources": [
+            "cuda-registers",
+            "cuda-hardware"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "registers"
+          ],
+          "modeled": true,
+          "modelNote": "Actual per-lane values; no physical allocation, bank conflict or spill model."
+        },
+        "lanes": {
+          "title": "Warp lanes",
+          "summary": "Thirty-two logical positions execute a common operation.",
+          "detail": [
+            "A warp contains 32 threads. Each lane retains its own values; active threads execute the selected instruction. Modern hardware also maintains per-thread execution state.",
+            "One lane owns one output element in this task. Each of its eight products uses a different k value. The same instruction therefore combines different values across the highlighted lanes."
+          ],
+          "path": [
+            "GPU",
+            "One warp",
+            "Warp lanes"
+          ],
+          "sources": [
+            "cuda-hardware"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "compute"
+          ],
+          "modeled": true,
+          "modelNote": "The lane mask and values come from the executable model; lanes are not 32 complete CPU cores."
+        },
+        "loadstore": {
+          "title": "Load/store units",
+          "summary": "Collect the addresses requested by active threads.",
+          "detail": [
+            "Concurrent global-memory accesses are combined according to the addressed memory regions. Nearby addresses can share sectors; scattered addresses can require more.",
+            "Switch the storage layout while keeping the same mathematical matrix. The output should stay identical, while the model’s address-derived sector demand changes."
+          ],
+          "path": [
+            "GPU",
+            "One warp",
+            "Load/store units"
+          ],
+          "sources": [
+            "cuda-sectors"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "memory",
+            "registers"
+          ],
+          "modeled": true,
+          "modelNote": "Counts actual modeled sectors; it does not equate every sector with a DRAM transaction."
+        },
+        "l1shared": {
+          "title": "L1 cache and shared memory",
+          "summary": "A nearby store with two different uses.",
+          "detail": [
+            "L1 caching is hardware managed. Shared memory is explicitly used by cooperating threads. Their capacity shares hardware resources, with architecture-specific limits.",
+            "The reference capacities are 128 KB combined for RTX Blackwell and 256 KB for Hopper. The current warp experiment bypasses a cache model; this landmark stays architectural context."
+          ],
+          "path": [
+            "GPU",
+            "One SM",
+            "L1 cache and shared memory"
+          ],
+          "sources": [
+            "cuda-memory",
+            "nvidia-blackwell",
+            "hopper-tuning"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "l2": {
+          "title": "Shared L2 cache",
+          "summary": "A cache between SM requests and device memory.",
+          "detail": [
+            "RTX 5090 has 96 MB of L2; H100 SXM5 has 50 MB. These are product configurations, not the larger fully enabled die totals.",
+            "L2 can serve reusable data across requests. The teaching model counts sectors directly from addresses and does not claim those requests miss this cache or reach DRAM."
+          ],
+          "path": [
+            "GPU",
+            "Processor",
+            "Shared L2 cache"
+          ],
+          "sources": [
+            "nvidia-blackwell",
+            "nvidia-hopper"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "memory": {
+          "title": "Device memory",
+          "summary": "Large backing storage outside the SMs.",
+          "detail": [
+            "RTX 5090 uses 32 GB of GDDR7; H100 SXM5 uses 80 GB of HBM3. These are different memory technologies and package arrangements.",
+            "The model keeps A, B and the output in a small addressed backing store. Glowing transfers represent requested model data, not measured bus utilization or physical wire travel."
+          ],
+          "path": [
+            "GPU",
+            "One warp",
+            "Device memory"
+          ],
+          "sources": [
+            "nvidia-5090",
+            "nvidia-hopper"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "memory"
+          ],
+          "modeled": true,
+          "modelNote": "Actual modeled operand traffic, without a device-memory controller or SKU bandwidth prediction."
+        },
+        "tensor": {
+          "title": "Tensor arithmetic",
+          "summary": "Specialized instructions compute matrix products.",
+          "detail": [
+            "Tensor Cores perform matrix multiply–accumulate work. Their supported types and instruction shapes vary by GPU generation.",
+            "Ordinary multiply–add code does not automatically mean Tensor Cores were used. This warp experiment deliberately shows scalar integer arithmetic; tensor blocks remain inactive reference landmarks."
+          ],
+          "path": [
+            "GPU",
+            "One SM",
+            "Tensor arithmetic"
+          ],
+          "sources": [
+            "nvidia-hopper"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "ray": {
+          "title": "Ray traversal and intersection",
+          "summary": "Dedicated graphics work beside the general compute units.",
+          "detail": [
+            "RTX Blackwell includes dedicated ray-tracing hardware. H100’s reference profile does not use that graphics block.",
+            "The input-tile task traces no rays. Leaving this unit inactive explains specialization more faithfully than lighting every block whenever any calculation runs."
+          ],
+          "path": [
+            "GPU",
+            "One SM",
+            "Ray traversal and intersection"
+          ],
+          "sources": [
+            "nvidia-blackwell"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "texture": {
+          "title": "Texture sampling",
+          "summary": "Fetch and filter sampled image data.",
+          "detail": [
+            "Texture units support image sampling operations such as fetching texels and filtering neighboring samples.",
+            "Painting an image in this explorer does not cause real texture instructions in the educational model. Its matrix values are ordinary indexed operands, so this is a static architectural landmark."
+          ],
+          "path": [
+            "GPU",
+            "One SM",
+            "Texture sampling"
+          ],
+          "sources": [
+            "nvidia-blackwell"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "An architectural landmark. This part is explained here but is not separately simulated."
+        },
+        "coalescer": {
+          "title": "Memory sectors",
+          "summary": "Addresses determine how much data must be requested.",
+          "detail": [
+            "For four-byte words, 32 adjacent aligned lane addresses fit into four 32-byte sectors. Scattering the same number of words can touch many more sectors.",
+            "Inspect the addresses rather than judging brightness. Repeated addresses count once in the modeled sector union. A memory layout change can improve this count without changing any output values."
+          ],
+          "path": [
+            "GPU",
+            "One warp",
+            "Memory sectors"
+          ],
+          "sources": [
+            "cuda-sectors",
+            "cuda-memory"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "memory"
+          ],
+          "modeled": true,
+          "modelNote": "Exact sector union for active addresses; cache behavior and measured memory efficiency are outside this model."
+        },
+        "output": {
+          "title": "Output values",
+          "summary": "The same answers emerge through parallel work.",
+          "detail": [
+            "Each thread contributes one output value after accumulating eight products. Values become valid when their modeled stores complete.",
+            "Compare the final matrix with CPU mode. Matching results demonstrate correctness of the two execution paths; differences in educational ticks do not establish which physical chip is faster."
+          ],
+          "path": [
+            "GPU",
+            "One warp",
+            "Output values"
+          ],
+          "sources": [
+            "cuda-model"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "output"
+          ],
+          "modeled": true,
+          "modelNote": "Exact output and validity from completed model stores."
+        },
+        "arithmetic": {
+          "title": "Arithmetic execution resources",
+          "summary": "Physical arithmetic resources carry out instructions issued by a scheduler.",
+          "detail": [
+            "Both reference SMs have 128 FP32 arithmetic resources, shown as four groups of 32. RTX Blackwell unifies FP32 and INT32 execution on those resources; Hopper also has separate integer and FP64 resources not individually drawn here.",
+            "These 32 cells are architectural resources, not the 32 logical threads of a warp. A warp is a scheduled group of work that uses execution resources over time. Enter the warp view to inspect the teaching model’s actual thread values."
+          ],
+          "path": [
+            "GPU",
+            "One SM",
+            "Arithmetic resources"
+          ],
+          "sources": [
+            "nvidia-blackwell",
+            "nvidia-hopper",
+            "cuda-hardware"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context. No physical instruction issue, FP32 pipeline timing or exact mapping from a model lane to a hardware cell is simulated."
+        }
+      }
+    },
+    "tensor": {
+      "name": "Tensor processor",
+      "overview": "Explore the first TPU’s documented matrix engine, then follow real operands through a smaller, explicitly different systolic teaching model.",
+      "levels": [
+        {
+          "id": "processor",
+          "title": "Processor",
+          "description": "Published TPU v1 functional units in an original schematic."
+        },
+        {
+          "id": "core",
+          "title": "Array",
+          "description": "A representative window into the documented 256 × 256 matrix array."
+        },
+        {
+          "id": "execution",
+          "title": "Live 4 × 4 array",
+          "description": "Exact integer products in an output-stationary teaching array."
+        }
+      ],
+      "blocks": {
+        "processor": {
+          "title": "Neural inference processor",
+          "summary": "A processor designed around repeated matrix arithmetic.",
+          "detail": [
+            "TPU v1 accelerates inference: evaluating a trained network on new inputs. Its documented design puts a large matrix unit beside local storage and host interfaces.",
+            "Open the array to inspect how operands meet. The live experiment multiplies two small matrices exactly; it does not run a trained network or emulate a full TPU."
+          ],
+          "path": [
+            "Tensor processor",
+            "Processor",
+            "Neural inference processor"
+          ],
+          "sources": [
+            "google-tpu-v1-paper",
+            "google-tpu-v1-explained"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "The live experiment is a 4 × 4 output-stationary integer array. TPU v1 is a 256 × 256 weight-stationary design; activity here is a conceptual correspondence, not device telemetry."
+        },
+        "matrix": {
+          "title": "Matrix multiply array",
+          "summary": "Nearby arithmetic cells reuse values as a wave moves through the array.",
+          "detail": [
+            "The first TPU contains 256 rows by 256 columns of multiply-accumulate units. Its weights are held in the array while input activations and partial sums move through it.",
+            "The displayed surface is a representative window. The live 4 × 4 experiment instead keeps each output sum at one cell and moves both input operands between neighbors."
+          ],
+          "path": [
+            "Tensor processor",
+            "Processor",
+            "Matrix multiply array"
+          ],
+          "sources": [
+            "google-tpu-v1-paper",
+            "google-tpu-v1-explained"
+          ],
+          "level": "processor",
+          "modelNodes": [
+            "compute",
+            "scheduler",
+            "registers"
+          ],
+          "modeled": true,
+          "modelNote": "The live experiment is a 4 × 4 output-stationary integer array. TPU v1 is a 256 × 256 weight-stationary design; activity here is a conceptual correspondence, not device telemetry."
+        },
+        "buffer": {
+          "title": "Unified buffer",
+          "summary": "Local storage holds activations and intermediate results.",
+          "detail": [
+            "The documented TPU has a 24 MiB on-chip unified buffer. Keeping intermediate values near arithmetic reduces repeated trips to host memory.",
+            "In the experiment, the scratch area holds operands for one tile. Its activity indicates model data readiness, not occupancy of the real 24 MiB buffer."
+          ],
+          "path": [
+            "Tensor processor",
+            "Processor",
+            "Unified buffer"
+          ],
+          "sources": [
+            "google-tpu-v1-paper"
+          ],
+          "level": "processor",
+          "modelNodes": [
+            "scratch"
+          ],
+          "modeled": true,
+          "modelNote": "The live experiment is a 4 × 4 output-stationary integer array. TPU v1 is a 256 × 256 weight-stationary design; activity here is a conceptual correspondence, not device telemetry."
+        },
+        "weights": {
+          "title": "Weight memory",
+          "summary": "The learned coefficients must reach the array before multiplication.",
+          "detail": [
+            "TPU v1 uses 8 GiB of external DDR3 weight memory. A FIFO stages weight tiles before they enter the matrix unit.",
+            "Our input B is a small editable matrix, not a trained network. Editing it changes the coefficients in the exact calculation; it does not model DDR3 transfers on the real TPU."
+          ],
+          "path": [
+            "Tensor processor",
+            "Processor",
+            "Weight memory"
+          ],
+          "sources": [
+            "google-tpu-v1-paper"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "instruction": {
+          "title": "Instruction control",
+          "summary": "A host command can describe a large matrix operation.",
+          "detail": [
+            "The first TPU accepts instructions from its host rather than fetching a general-purpose application. Its commands include host-memory transfers, weight reads, matrix work and activation.",
+            "The live scheduler has a narrower role: it starts a tile once model operands are available, then advances its wavefront. It does not decode the TPU instruction set."
+          ],
+          "path": [
+            "Tensor processor",
+            "Processor",
+            "Instruction control"
+          ],
+          "sources": [
+            "google-tpu-v1-paper",
+            "google-tpu-v1-explained"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "accumulator": {
+          "title": "Accumulation storage",
+          "summary": "Products are added to wider running sums.",
+          "detail": [
+            "TPU v1 provides 4 MiB of 32-bit accumulators beside its matrix unit. Wider sums preserve range while many lower-precision products are combined.",
+            "Each cell in the teaching array owns one exact integer output sum. Click a cell to see completed products accumulate; that local ownership differs from the published TPU dataflow."
+          ],
+          "path": [
+            "Tensor processor",
+            "Inside the engine",
+            "Accumulation storage"
+          ],
+          "sources": [
+            "google-tpu-v1-paper"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "interface": {
+          "title": "Host interface",
+          "summary": "The host supplies work and retrieves results.",
+          "detail": [
+            "TPU v1 connects to its host over PCIe Gen3 ×16. A DMA controller transfers data between host memory and the unified buffer.",
+            "The experiment begins with the matrices you enter and ends with their product. Browser input is not a PCIe transfer, and no host bandwidth or driver overhead is simulated."
+          ],
+          "path": [
+            "Tensor processor",
+            "Processor",
+            "Host interface"
+          ],
+          "sources": [
+            "google-tpu-v1-paper"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "activation": {
+          "title": "Activation and pooling",
+          "summary": "Matrix results can be transformed before the next network layer.",
+          "detail": [
+            "The first TPU includes nonlinear activation and pooling operations. They operate on accumulated results and return intermediate values to local storage.",
+            "The live calculation stops at C = A × B. It does not apply ReLU, sigmoid, pooling, quantization or the surrounding layers of a neural network."
+          ],
+          "path": [
+            "Tensor processor",
+            "Inside the engine",
+            "Activation and pooling"
+          ],
+          "sources": [
+            "google-tpu-v1-paper",
+            "google-tpu-v1-explained"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "memory": {
+          "title": "Operand memory",
+          "summary": "A tile starts by requesting the values it will reuse.",
+          "detail": [
+            "Matrix engines need data before arithmetic can proceed. Local reuse helps only after operands have arrived; an empty array cannot manufacture work.",
+            "This model loads four rows of A and four columns of B for each tile. The shown memory requests and authored delays belong to this experiment, not the TPU memory system."
+          ],
+          "path": [
+            "Tensor processor",
+            "Live experiment",
+            "Operand memory"
+          ],
+          "sources": [
+            "google-tpu-v1-paper",
+            "google-tpu-v1-explained"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "memory"
+          ],
+          "modeled": true,
+          "modelNote": "Live state comes from the small educational model; it does not reproduce vendor timing or implementation."
+        },
+        "scheduler": {
+          "title": "Tile scheduler",
+          "summary": "One tile is prepared and advanced at a time.",
+          "detail": [
+            "Regular matrix work can be organized as a sequence of tiles. Their boundaries determine which values are available together and where reuse occurs.",
+            "The model schedules four 4 × 4 output tiles to build the 8 × 8 result. A tile waits for its input transfer, then advances fourteen wave positions, including filling and draining the array."
+          ],
+          "path": [
+            "Tensor processor",
+            "Live experiment",
+            "Tile scheduler"
+          ],
+          "sources": [
+            "google-tpu-v1-explained"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "scheduler"
+          ],
+          "modeled": true,
+          "modelNote": "Live state comes from the small educational model; it does not reproduce vendor timing or implementation."
+        },
+        "registers": {
+          "title": "In-flight operands",
+          "summary": "An arithmetic cell must receive matching terms.",
+          "detail": [
+            "In a systolic array, neighboring cells pass values onward so that data does not have to return to large memory after every multiplication.",
+            "The experiment tags each operand with its k index. A cell adds a product only when both operands are present for the same k; this preserves the dot product while values travel."
+          ],
+          "path": [
+            "Tensor processor",
+            "Live experiment",
+            "In-flight operands"
+          ],
+          "sources": [
+            "google-tpu-v1-paper",
+            "google-tpu-v1-explained"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "registers"
+          ],
+          "modeled": true,
+          "modelNote": "Live state comes from the small educational model; it does not reproduce vendor timing or implementation."
+        },
+        "compute": {
+          "title": "Array execution",
+          "summary": "Sixteen cells compute sixteen output sums.",
+          "detail": [
+            "A matrix product contains many independent output sums, each formed from pairs of input values. An array exposes several of those sums at once.",
+            "The live 4 × 4 array computes one tile using exact integer arithmetic. Operand movement and completion events drive the glow; the full result contains 64 outputs and 512 products."
+          ],
+          "path": [
+            "Tensor processor",
+            "Live experiment",
+            "Array execution"
+          ],
+          "sources": [
+            "google-tpu-v1-explained"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "compute"
+          ],
+          "modeled": true,
+          "modelNote": "Live state comes from the small educational model; it does not reproduce vendor timing or implementation."
+        },
+        "pe": {
+          "title": "Processing element",
+          "summary": "One cell multiplies two arriving values and updates one sum.",
+          "detail": [
+            "A multiply-accumulate combines a product with an existing sum. Repeating it over k computes C[row,column] = Σ A[row,k] × B[k,column].",
+            "Here A moves right and B moves down. Each of the sixteen model cells keeps its output sum locally, adding only terms that have actually arrived; it is not a miniature copy of TPU v1’s cell."
+          ],
+          "path": [
+            "Tensor processor",
+            "Live experiment",
+            "Processing element"
+          ],
+          "sources": [
+            "google-tpu-v1-paper",
+            "google-tpu-v1-explained"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "pe0",
+            "pe1",
+            "pe2",
+            "pe3",
+            "pe4",
+            "pe5",
+            "pe6",
+            "pe7",
+            "pe8",
+            "pe9",
+            "pe10",
+            "pe11",
+            "pe12",
+            "pe13",
+            "pe14",
+            "pe15"
+          ],
+          "modeled": true,
+          "modelNote": "The live experiment is a 4 × 4 output-stationary integer array. TPU v1 is a 256 × 256 weight-stationary design; activity here is a conceptual correspondence, not device telemetry."
+        },
+        "output": {
+          "title": "Completed result",
+          "summary": "An output appears after its arithmetic and write complete.",
+          "detail": [
+            "A matrix engine must make results available to whatever consumes them next. Producing a sum and delivering that sum are distinct steps.",
+            "The model marks an output complete after all eight products and its modeled output write finish. Pending values remain pending; this display does not substitute a precomputed answer."
+          ],
+          "path": [
+            "Tensor processor",
+            "Live experiment",
+            "Completed result"
+          ],
+          "sources": [
+            "google-tpu-v1-explained"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "output"
+          ],
+          "modeled": true,
+          "modelNote": "Live state comes from the small educational model; it does not reproduce vendor timing or implementation."
+        }
+      }
+    },
+    "switch": {
+      "name": "Network processor",
+      "overview": "Explore public G200 functions, then create contention inside a small switch whose packets, queues and transfers you can inspect.",
+      "levels": [
+        {
+          "id": "processor",
+          "title": "Processor",
+          "description": "Documented G200 functions in an original schematic."
+        },
+        {
+          "id": "core",
+          "title": "Packet path",
+          "description": "How ingress, forwarding, buffering and egress fit together."
+        },
+        {
+          "id": "execution",
+          "title": "Live switch",
+          "description": "Three inputs, three outputs and bounded queues with real packet state."
+        }
+      ],
+      "blocks": {
+        "processor": {
+          "title": "Network switching processor",
+          "summary": "A specialized chip decides where packets should go.",
+          "detail": [
+            "G200 is a standalone network switch processor, with published 51.2 Tbps full-duplex bandwidth. Its arithmetic serves forwarding and traffic management rather than neural tensor computation.",
+            "Open the packet path, then inject traffic into a small switch. Congestion, queue order and admission are executable here; the underlying commercial device is architectural context."
+          ],
+          "path": [
+            "Network processor",
+            "Processor",
+            "Network switching processor"
+          ],
+          "sources": [
+            "cisco-g200"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        },
+        "ingress": {
+          "title": "Packet ingress",
+          "summary": "Incoming traffic enters before it can be forwarded.",
+          "detail": [
+            "G200’s public diagram shows Ethernet interfaces and a programmable processor. The drawing here groups their functions without asserting a number of internal processing pipelines.",
+            "The experiment has three inputs. An injected packet carries its chosen destination and receives an identity so you can follow it through waiting, transfer and delivery."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Packet ingress"
+          ],
+          "sources": [
+            "cisco-g200",
+            "p4-psa"
+          ],
+          "level": "core",
+          "modelNodes": [
+            "ingress-0",
+            "ingress-1",
+            "ingress-2"
+          ],
+          "modeled": true,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        },
+        "parser": {
+          "title": "Header parsing",
+          "summary": "Headers turn a stream of bytes into fields a forwarding program can use.",
+          "detail": [
+            "In the open P4 switch model, a parser extracts header fields before ingress decisions. This is a functional explanation, not a claim that G200 implements P4 PSA.",
+            "Our packets already have an input and destination. No Ethernet/IP header parsing, checksum validation or malformed-packet handling is executed in this experiment."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Header parsing"
+          ],
+          "sources": [
+            "p4-psa"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "lookup": {
+          "title": "Forwarding lookup",
+          "summary": "A table lookup connects packet fields to an action.",
+          "detail": [
+            "A programmable forwarding path can select a destination and modify metadata using match-action rules. Cisco publicly identifies programmable processing and databases in G200.",
+            "The experiment bypasses forwarding lookup: you choose the destination directly. This makes queue contention visible without pretending to simulate routing tables or a specific ASIC lookup pipeline."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Forwarding lookup"
+          ],
+          "sources": [
+            "p4-psa",
+            "cisco-g200"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "buffer": {
+          "title": "Shared packet buffer",
+          "summary": "Several ports can draw on one storage budget.",
+          "detail": [
+            "Cisco documents a fully shared on-chip G200 packet buffer. Its public data sheet does not provide an exact byte capacity.",
+            "The teaching switch has 32 shared packet slots, including packets in transit. When all slots are occupied, a new arrival is rejected; this number is authored for a small experiment."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Shared packet buffer"
+          ],
+          "sources": [
+            "cisco-g200"
+          ],
+          "level": "core",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        },
+        "queues": {
+          "title": "Queues and head-of-line blocking",
+          "summary": "Queue order determines which waiting packet can be considered.",
+          "detail": [
+            "Virtual output queues separate traffic by destination. Cisco’s QoS reference explains this mechanism on named Q200-based platforms; those hardware details are not G200 specifications.",
+            "In FIFO mode only an input’s first packet may compete. In VOQ mode the first packet for each destination may compete, so a blocked destination does not trap unrelated traffic behind it."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Queues and head-of-line blocking"
+          ],
+          "sources": [
+            "cisco-voq"
+          ],
+          "level": "core",
+          "modelNodes": [
+            "fifo-0",
+            "fifo-1",
+            "fifo-2",
+            "voq-0-0",
+            "voq-0-1",
+            "voq-0-2",
+            "voq-1-0",
+            "voq-1-1",
+            "voq-1-2",
+            "voq-2-0",
+            "voq-2-1",
+            "voq-2-2"
+          ],
+          "modeled": true,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        },
+        "scheduler": {
+          "title": "Transfer scheduler",
+          "summary": "When packets compete, a rule selects which may move.",
+          "detail": [
+            "Traffic scheduling considers available destinations and waiting traffic. The real implementation may have many classes and policies; this view does not disclose or infer Cisco arbitration logic.",
+            "Our rotating grants allow at most one transfer per input and one per output each tick. Blocking an output stops new grants to it and holds any transfer already in flight."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Transfer scheduler"
+          ],
+          "sources": [
+            "cisco-voq"
+          ],
+          "level": "core",
+          "modelNodes": [
+            "scheduler"
+          ],
+          "modeled": true,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        },
+        "fabric": {
+          "title": "Internal transfer",
+          "summary": "A granted packet moves toward its chosen output.",
+          "detail": [
+            "The connection between admission, buffering and egress is shown as a functional transfer path. The geometry is not a disclosed crossbar or a measurement of G200 wire lengths.",
+            "A granted packet normally arrives on the following model tick. Its identity remains visible in transit, and a blocked output can extend that wait. Model ticks have no nanosecond conversion."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Internal transfer"
+          ],
+          "sources": [
+            "p4-psa"
+          ],
+          "level": "core",
+          "modelNodes": [
+            "fabric"
+          ],
+          "modeled": true,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        },
+        "egress": {
+          "title": "Packet egress",
+          "summary": "Delivery releases space for other traffic.",
+          "detail": [
+            "Egress is the output side of a switch. Processing and transmission details depend on the actual device and configuration.",
+            "Delivery increments the selected output’s counter and releases one occupied slot. Observed waiting time includes queueing and modeled transit; it is not G200 packet latency."
+          ],
+          "path": [
+            "Network processor",
+            "Inside the engine",
+            "Packet egress"
+          ],
+          "sources": [
+            "p4-psa"
+          ],
+          "level": "core",
+          "modelNodes": [
+            "egress-0",
+            "egress-1",
+            "egress-2"
+          ],
+          "modeled": true,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        },
+        "interface": {
+          "title": "Ethernet and SerDes",
+          "summary": "Physical links carry traffic into and out of the chip.",
+          "detail": [
+            "G200 exposes 512 long-reach 112G SerDes and 512 Ethernet MACs, with flexible port combinations up to 800 Gbps. SerDes lanes and configured Ethernet ports are different concepts.",
+            "The three-port experiment is deliberately small. Its ports do not stand for a proportional slice of real bandwidth, and interface decoration does not enumerate the chip’s physical lanes."
+          ],
+          "path": [
+            "Network processor",
+            "Processor",
+            "Ethernet and SerDes"
+          ],
+          "sources": [
+            "cisco-g200"
+          ],
+          "level": "processor",
+          "modelNodes": [],
+          "modeled": false,
+          "modelNote": "Architectural context only. No separate execution or physical placement is simulated for this block."
+        },
+        "drop": {
+          "title": "Admission drop",
+          "summary": "Finite storage cannot admit every burst.",
+          "detail": [
+            "Queue management must account for finite resources. The G200 data sheet describes shared buffering, but the exact rejection and congestion policies are not reproduced here.",
+            "When the model’s 32 occupied slots are full, a new packet is counted as dropped without entering a queue. Attempted arrivals always equal drops plus delivered and currently held packets."
+          ],
+          "path": [
+            "Network processor",
+            "Live experiment",
+            "Admission drop"
+          ],
+          "sources": [
+            "cisco-g200"
+          ],
+          "level": "execution",
+          "modelNodes": [
+            "drop"
+          ],
+          "modeled": true,
+          "modelNote": "A generic three-port, input-queued experiment with authored timing and capacity. It does not reproduce G200’s internal organization, proprietary scheduler or physical layout."
+        }
+      }
+    }
+  }
+}

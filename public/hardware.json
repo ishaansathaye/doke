@@ -1,0 +1,479 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-15",
+  "scope": "Publicly documented reference hardware. Product facts do not parameterize the educational simulation.",
+  "profiles": [
+    {
+      "id": "ryzen-9950x",
+      "family": "cpu",
+      "name": "AMD Ryzen 9 9950X",
+      "facts": [
+        {
+          "label": "Architecture",
+          "value": "Zen 5",
+          "source": "amd-9950x",
+          "locator": "General Specifications → Processor Architecture"
+        },
+        {
+          "label": "CPU cores / threads",
+          "value": "16 / 32",
+          "source": "amd-9950x",
+          "locator": "General Specifications → # of CPU Cores; # of Threads"
+        },
+        {
+          "label": "L2 / L3 cache",
+          "value": "16 MB / 64 MB",
+          "source": "amd-9950x",
+          "locator": "General Specifications → L2 Cache; L3 Cache"
+        },
+        {
+          "label": "Base / maximum boost",
+          "value": "4.3 GHz / up to 5.7 GHz",
+          "source": "amd-9950x",
+          "locator": "General Specifications → Base Clock; Max. Boost Clock"
+        },
+        {
+          "label": "Package dies",
+          "value": "3",
+          "source": "amd-9950x",
+          "locator": "General Specifications → Package Die Count"
+        },
+        {
+          "label": "Instruction set",
+          "value": "x86-64",
+          "source": "amd-9950x",
+          "locator": "General Specifications → Instruction Set"
+        }
+      ],
+      "sources": [
+        {
+          "id": "amd-9950x",
+          "title": "AMD Ryzen 9 9950X — specifications",
+          "url": "https://www.amd.com/en/products/processors/desktops/ryzen/9000-series/amd-ryzen-9-9950x.html",
+          "checked": "2026-10-15"
+        }
+      ],
+      "limits": [
+        "These are published product facts. The small CPU model uses authored timing and cache rules, not Zen 5 microarchitecture.",
+        "Maximum boost is a conditional peak, not a clock promised for every core or workload.",
+        "Schematic block positions are explanatory; no physical die layout or measured workload trace is reproduced."
+      ],
+      "timing": {
+        "kind": "clock",
+        "hz": 4300000000,
+        "label": "4.3 GHz base clock",
+        "sourceIds": [
+          "amd-9950x"
+        ],
+        "scope": "Published base frequency. Actual core frequency varies with operating conditions. Its reciprocal is a reference clock period, not instruction latency or model-tick duration."
+      }
+    },
+    {
+      "id": "rtx-5090",
+      "family": "gpu",
+      "name": "NVIDIA GeForce RTX 5090",
+      "facts": [
+        {
+          "label": "Architecture",
+          "value": "Blackwell",
+          "source": "nvidia-5090",
+          "locator": "Full Specs → Technology Support → NVIDIA Architecture"
+        },
+        {
+          "label": "CUDA cores",
+          "value": "21,760",
+          "source": "nvidia-5090",
+          "locator": "Full Specs → GPU Engine Specs → NVIDIA CUDA Cores"
+        },
+        {
+          "label": "Tensor Core generation",
+          "value": "5th generation",
+          "source": "nvidia-5090",
+          "locator": "Full Specs → GPU Engine Specs → Tensor Cores (AI)"
+        },
+        {
+          "label": "Memory",
+          "value": "32 GB GDDR7",
+          "source": "nvidia-5090",
+          "locator": "Full Specs → Memory Specs → Standard Memory Config"
+        },
+        {
+          "label": "Memory interface width",
+          "value": "512-bit",
+          "source": "nvidia-5090",
+          "locator": "Full Specs → Memory Specs → Memory Interface Width"
+        },
+        {
+          "label": "Base / boost clock",
+          "value": "2.01 GHz / 2.41 GHz",
+          "source": "nvidia-5090",
+          "locator": "Full Specs → GPU Engine Specs → Base Clock; Boost Clock"
+        }
+      ],
+      "sources": [
+        {
+          "id": "nvidia-5090",
+          "title": "NVIDIA GeForce RTX 5090 — full specifications",
+          "url": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/",
+          "checked": "2026-10-15"
+        }
+      ],
+      "limits": [
+        "The listed specifications describe NVIDIA reference/Founders Edition hardware; partner designs can differ.",
+        "The parallel-lane model is an educational mechanism, not an RTX 5090 performance model.",
+        "CUDA core counts are not comparable one-for-one with CPU cores, Tensor Cores or biological neurons."
+      ],
+      "timing": {
+        "kind": "clock",
+        "hz": 2010000000,
+        "label": "2.01 GHz base clock",
+        "sourceIds": [
+          "nvidia-5090"
+        ],
+        "scope": "NVIDIA reference base frequency. Operating frequency varies; one cycle is not one completed CUDA instruction or one model tick."
+      }
+    },
+    {
+      "id": "h100-sxm",
+      "family": "gpu",
+      "name": "NVIDIA H100 SXM5",
+      "facts": [
+        {
+          "label": "Architecture",
+          "value": "Hopper",
+          "source": "nvidia-hopper",
+          "locator": "H100 GPU architecture"
+        },
+        {
+          "label": "Streaming multiprocessors",
+          "value": "132",
+          "source": "nvidia-hopper",
+          "locator": "H100 GPU architecture → H100 with SXM5 board form-factor"
+        },
+        {
+          "label": "FP32 CUDA cores",
+          "value": "128 per SM; 16,896 per GPU",
+          "source": "nvidia-hopper",
+          "locator": "H100 GPU architecture → H100 with SXM5 board form-factor"
+        },
+        {
+          "label": "Tensor Cores",
+          "value": "4 fourth-generation units per SM; 528 per GPU",
+          "source": "nvidia-hopper",
+          "locator": "H100 GPU architecture → H100 with SXM5 board form-factor"
+        },
+        {
+          "label": "Memory",
+          "value": "80 GB HBM3",
+          "source": "nvidia-hopper",
+          "locator": "H100 GPU architecture → H100 with SXM5 board form-factor"
+        },
+        {
+          "label": "L2 cache",
+          "value": "50 MB",
+          "source": "nvidia-hopper",
+          "locator": "H100 GPU architecture → H100 with SXM5 board form-factor"
+        }
+      ],
+      "sources": [
+        {
+          "id": "nvidia-hopper",
+          "title": "NVIDIA Hopper Architecture In-Depth",
+          "url": "https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/",
+          "checked": "2026-10-14"
+        },
+        {
+          "id": "nvidia-hgx-specifications",
+          "title": "NVIDIA HGX reference architecture: GPU specifications",
+          "url": "https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory-h100-h200-b200/latest/components.html",
+          "checked": "2026-10-15"
+        }
+      ],
+      "limits": [
+        "This profile is H100 SXM5, not H100 PCIe or the full 144-SM GH100 design illustrated in the source figure.",
+        "The generic model does not reproduce Hopper scheduling, instruction timing or actual compiler placement.",
+        "No peak-throughput figure is inferred from core counts or the source article’s preliminary performance table."
+      ],
+      "timing": {
+        "kind": "bandwidth",
+        "bytesPerSecond": 3350000000000,
+        "label": "3.35 TB/s memory bandwidth",
+        "sourceIds": [
+          "nvidia-hgx-specifications"
+        ],
+        "scope": "Published H100 SXM memory bandwidth, using decimal TB/s. This is aggregate data movement capacity, not a clock frequency, memory latency or measured application throughput."
+      }
+    },
+    {
+      "id": "tpu-v1",
+      "family": "npu",
+      "name": "Google TPU v1",
+      "facts": [
+        {
+          "label": "Generation / use",
+          "value": "First-generation TPU · neural-network inference",
+          "source": "google-tpu-v1-paper",
+          "locator": "Abstract; section 2"
+        },
+        {
+          "label": "Matrix array",
+          "value": "256 × 256 · 65,536 8-bit MACs",
+          "source": "google-tpu-v1-paper",
+          "locator": "Page 3, Figure 1 and matrix-unit description"
+        },
+        {
+          "label": "Unified buffer / accumulators",
+          "value": "24 MiB / 4 MiB",
+          "source": "google-tpu-v1-paper",
+          "locator": "Page 3, unified buffer and accumulator descriptions"
+        },
+        {
+          "label": "External weight memory",
+          "value": "8 GiB DDR3",
+          "source": "google-tpu-v1-paper",
+          "locator": "Pages 3 and 5; Table 2"
+        },
+        {
+          "label": "Clock",
+          "value": "700 MHz",
+          "source": "google-tpu-v1-paper",
+          "locator": "Page 5, Table 2"
+        },
+        {
+          "label": "Host interface",
+          "value": "PCIe Gen3 ×16",
+          "source": "google-tpu-v1-paper",
+          "locator": "Page 3, TPU instructions and interface"
+        }
+      ],
+      "sources": [
+        {
+          "id": "google-tpu-v1-paper",
+          "title": "Jouppi et al.: In-Datacenter Performance Analysis of a Tensor Processing Unit",
+          "url": "https://arxiv.org/pdf/1704.04760",
+          "checked": "2026-10-15"
+        },
+        {
+          "id": "google-tpu-v1-explained",
+          "title": "Google: An in-depth look at the first TPU",
+          "url": "https://cloud.google.com/blog/products/ai-machine-learning/an-in-depth-look-at-googles-first-tensor-processing-unit-tpu?hl=en",
+          "checked": "2026-10-15"
+        }
+      ],
+      "limits": [
+        "A historical, well-documented inference accelerator; not the latest TPU generation.",
+        "The visible array is representative, not a physical die reproduction or a drawing of every MAC.",
+        "TPU v1 stores weights in its matrix array. Doke’s separate 4 × 4 output-stationary model moves both operands and stores each output sum at a cell.",
+        "Model ticks, integer operands and memory rules are educational assumptions, not TPU instruction or performance emulation."
+      ],
+      "timing": {
+        "kind": "clock",
+        "hz": 700000000,
+        "label": "700 MHz documented clock",
+        "sourceIds": [
+          "google-tpu-v1-paper",
+          "google-tpu-v1-explained"
+        ],
+        "scope": "The 2017 paper’s first-generation inference TPU. Its clock period is a hardware reference; doke’s 4 × 4 output-stationary model is not this 256 × 256 weight-stationary implementation and its ticks are not TPU cycles."
+      }
+    },
+    {
+      "id": "tpu-v4",
+      "family": "npu",
+      "name": "Google TPU v4",
+      "facts": [
+        {
+          "label": "Accelerator type",
+          "value": "Tensor processor for machine learning",
+          "source": "google-tpu-architecture",
+          "locator": "How a TPU works"
+        },
+        {
+          "label": "TensorCores per chip",
+          "value": "2",
+          "source": "google-tpu-v4",
+          "locator": "System architecture → opening paragraph"
+        },
+        {
+          "label": "Matrix units per TensorCore",
+          "value": "4 MXUs, plus vector and scalar units",
+          "source": "google-tpu-v4",
+          "locator": "System architecture → opening paragraph"
+        },
+        {
+          "label": "HBM2 capacity",
+          "value": "32 GiB per chip",
+          "source": "google-tpu-v4",
+          "locator": "System architecture → specifications table → HBM2 capacity and bandwidth"
+        },
+        {
+          "label": "HBM2 bandwidth",
+          "value": "1,200 GB/s",
+          "source": "google-tpu-v4",
+          "locator": "System architecture → specifications table → HBM2 capacity and bandwidth"
+        },
+        {
+          "label": "Maximum pod size",
+          "value": "4,096 chips",
+          "source": "google-tpu-v4",
+          "locator": "System architecture → specifications table → TPU Pod size"
+        }
+      ],
+      "sources": [
+        {
+          "id": "google-tpu-v4",
+          "title": "Google Cloud TPU v4 — system architecture",
+          "url": "https://docs.cloud.google.com/tpu/docs/v4",
+          "checked": "2026-10-14"
+        },
+        {
+          "id": "google-tpu-architecture",
+          "title": "Google Cloud TPU architecture",
+          "url": "https://docs.cloud.google.com/tpu/docs/system-architecture-tpu-vm",
+          "checked": "2026-10-14"
+        }
+      ],
+      "limits": [
+        "NPU here means a neural accelerator. TPU is Google’s named tensor processor, not a network packet processor.",
+        "The small matrix model computes real sums but uses an authored dataflow; it does not emulate a TPU v4 MXU.",
+        "This is a documented reference generation, not a claim of the latest or fastest TPU."
+      ]
+    },
+    {
+      "id": "silicon-one-g200",
+      "family": "asic",
+      "name": "Cisco Silicon One G200",
+      "facts": [
+        {
+          "label": "Function",
+          "value": "Standalone network switching processor",
+          "source": "cisco-g200",
+          "locator": "Product overview"
+        },
+        {
+          "label": "Published switching bandwidth",
+          "value": "51.2 Tbps, full-duplex",
+          "source": "cisco-g200",
+          "locator": "Product overview"
+        },
+        {
+          "label": "SerDes",
+          "value": "512 × 112G",
+          "source": "cisco-g200",
+          "locator": "Features → long-reach SerDes"
+        },
+        {
+          "label": "Ethernet port rates",
+          "value": "Up to 800 Gbps",
+          "source": "cisco-g200",
+          "locator": "Features → flexible port configuration"
+        },
+        {
+          "label": "Packet storage",
+          "value": "Fully shared on-die packet buffer",
+          "source": "cisco-g200",
+          "locator": "Architectural characteristics → Large and fully unified packet buffer"
+        },
+        {
+          "label": "Host connection",
+          "value": "PCIe Gen3 + two Ethernet interfaces",
+          "source": "cisco-g200",
+          "locator": "Features → host CPU complex interfaces"
+        }
+      ],
+      "sources": [
+        {
+          "id": "cisco-g200",
+          "title": "Cisco Silicon One G200 data sheet",
+          "url": "https://www.cisco.com/c/en/us/solutions/collateral/silicon-one/silicon-one-g200-ds.html",
+          "checked": "2026-10-15"
+        },
+        {
+          "id": "cisco-voq",
+          "title": "Cisco Silicon One QoS white paper — mechanism context",
+          "url": "https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-9500-series-switches/catalyst-9500x-9600x-qos-q200-wp.html",
+          "checked": "2026-10-14"
+        }
+      ],
+      "limits": [
+        "Cisco’s NPU terminology means Network Processing Unit. This chip moves network traffic; it is not a transformer tensor-compute engine.",
+        "The packet scene is a generic input-queued switch with authored capacity, rotating grants and model ticks. It does not emulate G200 or a proprietary Cisco scheduler.",
+        "The QoS reference documents VOQ mechanisms on named Catalyst platforms. Their Q200 SMS/HBM capacities are not attributed to G200.",
+        "The G200 data sheet used here does not disclose an exact buffer capacity, internal stage timing or a physical floorplan."
+      ],
+      "timing": {
+        "kind": "throughput",
+        "bitsPerSecond": 51200000000000,
+        "label": "51.2 Tbps, full-duplex",
+        "sourceIds": [
+          "cisco-g200"
+        ],
+        "scope": "Cisco’s published aggregate switching bandwidth, preserving its full-duplex convention. Not a processor clock, packet latency or guarantee of application throughput; no conversion to clock period or model ticks is made."
+      }
+    },
+    {
+      "id": "silicon-one-g300",
+      "family": "asic",
+      "name": "Cisco Silicon One G300",
+      "facts": [
+        {
+          "label": "Function",
+          "value": "Standalone network switching processor",
+          "source": "cisco-g300",
+          "locator": "Product overview"
+        },
+        {
+          "label": "Published switching bandwidth",
+          "value": "102.4 Tbps, full-duplex",
+          "source": "cisco-g300",
+          "locator": "Product overview"
+        },
+        {
+          "label": "SerDes",
+          "value": "512 × 224 Gbps",
+          "source": "cisco-g300",
+          "locator": "Features → long-reach SerDes"
+        },
+        {
+          "label": "Ethernet port rates",
+          "value": "Up to 1,600 Gbps",
+          "source": "cisco-g300",
+          "locator": "Features → flexible port configuration"
+        },
+        {
+          "label": "Packet storage",
+          "value": "Fully shared on-die packet buffer",
+          "source": "cisco-g300",
+          "locator": "Architectural characteristics → Large and fully unified packet buffer"
+        },
+        {
+          "label": "Host connection",
+          "value": "PCIe Gen4 + four Ethernet interfaces",
+          "source": "cisco-g300",
+          "locator": "Features → host CPU complex interfaces"
+        }
+      ],
+      "sources": [
+        {
+          "id": "cisco-g300",
+          "title": "Cisco Silicon One G300 data sheet",
+          "url": "https://www.cisco.com/c/en/us/solutions/collateral/silicon-one/silicon-one-g300-ds.html",
+          "checked": "2026-10-14"
+        },
+        {
+          "id": "cisco-voq",
+          "title": "Cisco Silicon One QoS white paper — mechanism context",
+          "url": "https://www.cisco.com/c/en/us/products/collateral/switches/catalyst-9500-series-switches/catalyst-9500x-9600x-qos-q200-wp.html",
+          "checked": "2026-10-14"
+        }
+      ],
+      "limits": [
+        "Cisco’s NPU terminology means Network Processing Unit. This chip moves network traffic; it is not a transformer tensor-compute engine.",
+        "The packet scene is a generic input-queued switch with authored capacity, rotating grants and model ticks. It does not emulate G300 or a proprietary Cisco scheduler.",
+        "The QoS reference documents VOQ mechanisms on named Catalyst platforms. Their Q200 SMS/HBM capacities are not attributed to G300.",
+        "The G300 data sheet used here does not disclose an exact buffer capacity, internal stage timing or a physical floorplan."
+      ]
+    }
+  ],
+  "provenance": "Original factual summaries of linked public primary sources. Vendor artwork, SDKs, RTL and model weights are not included. Linked pages retain their own rights and terms."
+}
