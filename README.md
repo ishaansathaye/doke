@@ -1,5 +1,7 @@
 # doke
 
+**[Open doke](https://doke.ishaan.sh/)**
+
 Look inside CPUs, GPUs, a tensor processor, a network ASIC and the human brain. A floating 3D explorer with source-linked architecture, close-up execution, and an input you can change.
 
 Start with the whole processor, open a core or streaming multiprocessor, then follow one value through actual operand reads and arithmetic. Choose Ryzen 9 9950X, RTX 5090, H100 SXM, Google TPU v1 or Cisco Silicon One G200 from one hardware selector. These are original functional schematics, not physical die floorplans.

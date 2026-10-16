@@ -62,6 +62,8 @@ CI runs source/model checks and the focused browser checks without downloaded an
 
 ## Host a demo
 
+The live site is [doke.ishaan.sh](https://doke.ishaan.sh/), attached to the `doke` Cloudflare Pages project. Its proxied CNAME points to `doke-6lk.pages.dev`. Packaged responses use `Cache-Control: no-transform` to prevent automatic analytics injection and preserve the reviewed HTML.
+
 Doke needs static hosting, not an application server. Package the build:
 
 ```sh

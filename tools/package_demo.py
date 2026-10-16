@@ -7,6 +7,7 @@ for f in source.rglob('*'):
  if not f.is_file() or f.name in ['brain-high.bin','brain-high.bin.gz','release.json'] or f.suffix=='.gz':continue
  relative=f.relative_to(source);out=target/relative;out.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(f,out)
 (target/'_headers').write_text('''/*
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
