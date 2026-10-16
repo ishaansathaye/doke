@@ -167,12 +167,55 @@ function complete(config) {
       final,
       "completed model freezes",
     );
+    assert.equal(final.detail.outputs.length, 64);
+    assert.equal(
+      final.detail.outputs.reduce(
+        (sum, output) => sum + output.terms.length,
+        0,
+      ),
+      512,
+      "bounded provenance has one record per actual retired multiplication",
+    );
+    assert.deepEqual(
+      final.detail.outputs.map((output) => output.accumulated_sum),
+      expected,
+    );
+    assert.deepEqual(
+      final.detail.outputs.map((output) => output.reference_sum),
+      expected,
+      "independent expected answers remain explicitly separate",
+    );
+    assert.ok(
+      final.detail.outputs.every(
+        (output) =>
+          output.stored &&
+          output.retired_terms === 8 &&
+          output.terms.every(
+            (term, k) =>
+              term.k === k &&
+              term.product === term.a * term.b &&
+              term.retired_tick < final.tick &&
+              term.sum_after ===
+                output.terms
+                  .slice(0, k + 1)
+                  .reduce((sum, item) => sum + item.product, 0),
+          ),
+      ),
+    );
+    assert.ok(
+      initial.detail.outputs.every(
+        (output) =>
+          output.terms.length === 0 &&
+          output.accumulated_sum === 0 &&
+          !output.stored,
+      ),
+    );
     assert.deepEqual(
       JSON.parse(model.reset()),
       initial,
       "reset restores initial state",
     );
-    assertions += 9;
+    assertions += 15;
     return final;
   });
 }
@@ -198,6 +241,96 @@ assert.ok(
 assert.equal(results.get("gpu/packed").counters.loads, 1024);
 assert.equal(results.get("tensor/packed").counters.loads, 256);
 assertions += 7;
+
+// Browser-visible execution detail must not turn known input values into
+// already-loaded registers or completed arithmetic before the model arrives.
+for (const layout of ["packed", "strided"]) {
+  withModel(
+    new SiliconSimulation(JSON.stringify({ mode: "gpu", layout, input })),
+    (model) => {
+      const initial = snapshot(model);
+      assert.equal(initial.detail.warps.length, 2);
+      assert.ok(
+        initial.detail.warps.every(
+          (warp) =>
+            warp.requested_a_sectors.length === 0 &&
+            warp.requested_b_sectors.length === 0,
+        ),
+      );
+      const sent = JSON.parse(model.advance(1));
+      const warp = sent.detail.warps[0];
+      assert.equal(warp.stage, "waiting_operands");
+      assert.equal(warp.lanes.length, 32);
+      assert.deepEqual(warp.requested_a_sectors, [0, 1, 2, 3]);
+      assert.deepEqual(
+        warp.requested_b_sectors,
+        layout === "packed"
+          ? [128]
+          : Array.from({ length: 8 }, (_, i) => 128 + i),
+      );
+      assert.equal(
+        sent.transfers[0].bytes,
+        32 *
+          (warp.requested_a_sectors.length + warp.requested_b_sectors.length),
+      );
+      assert.ok(warp.lanes.every((lane) => lane.a === null && lane.b === null));
+      assert.deepEqual(
+        warp.lanes.map((lane) => lane.b_address),
+        Array.from(
+          { length: 32 },
+          (_, lane) => 4096 + (lane % 8) * (layout === "packed" ? 4 : 32),
+        ),
+      );
+      model.advance(warp.ready_tick - sent.tick - 1);
+      assert.ok(
+        snapshot(model).detail.warps[0].lanes.every(
+          (lane) => lane.a === null && lane.b === null,
+        ),
+      );
+      const arrived = JSON.parse(model.advance(1));
+      assert.ok(
+        arrived.detail.warps[0].lanes.every(
+          (lane) =>
+            lane.a === input[Math.floor(lane.output_index / 8) * 8] &&
+            lane.b === arrived.weights[lane.output_index % 8] &&
+            lane.retired_terms === 0 &&
+            lane.accumulated_sum === 0,
+        ),
+      );
+      assert.equal(arrived.counters.macs, 0);
+      assertions += 12;
+    },
+  );
+}
+withModel(
+  new SiliconSimulation(JSON.stringify({ mode: "cpu", input })),
+  (model) => {
+    const sent = JSON.parse(model.advance(1));
+    assert.equal(sent.detail.cpu_jobs.length, 64);
+    assert.deepEqual(
+      [sent.detail.cpu_jobs[0].a, sent.detail.cpu_jobs[0].b],
+      [null, null],
+    );
+    assert.equal(sent.detail.cache.lru_to_mru.length, 0);
+    assert.deepEqual(sent.detail.cache.pending_fills, [
+      { tag: 0, arrival_tick: 8 },
+    ]);
+    model.advance(6);
+    assert.equal(snapshot(model).detail.cpu_jobs[0].a, null);
+    const arrived = JSON.parse(model.advance(1));
+    assert.equal(arrived.detail.cpu_jobs[0].a, input[0]);
+    assert.equal(arrived.detail.cpu_jobs[0].b, null);
+    assert.deepEqual(arrived.detail.cache.lru_to_mru, [
+      { tag: 0, base_address: 0 },
+    ]);
+    assert.equal(arrived.detail.outputs[0].terms.length, 0);
+    assertions += 9;
+  },
+);
+assert.equal(uncached.detail.cache.enabled, false);
+assert.deepEqual(uncached.detail.cache.lru_to_mru, []);
+assert.deepEqual(uncached.detail.cache.pending_fills, []);
+assertions += 3;
 
 // Non-default supported issue width, maximum tick batch, and chunking semantics.
 withModel(

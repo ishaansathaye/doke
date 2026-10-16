@@ -38,6 +38,16 @@ export async function initBrainComparison(wasm) {
   let pinchDistance = null;
   let lastInputKey = "";
   let input = Array(64).fill(0);
+  let selectedRegion = null;
+  let cutaway = "whole";
+  let quality = "overview";
+  let requestedQuality = "overview";
+  let qualityLoading = false;
+  let qualityError = null;
+  let qualityToken = 0;
+  let qualityAbort = null;
+  let overviewMesh = null;
+  let activeMesh = null;
   const listen = (target, type, handler, options = {}) =>
     target?.addEventListener(type, handler, {
       ...options,
@@ -67,7 +77,226 @@ export async function initBrainComparison(wasm) {
       reducedMotion: reduced,
       hdr,
       backend: renderer?.backend() || null,
+      quality,
+      requestedQuality,
+      qualityLoading,
+      qualityError,
+      selectedRegion,
+      cutaway,
+      pixelWidth: canvas.width,
+      pixelHeight: canvas.height,
     };
+  }
+  function selectRegion(id, focus = false) {
+    const region = atlas?.regions.find((item) => item.id === id);
+    if (!region || !renderer || !ready || disposed) return false;
+    selectedRegion = id;
+    renderer.select(region.index);
+    if (focus && Array.isArray(region.centroid))
+      renderer.focus(...region.centroid);
+    evidence(region);
+    dirty = true;
+    return true;
+  }
+  function setCutaway(mode = "whole") {
+    const views = { whole: [0, 2], left: [2, 2], right: [3, 2], deep: [1, 2] };
+    if (!Object.hasOwn(views, mode))
+      throw new RangeError("Unknown anatomical view");
+    cutaway = mode;
+    renderer?.reveal(...views[mode]);
+    dirty = true;
+  }
+  function resetView() {
+    if (disposed) return;
+    selectedRegion = null;
+    renderer?.select(-1);
+    setCutaway("whole");
+    initialView();
+  }
+  function loadingStatus(message, failure = false) {
+    const element = $("#brain-loading");
+    if (!element) return;
+    element.hidden = !message;
+    element.textContent = message || "";
+    element.dataset.error = String(failure);
+  }
+  function qualityStatus(message) {
+    const element = $("#quality-status");
+    if (element) element.textContent = message;
+  }
+  async function boundedBytes(response, limit, signal) {
+    if (!response.ok)
+      throw Error(`Atlas download unavailable (${response.status})`);
+    const reader = response.body?.getReader();
+    if (!reader) throw Error("Atlas download stream unavailable");
+    const parts = [];
+    let length = 0;
+    try {
+      while (true) {
+        signal.throwIfAborted();
+        const { value, done } = await reader.read();
+        if (done) break;
+        length += value.byteLength;
+        if (length > limit) throw Error("Atlas data exceeds its declared size");
+        parts.push(value);
+      }
+      signal.throwIfAborted();
+    } catch (cause) {
+      await reader.cancel().catch(() => {});
+      throw cause;
+    } finally {
+      reader.releaseLock();
+    }
+    const bytes = new Uint8Array(length);
+    let offset = 0;
+    for (const part of parts) {
+      bytes.set(part, offset);
+      offset += part.byteLength;
+    }
+    return bytes;
+  }
+  async function sha256(bytes) {
+    if (!crypto.subtle)
+      throw Error("Secure checksums are unavailable in this browser");
+    return [...new Uint8Array(await crypto.subtle.digest("SHA-256", bytes))]
+      .map((n) => n.toString(16).padStart(2, "0"))
+      .join("");
+  }
+  async function detailedMesh(tier, signal, progress) {
+    if (!globalThis.DecompressionStream)
+      throw Error(
+        "This browser cannot decode detailed anatomy; Overview is still available",
+      );
+    const response = await fetch(`assets/${tier}/manifest.json`, { signal });
+    const raw = await boundedBytes(response, 65536, signal);
+    const meta = JSON.parse(new TextDecoder().decode(raw));
+    const integer = (n, low, high) =>
+      Number.isSafeInteger(n) && n >= low && n <= high;
+    const hash = (s) => typeof s === "string" && /^[a-f0-9]{64}$/.test(s);
+    if (
+      meta.encoding !== "gzip-chunks" ||
+      !integer(meta.bytes, 16, 200_000_000) ||
+      !integer(meta.compressedBytes, 1, 120_000_000) ||
+      !integer(meta.triangles, 1, 6_000_000) ||
+      !hash(meta.meshHash) ||
+      !Array.isArray(meta.chunks) ||
+      meta.chunks.length < 1 ||
+      meta.chunks.length > 32
+    )
+      throw Error("Invalid anatomy manifest");
+    let decodedTotal = 0,
+      compressedTotal = 0;
+    const urls = new Set();
+    for (const part of meta.chunks) {
+      if (
+        !integer(part.bytes, 1, 12_000_000) ||
+        !integer(part.decodedBytes, 1, 9_000_000) ||
+        !hash(part.sha256) ||
+        typeof part.url !== "string" ||
+        !new RegExp(`^assets/${tier}/part-[0-9]{3}\\.brnz$`).test(part.url) ||
+        urls.has(part.url)
+      )
+        throw Error("Invalid anatomy chunk manifest");
+      urls.add(part.url);
+      decodedTotal += part.decodedBytes;
+      compressedTotal += part.bytes;
+    }
+    if (decodedTotal !== meta.bytes || compressedTotal !== meta.compressedBytes)
+      throw Error("Anatomy manifest totals do not match");
+    const bytes = new Uint8Array(meta.bytes);
+    let offset = 0,
+      downloaded = 0;
+    for (const part of meta.chunks) {
+      signal.throwIfAborted();
+      const response = await fetch(part.url, { signal });
+      const compressed = await boundedBytes(response, part.bytes, signal);
+      if (compressed.length !== part.bytes)
+        throw Error("Incomplete anatomy chunk");
+      if ((await sha256(compressed)) !== part.sha256)
+        throw Error("Anatomy chunk checksum mismatch");
+      signal.throwIfAborted();
+      const decoded = await boundedBytes(
+        new Response(
+          new Blob([compressed])
+            .stream()
+            .pipeThrough(new DecompressionStream("gzip")),
+        ),
+        part.decodedBytes,
+        signal,
+      );
+      if (decoded.length !== part.decodedBytes)
+        throw Error("Anatomy chunk decoded size mismatch");
+      bytes.set(decoded, offset);
+      offset += decoded.length;
+      downloaded += part.bytes;
+      progress(downloaded / meta.compressedBytes, meta);
+    }
+    if ((await sha256(bytes)) !== meta.meshHash)
+      throw Error("Anatomy mesh checksum mismatch");
+    signal.throwIfAborted();
+    const header = new DataView(
+      bytes.buffer,
+      bytes.byteOffset,
+      bytes.byteLength,
+    );
+    if (
+      new TextDecoder().decode(bytes.subarray(0, 4)) !== "BRN1" ||
+      header.getUint32(8, true) / 3 !== meta.triangles
+    )
+      throw Error("Anatomy mesh does not match its manifest");
+    return bytes;
+  }
+  async function setQuality(tier) {
+    if (!["overview", "fine", "native"].includes(tier))
+      throw new RangeError("Unknown brain quality");
+    if (disposed || !ready || !renderer) return false;
+    const token = ++qualityToken;
+    qualityAbort?.abort();
+    qualityAbort = new AbortController();
+    const signal = qualityAbort.signal;
+    requestedQuality = tier;
+    qualityLoading = true;
+    qualityError = null;
+    qualityStatus(`Preparing ${tier} anatomy…`);
+    try {
+      const bytes =
+        tier === quality
+          ? activeMesh
+          : tier === "overview"
+            ? overviewMesh
+            : await detailedMesh(tier, signal, (fraction, meta) => {
+                if (token === qualityToken && !disposed)
+                  qualityStatus(
+                    `${tier === "native" ? "Native" : "Fine"} anatomy · ${Math.round(fraction * 100)}% of ${Math.round(meta.compressedBytes / 1e6)} MB`,
+                  );
+              });
+      signal.throwIfAborted();
+      if (disposed || token !== qualityToken) return false;
+      if (bytes !== activeMesh) renderer.load_mesh(bytes);
+      activeMesh = bytes;
+      quality = tier;
+      const select = $("#brain-quality");
+      if (select) select.value = quality;
+      qualityStatus(
+        `${quality[0].toUpperCase() + quality.slice(1)} · ${renderer.triangle_count().toLocaleString()} triangles`,
+      );
+      highlight();
+      dirty = true;
+      return true;
+    } catch (cause) {
+      if (token !== qualityToken || disposed) return false;
+      qualityError =
+        cause.name === "AbortError"
+          ? "Detail download canceled"
+          : cause.message || String(cause);
+      requestedQuality = quality;
+      const select = $("#brain-quality");
+      if (select) select.value = quality;
+      qualityStatus(`${qualityError}. Keeping ${quality} anatomy.`);
+      return false;
+    } finally {
+      if (token === qualityToken) qualityLoading = false;
+    }
   }
   function drawStimulus(values) {
     if (
@@ -111,7 +340,9 @@ export async function initBrainComparison(wasm) {
   function highlight() {
     if (!renderer || !atlas) return;
     const values = new Float32Array(64);
-    for (const id of currentStage()?.regions || []) {
+    for (const id of $("#brain-guide")?.hidden
+      ? []
+      : currentStage()?.regions || []) {
       const region = atlas.regions.find((region) => region.id === id);
       if (region) values[region.index] = 0.65;
     }
@@ -183,6 +414,7 @@ export async function initBrainComparison(wasm) {
     elapsed = 0;
     lastFrame = null;
     lastStage = -1;
+    selectedRegion = null;
     renderer?.select(-1);
     update();
   }
@@ -215,6 +447,8 @@ export async function initBrainComparison(wasm) {
     window.dispatchEvent(
       new CustomEvent("doke-comparison-evidence", {
         detail: {
+          regionId: region?.id || null,
+          region: region ? structuredClone(region) : null,
           title,
           sourceIds,
           sources,
@@ -236,21 +470,37 @@ export async function initBrainComparison(wasm) {
   function resize() {
     if (disposed) return;
     const rect = canvas.getBoundingClientRect();
-    const pixelRatio = Math.min(devicePixelRatio || 1, 1.75);
-    const width = Math.max(
+    const mode = $("#resolution")?.value || "sharp";
+    const dpr = devicePixelRatio || 1;
+    const pixelRatio =
+      mode === "balanced"
+        ? Math.min(dpr, 1.5)
+        : mode === "ultra"
+          ? Math.max(3, dpr * 1.75)
+          : Math.max(2, dpr * 1.25);
+    const wantedWidth = Math.max(1, rect.width * pixelRatio);
+    const wantedHeight = Math.max(1, rect.height * pixelRatio);
+    const fit = Math.min(
       1,
-      Math.min(4096, Math.round(rect.width * pixelRatio)),
+      4096 / wantedWidth,
+      4096 / wantedHeight,
+      Math.sqrt(12_000_000 / (wantedWidth * wantedHeight)),
     );
-    const height = Math.max(
-      1,
-      Math.min(4096, Math.round(rect.height * pixelRatio)),
-    );
+    const width = Math.max(1, Math.floor(wantedWidth * fit));
+    const height = Math.max(1, Math.floor(wantedHeight * fit));
     if (canvas.width !== width) canvas.width = width;
     if (canvas.height !== height) canvas.height = height;
     if (renderer) {
       renderer.resize(width, height);
       updateLight();
     }
+    if (
+      document.body.dataset.world === "brain" &&
+      renderer &&
+      $("#render-status")
+    )
+      $("#render-status").textContent =
+        renderer.backend() + " · " + width.toLocaleString() + " px";
     dirty = true;
   }
   function updateLight() {
@@ -317,11 +567,7 @@ export async function initBrainComparison(wasm) {
             (event.clientY - rect.top) / rect.height,
           );
           const region = atlas.regions.find((region) => region.index === index);
-          if (region) {
-            renderer.select(index);
-            evidence(region);
-            dirty = true;
-          }
+          if (region) selectRegion(region.id);
         }
       }
       pointers.delete(event.pointerId);
@@ -389,6 +635,10 @@ export async function initBrainComparison(wasm) {
           pause();
           canvas.dataset.error = error;
           canvas.dataset.ready = "false";
+          loadingStatus(
+            "The 3D atlas is unavailable. Reload to retry; anatomy and evidence remain available.",
+            true,
+          );
           if (controls.copy)
             controls.copy.textContent = `${error}. Reload to restore the 3D view. The evidence remains available.`;
         }
@@ -403,6 +653,11 @@ export async function initBrainComparison(wasm) {
     playing = false;
     cancelAnimationFrame(frameId);
     abort.abort();
+    qualityToken++;
+    qualityAbort?.abort();
+    qualityLoading = false;
+    overviewMesh = null;
+    activeMesh = null;
     resizeObserver?.disconnect();
     pointers.clear();
     renderer?.free?.();
@@ -419,6 +674,16 @@ export async function initBrainComparison(wasm) {
     dispose,
     snapshot,
     getRenderer: () => renderer,
+    getAtlas: () => (atlas ? structuredClone(atlas) : null),
+    selectRegion,
+    setCutaway,
+    resetView,
+    redraw: () => {
+      resize();
+      highlight();
+      dirty = true;
+    },
+    setQuality,
     get state() {
       return snapshot();
     },
@@ -445,6 +710,10 @@ export async function initBrainComparison(wasm) {
     dirty = true;
   });
   listen($("#light-mode"), "change", resize);
+  listen($("#resolution"), "change", resize);
+  listen($("#brain-quality"), "change", (event) => {
+    void setQuality(event.target.value);
+  });
   listen($("#reduce-motion"), "change", (event) => {
     reduced = event.target.checked;
     if (reduced) pause();
@@ -452,6 +721,8 @@ export async function initBrainComparison(wasm) {
   });
   listen(window, "resize", resize);
   drawStimulus(window.dokeSilicon?.input?.() || input);
+  if ($("#brain-quality")) $("#brain-quality").disabled = true;
+  loadingStatus("Opening the atlas…");
   update();
   try {
     const get = async (url, json) => {
@@ -506,6 +777,7 @@ export async function initBrainComparison(wasm) {
     }
     if (meshResult.status === "rejected") throw meshResult.reason;
     const mesh = meshResult.value;
+    overviewMesh = mesh;
     resize();
     const forceGL =
       !navigator.gpu ||
@@ -526,6 +798,7 @@ export async function initBrainComparison(wasm) {
       return controller;
     }
     renderer.load_mesh(mesh);
+    activeMesh = mesh;
     renderer.anatomy();
     renderer.accents(true);
     initialView();
@@ -534,6 +807,14 @@ export async function initBrainComparison(wasm) {
     resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(canvas);
     ready = true;
+    if ($("#brain-quality")) {
+      $("#brain-quality").disabled = false;
+      $("#brain-quality").value = quality;
+    }
+    loadingStatus("");
+    qualityStatus(
+      `Overview · ${renderer.triangle_count().toLocaleString()} triangles`,
+    );
     canvas.dataset.ready = "true";
     canvas.dataset.backend = renderer.backend();
     lastStage = -1;
@@ -545,6 +826,10 @@ export async function initBrainComparison(wasm) {
     renderer = null;
     canvas.dataset.ready = "false";
     canvas.dataset.error = error;
+    loadingStatus(
+      "The 3D atlas is unavailable. Reload to retry; the guide and evidence remain available.",
+      true,
+    );
     update();
     if (!comparison && controls.title)
       controls.title.textContent = "Reference anatomy";

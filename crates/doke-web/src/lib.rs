@@ -21,7 +21,7 @@ struct Uniform {
     eye: [f32; 4],
     params: [f32; 4],
     flags: [f32; 4],
-    activity: [[f32; 4]; 64],
+    activity: [[f32; 4]; 256],
     detail: [f32; 4],
     style: [f32; 4],
     flow_from: [[f32; 4]; 32],
@@ -70,6 +70,8 @@ pub struct BrainRenderer {
     hdr: bool,
     target_format: wgpu::TextureFormat,
 }
+// This resource factory receives the shared pipelines and bindings together.
+#[allow(clippy::too_many_arguments)]
 fn targets(
     d: &wgpu::Device,
     p: &wgpu::RenderPipeline,
@@ -510,7 +512,7 @@ impl BrainRenderer {
         self.state.params = [0., 0., 4., 0.];
         self.state.flags = [-1., 0., 2., 0.];
         self.state.detail = [0.; 4];
-        self.state.activity = [[0.; 4]; 64];
+        self.state.activity = [[0.; 4]; 256];
         self.state.flow_from = [[0.; 4]; 32];
         self.state.flow_to = [[0.; 4]; 32];
         self.tissue_buffers = None;
@@ -520,10 +522,47 @@ impl BrainRenderer {
         self.distance = 9.5;
         self.load_mesh(&mesh.bytes())
     }
+    /// Camera values for UI-owned easing: distance, yaw, pitch, target x/y/z.
+    pub fn camera_state(&self) -> Vec<f32> {
+        vec![
+            self.distance,
+            self.yaw,
+            self.pitch,
+            self.target.x,
+            self.target.y,
+            self.target.z,
+        ]
+    }
+    /// Validated chip camera pose. Call render() after setting a pose before picking.
+    pub fn chip_camera(
+        &mut self,
+        distance: f32,
+        yaw: f32,
+        pitch: f32,
+        x: f32,
+        y: f32,
+        z: f32,
+    ) -> Result<(), JsValue> {
+        if self.state.params[2] != 4.
+            || ![distance, yaw, pitch, x, y, z]
+                .iter()
+                .all(|v| v.is_finite())
+            || !(0.25..=24.).contains(&distance)
+            || pitch.abs() > 1.45
+            || x.abs().max(y.abs()).max(z.abs()) > 8.
+        {
+            return Err(JsValue::from_str("Invalid chip camera pose"));
+        }
+        self.distance = distance;
+        self.yaw = yaw;
+        self.pitch = pitch;
+        self.target = Vec3::new(x, y, z);
+        Ok(())
+    }
     /// Up to 32 real transfer markers: start xyz, end xyz, interpolation fraction.
     pub fn chip_flows(&mut self, data: &[f32]) -> Result<(), JsValue> {
         if data.len() > 224
-            || data.len() % 7 != 0
+            || !data.len().is_multiple_of(7)
             || data.iter().any(|x| !x.is_finite() || x.abs() > 8.)
         {
             return Err(JsValue::from_str("Invalid transfer positions"));
@@ -582,7 +621,8 @@ impl BrainRenderer {
         if i.iter().any(|&x| x as usize >= nv)
             || v.iter().any(|x| {
                 x.p.iter().chain(x.n.iter()).any(|v| !v.is_finite())
-                    || !(0.0..64.0).contains(&x.region)
+                    || !(0.0..256.0).contains(&x.region)
+                    || x.region.fract() != 0.
             })
         {
             return Err(JsValue::from_str("Invalid anatomy geometry"));
@@ -632,8 +672,14 @@ impl BrainRenderer {
         self.pitch = (self.pitch + dy).clamp(-1.45, 1.45);
     }
     pub fn zoom(&mut self, delta: f32) {
-        self.distance = (self.distance * delta.exp())
-            .clamp(0.65, if self.state.params[2] == 4. { 15. } else { 7. });
+        self.distance = (self.distance * delta.exp()).clamp(
+            if self.state.params[2] == 4. {
+                0.25
+            } else {
+                0.65
+            },
+            if self.state.params[2] == 4. { 24. } else { 7. },
+        );
     }
     pub fn pan(&mut self, dx: f32, dy: f32) {
         let right = Vec3::new(self.yaw.cos(), 0., -self.yaw.sin());
@@ -714,7 +760,7 @@ impl BrainRenderer {
         self.bloom = v.clamp(0., 3.);
     }
     pub fn activity(&mut self, values: &[f32]) {
-        for n in 0..64 {
+        for n in 0..256 {
             self.state.activity[n][0] = values.get(n).copied().unwrap_or(0.).clamp(0., 1.);
         }
     }
@@ -972,6 +1018,7 @@ pub fn envelope(time: f32, start: f32, end: f32) -> f32 {
     doke_core::envelope(time, start, end)
 }
 #[wasm_bindgen]
+#[derive(Default)]
 pub struct Circuit {
     state: doke_core::Model,
 }

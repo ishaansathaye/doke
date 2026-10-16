@@ -110,6 +110,93 @@ pub struct LaneState {
     pub active: bool,
     pub output_index: Option<usize>,
 }
+/// A multiplication that has really completed, not a precomputed reference term.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct RetiredTerm {
+    pub k: usize,
+    pub a: i32,
+    pub b: i32,
+    pub product: i32,
+    pub sum_after: i32,
+    pub retired_tick: u64,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct OutputDetail {
+    pub output_index: usize,
+    pub retired_terms: usize,
+    pub accumulated_sum: i32,
+    pub stored: bool,
+    pub terms: Vec<RetiredTerm>,
+    /// Independent expected answer, never used to drive execution or activity.
+    pub reference_sum: i32,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct CpuJobDetail {
+    pub output_index: usize,
+    pub k: usize,
+    pub stage: &'static str,
+    pub reason: &'static str,
+    pub ready_tick: Option<u64>,
+    /// Model byte addresses of this term; an address does not imply a request.
+    pub a_address: Option<u64>,
+    pub b_address: Option<u64>,
+    /// An operand is visible only after its load completes for the current k.
+    pub a: Option<i32>,
+    pub b: Option<i32>,
+    pub accumulated_sum: i32,
+    pub retired_terms: usize,
+    pub stored: bool,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct CacheLineDetail {
+    pub tag: u64,
+    pub base_address: u64,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct CacheFillDetail {
+    pub tag: u64,
+    pub arrival_tick: u64,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct CacheDetail {
+    pub enabled: bool,
+    pub capacity_lines: usize,
+    pub line_bytes: u32,
+    /// Actual replacement order, not physical cache ways or sets.
+    pub lru_to_mru: Vec<CacheLineDetail>,
+    pub pending_fills: Vec<CacheFillDetail>,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct GpuLaneDetail {
+    pub lane: usize,
+    pub output_index: usize,
+    pub a_address: Option<u64>,
+    pub b_address: Option<u64>,
+    pub a: Option<i32>,
+    pub b: Option<i32>,
+    pub accumulated_sum: i32,
+    pub retired_terms: usize,
+    pub stored: bool,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct WarpDetail {
+    pub warp: usize,
+    pub k: usize,
+    pub stage: &'static str,
+    pub reason: &'static str,
+    pub ready_tick: Option<u64>,
+    /// Actual sector IDs requested for the current k. Empty before issue.
+    pub requested_a_sectors: Vec<u64>,
+    pub requested_b_sectors: Vec<u64>,
+    pub lanes: Vec<GpuLaneDetail>,
+}
+#[derive(Clone, Debug, Serialize)]
+pub struct ExecutionDetail {
+    pub cpu_jobs: Vec<CpuJobDetail>,
+    pub cache: CacheDetail,
+    pub warps: Vec<WarpDetail>,
+    pub outputs: Vec<OutputDetail>,
+}
 #[derive(Clone, Debug, Serialize)]
 pub struct Rules {
     pub label: &'static str,
@@ -148,6 +235,7 @@ pub struct SiliconSnapshot {
     pub counters: Counters,
     pub rules: Rules,
     pub config: SiliconConfig,
+    pub detail: ExecutionDetail,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -249,6 +337,7 @@ pub struct SiliconModel {
     scratch_b: [i32; 32],
     pe_a: [Option<(usize, i32)>; 16],
     pe_b: [Option<(usize, i32)>; 16],
+    retired: Vec<Vec<RetiredTerm>>,
 }
 
 /// Distinct 32-byte sectors touched by active accesses. Address overflow is an
@@ -337,6 +426,7 @@ impl SiliconModel {
             scratch_b: [0; 32],
             pe_a: [None; 16],
             pe_b: [None; 16],
+            retired: vec![Vec::new(); CELLS],
         })
     }
     pub fn reset(&mut self) {
@@ -696,6 +786,20 @@ impl SiliconModel {
         // External traffic: memory reads plus final output writes.
         self.counters.bytes_moved += 4;
     }
+    fn retire_term(&mut self, id: usize, k: usize, a: i32, b: i32, sum_after: i32) {
+        // One bounded record per completed MAC, independent of transfer-history
+        // truncation. Reset starts a new run and clears every output's provenance.
+        debug_assert_eq!(self.retired[id].len(), k);
+        debug_assert!(k < SIDE);
+        self.retired[id].push(RetiredTerm {
+            k,
+            a,
+            b,
+            product: a * b,
+            sum_after,
+            retired_tick: self.tick,
+        });
+    }
     fn complete_pending(&mut self) {
         let mut finished = Vec::new();
         self.pending.retain(|p| {
@@ -728,6 +832,7 @@ impl SiliconModel {
                 Completion::Mac { job } => {
                     let j = &mut self.jobs[job];
                     j.sum += j.a * j.b;
+                    let term = (j.k, j.a, j.b, j.sum);
                     j.k += 1;
                     self.counters.macs += 1;
                     if j.k == SIDE {
@@ -743,13 +848,25 @@ impl SiliconModel {
                     } else {
                         j.stage = Stage::LoadA;
                     }
+                    self.retire_term(job, term.0, term.1, term.2, term.3);
                 }
-                Completion::WarpLoad { warp } => self.warps[warp].stage = Stage::Mac,
+                Completion::WarpLoad { warp } => {
+                    let k = self.warps[warp].k;
+                    for id in warp * 32..warp * 32 + 32 {
+                        // Latch actual operands at completion, just like the CPU
+                        // model. Neither the inspector nor execution reads them
+                        // early from the known input matrix.
+                        self.jobs[id].a = self.config.input[id / SIDE * SIDE + k];
+                        self.jobs[id].b = self.weights[k * SIDE + id % SIDE];
+                    }
+                    self.warps[warp].stage = Stage::Mac;
+                }
                 Completion::WarpMac { warp } => {
                     let k = self.warps[warp].k;
                     for id in warp * 32..warp * 32 + 32 {
-                        self.output[id] += self.config.input[id / SIDE * SIDE + k]
-                            * self.weights[k * SIDE + id % SIDE];
+                        let (a, b) = (self.jobs[id].a, self.jobs[id].b);
+                        self.output[id] += a * b;
+                        self.retire_term(id, k, a, b, self.output[id]);
                     }
                     self.counters.macs += 32;
                     self.counters.active_lane_ops += 32;
@@ -793,6 +910,7 @@ impl SiliconModel {
                             debug_assert_eq!(ka, kb, "Systolic operands must have matching k");
                             let id = ids[pe];
                             self.output[id] += av * bv;
+                            self.retire_term(id, ka, av, bv, self.output[id]);
                             self.counters.macs += 1;
                             if ka == 7 {
                                 self.pending.push(Pending {
@@ -824,6 +942,238 @@ impl SiliconModel {
                     }
                 }
             }
+        }
+    }
+    fn store_ready_tick(&self, id: usize) -> Option<u64> {
+        self.pending
+            .iter()
+            .find_map(|pending| match &pending.action {
+                Completion::Store { values } if values.iter().any(|(output, _)| *output == id) => {
+                    Some(pending.end)
+                }
+                _ => None,
+            })
+    }
+    fn execution_detail(&self) -> ExecutionDetail {
+        let outputs = (0..CELLS)
+            .map(|id| OutputDetail {
+                output_index: id,
+                retired_terms: self.retired[id].len(),
+                accumulated_sum: self.retired[id].last().map_or(0, |term| term.sum_after),
+                stored: self.valid[id],
+                terms: self.retired[id].clone(),
+                reference_sum: (0..SIDE)
+                    .map(|k| {
+                        self.config.input[id / SIDE * SIDE + k] * self.weights[k * SIDE + id % SIDE]
+                    })
+                    .sum(),
+            })
+            .collect();
+        let cpu_jobs = if self.config.mode == Mode::Cpu {
+            self.jobs
+                .iter()
+                .enumerate()
+                .map(|(id, job)| {
+                    let (stage, reason) = match job.stage {
+                        Stage::LoadA | Stage::LoadB => (
+                            if job.stage == Stage::LoadA {
+                                "ready_a"
+                            } else {
+                                "ready_b"
+                            },
+                            if self.memory_inflight() >= MEMORY_SLOTS {
+                                "All operand request slots are occupied"
+                            } else {
+                                "Operand load is ready; awaiting a round-robin issue slot"
+                            },
+                        ),
+                        Stage::WaitingA => ("waiting_a", "Operand A request has not completed"),
+                        Stage::WaitingB => ("waiting_b", "Operand B request has not completed"),
+                        Stage::Mac => (
+                            "ready_mac",
+                            if self.compute_inflight() >= self.config.issue_width as usize {
+                                "All multiply-accumulate slots are occupied"
+                            } else {
+                                "Both operands are ready; awaiting a round-robin issue slot"
+                            },
+                        ),
+                        Stage::WaitingMac => (
+                            "executing_mac",
+                            "Multiply-accumulate is in flight; its sum is not retired yet",
+                        ),
+                        Stage::Done if self.valid[id] => (
+                            "stored",
+                            "All eight products and the final output write have completed",
+                        ),
+                        Stage::Done => (
+                            "waiting_store",
+                            "All eight products have retired; the output write is in flight",
+                        ),
+                    };
+                    let ready_tick = self
+                        .pending
+                        .iter()
+                        .find_map(|pending| match pending.action {
+                            Completion::Load { job, .. } | Completion::Mac { job } if job == id => {
+                                Some(pending.end)
+                            }
+                            _ => None,
+                        })
+                        .or_else(|| self.store_ready_tick(id));
+                    CpuJobDetail {
+                        output_index: id,
+                        k: job.k,
+                        stage,
+                        reason,
+                        ready_tick,
+                        a_address: (job.k < SIDE)
+                            .then(|| self.address(true, id / SIDE, id % SIDE, job.k)),
+                        b_address: (job.k < SIDE)
+                            .then(|| self.address(false, id / SIDE, id % SIDE, job.k)),
+                        a: matches!(
+                            job.stage,
+                            Stage::LoadB | Stage::WaitingB | Stage::Mac | Stage::WaitingMac
+                        )
+                        .then_some(job.a),
+                        b: matches!(job.stage, Stage::Mac | Stage::WaitingMac).then_some(job.b),
+                        accumulated_sum: job.sum,
+                        retired_terms: self.retired[id].len(),
+                        stored: self.valid[id],
+                    }
+                })
+                .collect()
+        } else {
+            Vec::new()
+        };
+        let warps = if self.config.mode == Mode::Gpu {
+            self.warps
+                .iter()
+                .enumerate()
+                .map(|(warp, group)| {
+                    let first = warp * 32;
+                    let (stage, reason) = match group.stage {
+                        Stage::LoadA => (
+                            "ready_operands",
+                            "Warp is ready; awaiting the shared issue slot",
+                        ),
+                        Stage::WaitingA => (
+                            "waiting_operands",
+                            "Requested memory sectors have not completed",
+                        ),
+                        Stage::Mac => (
+                            "ready_mac",
+                            "Both operands are ready; awaiting the shared issue slot",
+                        ),
+                        Stage::WaitingMac => (
+                            "executing_mac",
+                            "All 32 lanes execute this product; their sums are not retired yet",
+                        ),
+                        Stage::Done if self.valid[first] => (
+                            "stored",
+                            "All eight products and the warp's output write have completed",
+                        ),
+                        Stage::Done => (
+                            "waiting_store",
+                            "All eight products have retired; the warp's output write is in flight",
+                        ),
+                        _ => unreachable!("GPU groups load both operands together"),
+                    };
+                    let ready_tick = self
+                        .pending
+                        .iter()
+                        .find_map(|pending| match pending.action {
+                            Completion::WarpLoad { warp: w } | Completion::WarpMac { warp: w }
+                                if w == warp =>
+                            {
+                                Some(pending.end)
+                            }
+                            _ => None,
+                        })
+                        .or_else(|| self.store_ready_tick(first));
+                    let arrived = matches!(group.stage, Stage::Mac | Stage::WaitingMac);
+                    let lanes: Vec<_> = (0..32)
+                        .map(|lane| {
+                            let id = first + lane;
+                            GpuLaneDetail {
+                                lane,
+                                output_index: id,
+                                a_address: (group.k < SIDE)
+                                    .then(|| self.address(true, id / SIDE, id % SIDE, group.k)),
+                                b_address: (group.k < SIDE)
+                                    .then(|| self.address(false, id / SIDE, id % SIDE, group.k)),
+                                a: arrived.then_some(self.jobs[id].a),
+                                b: arrived.then_some(self.jobs[id].b),
+                                accumulated_sum: self.retired[id]
+                                    .last()
+                                    .map_or(0, |term| term.sum_after),
+                                retired_terms: self.retired[id].len(),
+                                stored: self.valid[id],
+                            }
+                        })
+                        .collect();
+                    let requested = matches!(
+                        group.stage,
+                        Stage::WaitingA | Stage::Mac | Stage::WaitingMac
+                    );
+                    let sectors = |a: bool| {
+                        if !requested {
+                            return Vec::new();
+                        }
+                        let addresses: Vec<_> = lanes
+                            .iter()
+                            .map(|lane| {
+                                if a { lane.a_address } else { lane.b_address }
+                                    .expect("In-flight term has an address")
+                            })
+                            .collect();
+                        coalesced_sectors(&addresses, &[true; 32], 4)
+                            .expect("Bounded model addresses")
+                    };
+                    WarpDetail {
+                        warp,
+                        k: group.k,
+                        stage,
+                        reason,
+                        ready_tick,
+                        requested_a_sectors: sectors(true),
+                        requested_b_sectors: sectors(false),
+                        lanes,
+                    }
+                })
+                .collect()
+        } else {
+            Vec::new()
+        };
+        ExecutionDetail {
+            cpu_jobs,
+            cache: CacheDetail {
+                enabled: self.config.mode == Mode::Cpu && self.config.cache_enabled,
+                capacity_lines: CACHE_LINES,
+                line_bytes: 64,
+                lru_to_mru: self
+                    .cache
+                    .iter()
+                    .map(|&tag| CacheLineDetail {
+                        tag,
+                        base_address: tag * 64,
+                    })
+                    .collect(),
+                pending_fills: self
+                    .pending
+                    .iter()
+                    .filter_map(|pending| match pending.action {
+                        Completion::Load {
+                            fill: Some(tag), ..
+                        } => Some(CacheFillDetail {
+                            tag,
+                            arrival_tick: pending.end,
+                        }),
+                        _ => None,
+                    })
+                    .collect(),
+            },
+            warps,
+            outputs,
         }
     }
     pub fn snapshot(&self) -> SiliconSnapshot {
@@ -954,6 +1304,7 @@ impl SiliconModel {
             group_index,
             counters: self.counters.clone(),
             config: self.config.clone(),
+            detail: self.execution_detail(),
             rules: Rules {
                 label: "Educational dataflow model; no vendor cycle or power prediction",
                 version: 1,
@@ -1235,6 +1586,189 @@ mod tests {
         assert!(!m.cache_hit(1));
         assert!(m.cache_hit(0));
         assert_eq!(m.cache.len(), 4);
+        let cache = m.snapshot().detail.cache;
+        assert_eq!(
+            cache
+                .lru_to_mru
+                .iter()
+                .map(|line| line.tag)
+                .collect::<Vec<_>>(),
+            vec![2, 3, 4, 0]
+        );
+        assert!(cache
+            .lru_to_mru
+            .iter()
+            .all(|line| line.base_address == line.tag * 64));
+    }
+    #[test]
+    fn cpu_detail_exposes_operands_only_after_matching_load_completes() {
+        let mut model = SiliconModel::new(Default::default()).unwrap();
+        model.step(1).unwrap();
+        let first = model.snapshot();
+        let job = &first.detail.cpu_jobs[0];
+        assert_eq!(job.stage, "waiting_a");
+        assert_eq!((job.a, job.b), (None, None));
+        assert_eq!(job.ready_tick, Some(8));
+        assert_eq!(job.a_address, Some(0));
+        assert_eq!(job.b_address, Some(4096));
+        assert!(first.detail.cache.lru_to_mru.is_empty());
+        assert_eq!(first.detail.cache.pending_fills.len(), 1);
+        assert_eq!(first.detail.cache.pending_fills[0].arrival_tick, 8);
+        model.step(6).unwrap();
+        assert_eq!(model.snapshot().detail.cpu_jobs[0].a, None);
+        model.step(1).unwrap();
+        let arrived = model.snapshot();
+        assert_eq!(arrived.detail.cpu_jobs[0].a, Some(model.config.input[0]));
+        assert_eq!(arrived.detail.cpu_jobs[0].b, None);
+        assert_eq!(arrived.detail.cache.lru_to_mru[0].tag, 0);
+        assert!(arrived.detail.outputs[0].terms.is_empty());
+        // A/B registers retain old bits internally, but the next k must not
+        // present them as its operands before new loads complete.
+        loop {
+            model.step(1).unwrap();
+            let detail = model.snapshot().detail;
+            if detail.cpu_jobs[0].k == 1 {
+                assert_eq!(detail.cpu_jobs[0].a, None);
+                assert_eq!(detail.cpu_jobs[0].b, None);
+                assert_eq!(detail.outputs[0].terms.len(), 1);
+                assert_eq!(detail.outputs[0].terms[0].retired_tick, model.tick);
+                break;
+            }
+            assert!(model.tick < 1000);
+        }
+    }
+    #[test]
+    fn gpu_detail_reports_requested_sectors_and_actual_arrival_not_future_values() {
+        for layout in [Layout::Packed, Layout::Strided] {
+            let mut model = SiliconModel::new(SiliconConfig {
+                mode: Mode::Gpu,
+                layout,
+                ..Default::default()
+            })
+            .unwrap();
+            let initial = model.snapshot();
+            assert!(initial
+                .detail
+                .warps
+                .iter()
+                .all(|warp| warp.requested_a_sectors.is_empty()
+                    && warp.requested_b_sectors.is_empty()));
+            model.step(1).unwrap();
+            let sent = model.snapshot();
+            let warp = &sent.detail.warps[0];
+            assert_eq!(warp.stage, "waiting_operands");
+            assert_eq!(warp.requested_a_sectors, vec![0, 1, 2, 3]);
+            assert_eq!(
+                warp.requested_b_sectors,
+                if layout == Layout::Packed {
+                    vec![128]
+                } else {
+                    (128..136).collect()
+                }
+            );
+            assert_eq!(
+                sent.counters.sectors as usize,
+                warp.requested_a_sectors.len() + warp.requested_b_sectors.len()
+            );
+            assert_eq!(sent.transfers[0].bytes, sent.counters.sectors as u32 * 32);
+            for lane in &warp.lanes {
+                assert_eq!(lane.a, None);
+                assert_eq!(lane.b, None);
+                assert_eq!(lane.a_address, Some((lane.output_index / 8 * 32) as u64));
+                assert_eq!(
+                    lane.b_address,
+                    Some(
+                        4096 + (lane.output_index % 8
+                            * if layout == Layout::Packed { 4 } else { 32 })
+                            as u64
+                    )
+                );
+            }
+            let arrival = warp.ready_tick.unwrap();
+            model.step((arrival - model.tick - 1) as u32).unwrap();
+            assert!(model.snapshot().detail.warps[0]
+                .lanes
+                .iter()
+                .all(|lane| lane.a.is_none() && lane.b.is_none()));
+            model.step(1).unwrap();
+            let ready = model.snapshot();
+            for lane in &ready.detail.warps[0].lanes {
+                assert_eq!(lane.a, Some(model.config.input[lane.output_index / 8 * 8]));
+                assert_eq!(lane.b, Some(model.weights[lane.output_index % 8]));
+                assert_eq!(lane.accumulated_sum, 0);
+                assert_eq!(lane.retired_terms, 0);
+            }
+            assert_eq!(ready.counters.macs, 0);
+        }
+    }
+    #[test]
+    fn retired_provenance_is_bounded_monotonic_and_tracks_completed_macs_in_every_model() {
+        for mode in [Mode::Cpu, Mode::Gpu, Mode::Tensor] {
+            let mut model = SiliconModel::new(SiliconConfig {
+                mode,
+                input: (0..64).map(|i| (i * 7) % 17 - 8).collect(),
+                filter: Filter::Mix,
+                ..Default::default()
+            })
+            .unwrap();
+            let expected = reference(model.config());
+            let mut previous: Vec<Vec<RetiredTerm>> = vec![Vec::new(); 64];
+            loop {
+                let snapshot = model.snapshot();
+                assert_eq!(snapshot.detail.outputs.len(), 64);
+                assert_eq!(
+                    snapshot
+                        .detail
+                        .outputs
+                        .iter()
+                        .map(|output| output.terms.len())
+                        .sum::<usize>() as u64,
+                    snapshot.counters.macs
+                );
+                for output in &snapshot.detail.outputs {
+                    let id = output.output_index;
+                    assert!(output.terms.len() <= 8);
+                    assert_eq!(output.retired_terms, output.terms.len());
+                    assert_eq!(output.reference_sum, expected[id]);
+                    assert!(output.terms.starts_with(&previous[id]));
+                    let mut sum = 0;
+                    for (k, term) in output.terms.iter().enumerate() {
+                        assert_eq!(term.k, k);
+                        assert_eq!(term.a, snapshot.input[id / 8 * 8 + k]);
+                        assert_eq!(term.b, snapshot.weights[k * 8 + id % 8]);
+                        assert_eq!(term.product, term.a * term.b);
+                        sum += term.product;
+                        assert_eq!(term.sum_after, sum);
+                        assert!(term.retired_tick > 0 && term.retired_tick <= snapshot.tick);
+                    }
+                    assert_eq!(output.accumulated_sum, sum);
+                    assert_eq!(output.stored, snapshot.valid[id]);
+                    if output.stored {
+                        assert_eq!(output.retired_terms, 8);
+                        assert_eq!(sum, snapshot.output[id]);
+                        assert!(
+                            output.terms.last().unwrap().retired_tick < snapshot.tick,
+                            "Output cannot be stored in the same tick as its last MAC"
+                        );
+                    }
+                    previous[id] = output.terms.clone();
+                }
+                if snapshot.status == RunStatus::Complete {
+                    break;
+                }
+                model.step(1).unwrap();
+                assert!(model.tick < 20_000);
+            }
+            model.reset();
+            assert!(model
+                .snapshot()
+                .detail
+                .outputs
+                .iter()
+                .all(|output| output.terms.is_empty()
+                    && output.accumulated_sum == 0
+                    && !output.stored));
+        }
     }
     #[test]
     fn inputs_and_tick_batches_reject_without_mutating() {

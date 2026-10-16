@@ -3,12 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/browser.mjs",
+    "test": "node tests/hardware-catalog.mjs && node tests/architecture.mjs && node tests/silicon-wasm.mjs && node tests/focused-browser.mjs",
     "build": "bash tools/build.sh",
-    "test:deployed": "node tests/deployed.mjs",
-    "test:performance": "node tests/performance.mjs",
-    "format": "prettier --write public/app.js public/style.css public/index.html tests/*.mjs",
-    "test:silicon": "node tests/hardware-catalog.mjs && node tests/silicon-wasm.mjs && node tests/silicon-browser.mjs"
+    "test:browser": "node tests/focused-browser.mjs",
+    "test:portable": "node tests/portable-demo.mjs",
+    "format": "prettier --write public/silicon.js public/silicon-layouts.js public/brain-comparison.js public/silicon.css public/index.html tests/*.mjs",
+    "test:silicon": "node tests/hardware-catalog.mjs && node tests/architecture.mjs && node tests/silicon-wasm.mjs"
   },
   "devDependencies": {
     "playwright": "1.58.2",

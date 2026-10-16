@@ -14,7 +14,7 @@ for f in source.rglob('*'):
   X-Frame-Options: DENY
 ''')
 files={str(f.relative_to(target)):hashlib.sha256(f.read_bytes()).hexdigest() for f in target.rglob('*') if f.is_file()}
-(target/'release.json').write_text(json.dumps({'version':'0.3.0','distribution':'portable-static','files':files},indent=2))
+(target/'release.json').write_text(json.dumps({'version':'0.4.0','distribution':'portable-static','files':files},indent=2))
 sizes=[(f.stat().st_size,str(f.relative_to(target))) for f in target.rglob('*') if f.is_file()]
 assert max(x[0] for x in sizes)<25*1024*1024,'Pages has a 25 MiB per-file limit'
 assert len(sizes)<20000 and sum(x[0] for x in sizes)<1024**3

@@ -13,6 +13,8 @@ jobs:
         with:
           node-version: "22"
       - run: node tests/hardware-catalog.mjs
+      - run: node tests/architecture.mjs
+      - run: python3 tools/check_content.py
       - run: cargo test -p doke-core --locked
   browser-and-wasm:
     runs-on: ubuntu-latest
@@ -36,4 +38,4 @@ jobs:
           python3 -m http.server 4181 --bind 127.0.0.1 --directory public > /tmp/doke-preview.log 2>&1 &
           DOKE_SERVER_PID=$!
           trap 'kill "$DOKE_SERVER_PID"' EXIT
-          node tests/silicon-browser.mjs
+          DOKE_SKIP_BRAIN=1 node tests/focused-browser.mjs

@@ -1,314 +1,468 @@
-/** Original functional schematics. Positions are not vendor die coordinates. */
-const HEIGHT = 0.1;
-const THICKNESS = 0.12;
-
-/** Build an independent layout; callers may attach transient display state. */
-export function makeLayout(mode) {
-  if (!["cpu", "gpu", "tensor", "switch"].includes(mode)) {
-    throw new RangeError("Unknown silicon layout");
-  }
-  const blocks = [];
-  const links = [];
+/** Original functional layouts. No position or area is a vendor floorplan. */
+export function makeLayout(
+  family,
+  level = "processor",
+  profile = "rtx-5090",
+  selectedUnit = 0,
+) {
+  if (
+    !["cpu", "gpu"].includes(family) ||
+    !["processor", "core", "execution"].includes(level)
+  )
+    throw new RangeError("Unknown exploration level");
+  const blocks = [],
+    links = [],
+    parts = [];
   const byKey = new Map();
-  function block(key, title, x, z, width, depth, description, label = false) {
-    const item = {
+  function block(key, title, architecture, x, z, w, d, options = {}) {
+    const b = {
       key,
       title,
+      architecture,
       region: blocks.length,
-      position: [x, HEIGHT, z],
-      size: [width, THICKNESS, depth],
-      description,
-      label,
+      position: [x, options.y ?? 0.1, z],
+      size: [w, options.height ?? 0.16, d],
+      style: options.style || "compute",
+      label: options.label ?? false,
+      nodes: options.nodes || [],
+      ...options,
     };
-    blocks.push(item);
-    byKey.set(key, item);
-    return item;
+    blocks.push(b);
+    byKey.set(key, b);
+    return b;
   }
-  function link(from, to) {
-    const a = byKey.get(from);
-    const b = byKey.get(to);
-    if (!a || !b) throw new Error("Unknown schematic link endpoint");
-    // Static traces sit below the raised blocks. Moving data is supplied by the
-    // model, not these links. Endpoints align with the actual block centers.
-    links.push({
-      from: [a.position[0], 0.015, a.position[2]],
-      to: [b.position[0], 0.015, b.position[2]],
+  function link(a, b) {
+    const A = byKey.get(a),
+      B = byKey.get(b);
+    if (A && B)
+      links.push({
+        from: [A.position[0], 0.015, A.position[2]],
+        to: [B.position[0], 0.015, B.position[2]],
+      });
+  }
+  function cell(parent, x, z, w = 0.045, d = 0.045, y = 0.205) {
+    parts.push({
+      type: "cuboid",
+      parent: parent.region,
+      position: [x, y, z],
+      size: [w, 0.018, d],
     });
   }
-
-  if (mode === "cpu") {
+  function banks(b, cols, rows) {
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
+        cell(
+          b,
+          b.position[0] + ((c - (cols - 1) / 2) * b.size[0]) / (cols + 1),
+          b.position[2] + ((r - (rows - 1) / 2) * b.size[2]) / (rows + 1),
+          (b.size[0] / (cols + 1)) * 0.5,
+          (b.size[2] / (rows + 1)) * 0.42,
+          b.position[1] + b.size[1] / 2 + 0.025,
+        );
+  }
+  let board = { position: [0, -0.18, 0], size: [6.4, 0.14, 4.65] },
+    camera = [12.6, -0.22, 0.83, 0, 0, 0];
+  if (level === "processor" && family === "gpu") {
+    const count = profile === "h100-sxm" ? 132 : 170,
+      cols = profile === "h100-sxm" ? 12 : 17,
+      rows = Math.ceil(count / cols);
+    const dx = 4.8 / cols,
+      dz = 3.3 / rows;
+    for (let i = 0; i < count; i++) {
+      const b = block(
+        "sm-" + i,
+        "SM " + (i + 1),
+        "sm",
+        ((i % cols) - (cols - 1) / 2) * dx,
+        (Math.floor(i / cols) - (rows - 1) / 2) * dz,
+        dx * 0.78,
+        dz * 0.78,
+        {
+          unit: i,
+          enter: "core",
+          nodes:
+            i === selectedUnit ? ["compute", "scheduler", "registers"] : [],
+        },
+      );
+      banks(b, 2, 2);
+    }
     block(
-      "memory",
-      "Main memory",
-      -1.34,
-      -0.15,
-      0.62,
-      1.72,
-      "Backing storage for the two input matrices. Each modeled load has an address; a cache miss moves bytes from here. Latencies are authored model ticks.",
-      true,
+      "l2",
+      profile === "h100-sxm" ? "50 MB L2" : "96 MB L2",
+      "l2",
+      0,
+      1.94,
+      4.7,
+      0.25,
+      { style: "memory", label: true },
     );
+    block("memory", "Device memory", "memory", -2.88, 0, 0.36, 3.45, {
+      style: "memory",
+      label: true,
+      nodes: ["memory"],
+    });
+    block("dispatch", "Work distribution", "dispatch", 2.88, 0, 0.36, 3.45, {
+      style: "control",
+      label: true,
+    });
+    link("memory", "l2");
+    link("l2", "sm-" + selectedUnit);
+    link("dispatch", "sm-" + selectedUnit);
+  } else if (level === "processor") {
+    for (let group = 0; group < 2; group++) {
+      const cx = group ? 1.5 : -1.5;
+      for (let i = 0; i < 8; i++) {
+        const n = group * 8 + i;
+        const b = block(
+          "core-" + n,
+          "Core " + (n + 1),
+          "core",
+          cx + ((i % 4) - 1.5) * 0.58,
+          -0.9 + Math.floor(i / 4) * 0.75,
+          0.48,
+          0.6,
+          {
+            unit: n,
+            enter: "core",
+            nodes:
+              n === selectedUnit ? ["compute", "scheduler", "registers"] : [],
+          },
+        );
+        banks(b, 3, 3);
+      }
+      block("l3-" + group, "Shared L3", "l3", cx, 0.56, 2.25, 0.42, {
+        style: "memory",
+        label: true,
+      });
+      for (let i = 0; i < 8; i++)
+        link("core-" + (group * 8 + i), "l3-" + group);
+    }
+    block("io", "I/O & memory interface", "io", 0, 1.42, 2.8, 0.62, {
+      style: "io",
+      label: true,
+      nodes: ["memory"],
+    });
+    link("l3-0", "io");
+    link("l3-1", "io");
+  } else if (level === "core" && family === "cpu") {
+    block("branch", "Branch prediction", "branch", -2.15, -1.65, 1.3, 0.42, {
+      style: "control",
+      label: true,
+    });
+    block("fetch", "Instruction fetch", "fetch", -0.57, -1.65, 1.3, 0.42, {
+      style: "control",
+    });
+    block("l1i", "L1 instruction cache", "l1i", 1.03, -1.65, 1.3, 0.42, {
+      style: "memory",
+      label: true,
+    });
+    block("decode", "Decode", "decode", -2.0, -0.91, 1.5, 0.5, {
+      style: "control",
+      label: true,
+    });
     block(
-      "cache",
-      "Cache",
-      -0.31,
-      -1.13,
-      0.87,
+      "uop-cache",
+      "Decoded-op cache",
+      "uop-cache",
+      -0.35,
+      -0.91,
+      1.4,
       0.5,
-      "Four fully associative 64-byte lines with true LRU replacement in this teaching model. Hits reuse a resident line; simultaneous requests for an outstanding line can merge.",
-      true,
+      { style: "memory", label: true },
     );
+    block("rename", "Rename & dispatch", "rename", -1.3, -0.17, 2.72, 0.43, {
+      style: "control",
+    });
+    block("scheduler", "Ready work", "scheduler", -1.3, 0.49, 2.72, 0.43, {
+      style: "control",
+      label: true,
+      nodes: ["scheduler"],
+    });
+    block(
+      "registers",
+      "Operand registers",
+      "registers",
+      -1.3,
+      1.13,
+      2.72,
+      0.43,
+      { style: "memory", label: true, nodes: ["registers"] },
+    );
+    for (let i = 0; i < 6; i++)
+      block(
+        "alu-" + i,
+        "Integer ALU " + (i + 1),
+        "integer",
+        -2.45 + i * 0.46,
+        1.77,
+        0.36,
+        0.38,
+        { nodes: i === 0 ? ["compute"] : [], enter: "execution" },
+      );
+    for (let i = 0; i < 4; i++)
+      block(
+        "agu-" + i,
+        "Address unit " + (i + 1),
+        "loadstore",
+        0.75 + (i % 2) * 0.6,
+        0.15 + Math.floor(i / 2) * 0.63,
+        0.48,
+        0.43,
+        { style: "io" },
+      );
+    block("l1d", "L1 data cache", "l1d", 1.05, 1.53, 1.1, 0.73, {
+      style: "memory",
+      label: true,
+      nodes: ["cache"],
+    });
+    block("l2", "Private L2", "l2", 2.44, 0, 0.65, 3.78, {
+      style: "memory",
+      label: true,
+    });
+    block(
+      "vector",
+      "Vector / floating point",
+      "vector",
+      1.18,
+      -0.86,
+      1.1,
+      0.61,
+      { style: "compute", label: true },
+    );
+    block("retire", "Retire", "retire", 1.85, -0.15, 0.28, 0.36, {
+      style: "control",
+    });
+    for (const pair of [
+      ["branch", "fetch"],
+      ["l1i", "fetch"],
+      ["fetch", "decode"],
+      ["decode", "rename"],
+      ["uop-cache", "rename"],
+      ["rename", "scheduler"],
+      ["scheduler", "registers"],
+      ["registers", "alu-0"],
+      ["l2", "l1d"],
+      ["l1d", "registers"],
+    ])
+      link(...pair);
+    for (const b of blocks.filter((b) => b.style === "memory")) banks(b, 4, 3);
+  } else if (level === "core") {
+    board.size = [6.4, 0.14, 5.9];
+    block(
+      "instruction-cache",
+      "Instruction cache",
+      "instruction-cache",
+      0,
+      -2.44,
+      5.4,
+      0.28,
+      { style: "memory", label: true },
+    );
+    for (let p = 0; p < 4; p++) {
+      const x = p % 2 ? 1.42 : -1.42,
+        z = p < 2 ? -1.07 : 1.07;
+      block(
+        "scheduler-" + p,
+        "Warp scheduler " + (p + 1),
+        "warp-scheduler",
+        x,
+        z - 0.7,
+        2.45,
+        0.24,
+        {
+          style: "control",
+          label: p === 0,
+          nodes: p === 0 ? ["scheduler"] : [],
+        },
+      );
+      const rf = block(
+        "registers-" + p,
+        "Register file",
+        "registers",
+        x,
+        z - 0.31,
+        2.45,
+        0.34,
+        {
+          style: "memory",
+          label: p === 0,
+          nodes: p === 0 ? ["registers"] : [],
+        },
+      );
+      banks(rf, 16, 2);
+      const lanes = block(
+        "arithmetic-" + p,
+        profile === "h100-sxm" ? "32 FP32 units" : "32 FP32 / INT32 units",
+        "arithmetic",
+        x - 0.37,
+        z + 0.32,
+        1.65,
+        0.66,
+        {
+          enter: "execution",
+          partition: p,
+          label: p === 0,
+          nodes: p === 0 ? ["compute"] : [],
+        },
+      );
+      banks(lanes, 8, 4);
+      const tensor = block(
+        "tensor-" + p,
+        "Tensor unit",
+        "tensor",
+        x + 0.92,
+        z + 0.32,
+        0.48,
+        0.66,
+        { style: "compute", label: p === 0 },
+      );
+      banks(tensor, 3, 4);
+      block(
+        "loadstore-" + p,
+        "Load / store",
+        "loadstore",
+        x,
+        z + 0.86,
+        2.45,
+        0.2,
+        { style: "io", nodes: p === 0 ? ["memory"] : [] },
+      );
+      for (const key of ["registers-", "arithmetic-", "loadstore-"])
+        link("scheduler-" + p, key + p);
+    }
+    block(
+      "l1shared",
+      profile === "h100-sxm" ? "L1 / shared · 256 KB" : "L1 / shared · 128 KB",
+      "l1shared",
+      0,
+      2.18,
+      5.4,
+      0.23,
+      { style: "memory", label: true },
+    );
+    if (profile !== "h100-sxm")
+      block("ray", "Ray-tracing unit", "ray", -1.38, 2.66, 2.6, 0.26, {
+        label: true,
+      });
+    block(
+      "texture",
+      "Texture processing",
+      "texture",
+      profile === "h100-sxm" ? 0 : 1.38,
+      2.66,
+      profile === "h100-sxm" ? 5.4 : 2.6,
+      0.26,
+      { style: "io", label: true },
+    );
+    camera = [14.2, -0.18, 0.9, 0, 0, 0];
+  } else if (family === "gpu") {
+    board.size = [6.2, 0.14, 4.6];
+    block("memory", "Memory sectors", "memory", -2.5, 0, 0.64, 3.22, {
+      style: "memory",
+      label: true,
+      nodes: ["memory"],
+    });
     block(
       "scheduler",
-      "Issue",
-      0.89,
-      -1.13,
-      0.89,
-      0.5,
-      "Selects ready operations from independent dot products with a bounded issue width. This is not an x86 decoder, reorder buffer or speculative front end.",
-      true,
+      "Warp issue",
+      "warp-scheduler",
+      -0.45,
+      -1.72,
+      2.5,
+      0.36,
+      { style: "control", label: true, nodes: ["scheduler"] },
     );
     block(
       "registers",
-      "Operands",
-      -0.31,
-      0.03,
-      0.87,
-      0.72,
-      "Loaded operand values wait here before multiply–accumulate. The displayed occupancy counts outstanding operand and compute requests, not architectural registers.",
+      "Operand registers",
+      "registers",
+      1.65,
+      -1.72,
+      1.28,
+      0.36,
+      { style: "memory", label: true, nodes: ["registers"] },
     );
+    for (let i = 0; i < 32; i++)
+      block(
+        "lane" + i,
+        "Lane " + i,
+        "lanes",
+        -1.25 + (i % 8) * 0.48,
+        -0.98 + Math.floor(i / 8) * 0.52,
+        0.36,
+        0.38,
+        { lane: i, nodes: ["lane" + i], enter: null },
+      );
     block(
       "compute",
-      "Multiply · add",
-      0.89,
-      0.03,
-      0.89,
-      0.72,
-      "Computes exact signed integer products and accumulates each dot product. Operations issue only after both operands arrive.",
-      true,
+      "Integer multiply + add",
+      "lanes",
+      -0.05,
+      1.37,
+      3.82,
+      0.34,
+      { label: true, nodes: ["compute"] },
     );
+    block("output", "Output values", "output", -0.05, 1.95, 3.82, 0.3, {
+      style: "memory",
+      label: true,
+      nodes: ["output"],
+    });
+    link("memory", "registers");
+    link("scheduler", "compute");
+    link("registers", "lane0");
+    link("lane31", "compute");
+    link("compute", "output");
+  } else {
+    block("memory", "Main memory", "memory", -2.5, 0, 0.64, 3.35, {
+      style: "memory",
+      label: true,
+      nodes: ["memory"],
+    });
+    block("cache", "Four cache lines", "l1d", -1.1, -1.1, 1.45, 1.05, {
+      style: "memory",
+      label: true,
+      nodes: ["cache"],
+    });
+    block("scheduler", "Ready work", "scheduler", 1.05, -1.38, 2.1, 0.5, {
+      style: "control",
+      label: true,
+      nodes: ["scheduler"],
+    });
     block(
-      "scratch",
-      "Tile storage · unused",
-      -0.69,
-      1.14,
-      0.7,
-      0.44,
-      "Reserved explanatory location for tensor tile storage. It is inactive in CPU mode and does not add a cache or resource to this model.",
+      "registers",
+      "Returned operands",
+      "registers",
+      1.05,
+      -0.48,
+      2.1,
+      0.66,
+      { style: "memory", label: true, nodes: ["registers"] },
     );
-    block(
-      "output",
-      "Result",
-      0.8,
-      1.14,
-      1.08,
-      0.44,
-      "Completed matrix values arrive here after their modeled output transfer. A value becomes valid only at completion.",
-      true,
-    );
+    block("compute", "Multiply + add", "integer", 1.05, 0.57, 2.1, 0.72, {
+      label: true,
+      nodes: ["compute"],
+    });
+    block("output", "Completed result", "output", 0.2, 1.68, 3.8, 0.43, {
+      style: "memory",
+      label: true,
+      nodes: ["output"],
+    });
     for (const pair of [
       ["memory", "cache"],
       ["cache", "registers"],
-      ["memory", "registers"],
       ["scheduler", "registers"],
       ["registers", "compute"],
       ["compute", "output"],
     ])
       link(...pair);
+    for (const b of blocks.filter((b) => b.style === "memory")) banks(b, 5, 3);
   }
-
-  if (mode === "gpu" || mode === "tensor") {
-    const tensor = mode === "tensor";
-    block(
-      "memory",
-      "Memory",
-      -1.43,
-      -0.54,
-      0.48,
-      1.49,
-      "Matrix operands are read from backing storage. Traffic is counted from the actual addresses and modeled transfer granularity, not inferred from glow intensity.",
-      true,
-    );
-    block(
-      "cache",
-      "Cache · not modeled",
-      -1.43,
-      0.82,
-      0.48,
-      0.58,
-      "This teaching mode does not simulate a GPU or tensor-accelerator cache hierarchy. The inactive block provides a consistent orientation across views.",
-    );
-    block(
-      "scheduler",
-      tensor ? "Tile sequence" : "Warp issue",
-      -0.55,
-      -1.32,
-      0.66,
-      0.32,
-      tensor
-        ? "Selects the next 4×4 output tile. The sequence and transfer costs are authored; this is not a commercial accelerator instruction scheduler."
-        : "Issues one modeled warp operation at a time while two warps can retain work in flight. This illustrates scheduling, not every resource of a GPU SM.",
-      true,
-    );
-    block(
-      "registers",
-      "Operands",
-      0.33,
-      -1.32,
-      0.66,
-      0.32,
-      tensor
-        ? "A shared orientation marker. Tensor operands are staged in the scratch tile; this block does not imply an extra register-file simulation."
-        : "Warp operands become available after memory transfer. Duplicate addresses can share a request sector; lanes retain their own mathematical output identity.",
-    );
-    block(
-      "compute",
-      tensor ? "Array control" : "Compute",
-      1.2,
-      -1.32,
-      0.65,
-      0.32,
-      tensor
-        ? "Aggregate compute state for the processing-element array below. It is a schematic control marker, not additional arithmetic hardware."
-        : "Aggregate state of the modeled warp arithmetic. The cells below show one identified warp in detail, not all cores of the selected commercial GPU.",
-      true,
-    );
-    block(
-      "scratch",
-      "Tile storage",
-      -0.4,
-      1.28,
-      0.92,
-      0.36,
-      tensor
-        ? "Holds the A and B operands loaded for one output tile, allowing reuse across processing elements. Its modeled storage is distinct from external memory."
-        : "Inactive in this GPU model. Shared-memory tiling would require an additional explicitly implemented mechanism.",
-      tensor,
-    );
-    block(
-      "output",
-      "Result",
-      0.99,
-      1.28,
-      0.95,
-      0.36,
-      "Exact output matrix values are published after their modeled store transfer. Partial arithmetic and completed outputs remain distinct.",
-      true,
-    );
-
-    if (tensor) {
-      for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 4; col++) {
-          const pe = row * 4 + col;
-          block(
-            `pe${pe}`,
-            `Processing element ${row + 1} · ${col + 1}`,
-            -0.63 + col * 0.55,
-            -0.75 + row * 0.48,
-            0.38,
-            0.33,
-            `Tile row ${row + 1}, column ${col + 1}. This processing element accumulates the products for one output value. Light follows the model's valid operand and multiply–accumulate events.`,
-          );
-          if (col > 0) link(`pe${pe - 1}`, `pe${pe}`);
-          if (row > 0) link(`pe${pe - 4}`, `pe${pe}`);
-        }
-      }
-      link("memory", "scratch");
-      link("scheduler", "compute");
-      for (let row = 0; row < 4; row++) link("scratch", `pe${row * 4}`);
-      for (let col = 0; col < 4; col++) link("scratch", `pe${col}`);
-      for (let col = 0; col < 4; col++) link(`pe${12 + col}`, "output");
-    } else {
-      for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 8; col++) {
-          const lane = row * 8 + col;
-          block(
-            `lane${lane}`,
-            `Warp lane ${lane}`,
-            -0.8 + col * 0.31,
-            -0.72 + row * 0.46,
-            0.23,
-            0.31,
-            `Lane ${lane} of the displayed 32-lane warp. Its output index comes from the model snapshot. These 32 cells are a selected execution group, not a physical count of GPU cores.`,
-          );
-        }
-      }
-      link("memory", "registers");
-      link("scheduler", "compute");
-      link("registers", "compute");
-      for (const lane of [0, 8, 16, 24]) link("registers", `lane${lane}`);
-      for (const lane of [7, 15, 23, 31]) link(`lane${lane}`, "output");
-    }
-  }
-
-  if (mode === "switch") {
-    for (let ingress = 0; ingress < 3; ingress++) {
-      const z = (ingress - 1) * 1.04;
-      block(
-        `ingress-${ingress}`,
-        `Ingress ${ingress + 1}`,
-        -1.57,
-        z,
-        0.35,
-        0.59,
-        `Input port ${ingress + 1}. Injected fixed-size packets enter the bounded shared storage here. Full capacity rejects a packet; no traffic is silently created or removed.`,
-        ingress === 1,
-      );
-      for (let egress = 0; egress < 3; egress++) {
-        block(
-          `voq-${ingress}-${egress}`,
-          `Queue ${ingress + 1} → ${egress + 1}`,
-          -0.98 + egress * 0.37,
-          z,
-          0.26,
-          0.43,
-          `Packets arriving at input ${ingress + 1} for output ${egress + 1}. In VOQ mode, another destination can proceed when this one is blocked. FIFO mode consolidates the input's queue at its middle cell.`,
-        );
-        link(`ingress-${ingress}`, `voq-${ingress}-${egress}`);
-      }
-    }
-    block(
-      "fabric",
-      "Grant · transfer",
-      0.58,
-      0,
-      0.57,
-      2.65,
-      "A generic rotating arbiter grants at most one transfer per input and output in a tick. Each output has one transfer slot; a blocked output retains its occupied credit. This is not a proprietary Cisco scheduler.",
-      true,
-    );
-    for (let egress = 0; egress < 3; egress++) {
-      block(
-        `egress-${egress}`,
-        `Output ${"ABC"[egress]}`,
-        1.48,
-        (egress - 1) * 1.04,
-        0.42,
-        0.59,
-        `Output port ${egress + 1}. Blocking it prevents completion and new grants to this destination. Releasing it allows held work to drain. Other destinations can still proceed in VOQ mode.`,
-        true,
-      );
-      link("fabric", `egress-${egress}`);
-      for (let ingress = 0; ingress < 3; ingress++)
-        link(`voq-${ingress}-${egress}`, "fabric");
-    }
-  }
-  return { blocks, links };
+  return { family, level, blocks, links, parts, board, camera };
 }
-
-/** Map exact model IDs, plus explicit display aliases, to selectable geometry. */
 export function resolveBlock(layout, nodeId) {
-  if (!layout || !Array.isArray(layout.blocks) || typeof nodeId !== "string") {
-    return undefined;
-  }
-  const exact = layout.blocks.find((block) => block.key === nodeId);
-  if (exact) return exact;
-  const fifo = /^fifo-([0-2])$/.exec(nodeId);
-  if (fifo)
-    return layout.blocks.find((block) => block.key === `voq-${fifo[1]}-1`);
-  // There is no additional physical scheduler or drop engine in this schematic.
-  // These aliases locate abstract events on the central switch mechanism.
-  if (nodeId === "scheduler" || nodeId === "drop") {
-    return layout.blocks.find((block) => block.key === "fabric");
-  }
-  return undefined;
+  return (
+    layout.blocks.find((b) => b.key === nodeId) ||
+    layout.blocks.find((b) => b.nodes.includes(nodeId))
+  );
 }
