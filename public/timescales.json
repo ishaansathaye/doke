@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-10-15",
+  "title": "Different events, one timescale",
+  "intro": "A chip clock period and a biological signal can both be measured in seconds. Explore the scale of each event, then read what the experiment actually measured.",
+  "units": "seconds",
+  "axis": "logarithmic",
+  "comparisonLimit": "Clock periods, spike widths, synaptic latencies and task-related signals describe different events. Their positions do not rank intelligence or task performance. There is no single brain clock. Model ticks and the brain guide's animation pacing are separate from these measurements.",
+  "clockRule": "For a documented clock frequency f in hertz, one period is 1/f seconds. A period does not specify instruction latency or completed work. Memory bandwidth and network throughput stay off this clock axis.",
+  "measurements": [
+    {
+      "id": "human-synaptic-onset",
+      "label": "A nearby neuron begins to respond",
+      "minSeconds": 0.00091,
+      "maxSeconds": 0.00091,
+      "statistic": "mean",
+      "displayValue": "0.91 ms · mean",
+      "species": "human",
+      "context": "Molnár et al.: layer 2/3 pyramidal-to-pyramidal EPSP latency, 38 postsynaptic cells; 0.91 ± 0.46 ms (mean ± SD). Surgical cortical slices, about 36 °C; study donors aged 18–73.",
+      "interpretation": "The onset of a voltage response after a presynaptic spike. This includes the recorded connection's transmission delay; it does not isolate chemical release or measure an entire thought.",
+      "sourceIds": ["molnar-2008"]
+    },
+    {
+      "id": "human-spike-width",
+      "label": "The width of one electrical spike",
+      "minSeconds": 0.0011,
+      "maxSeconds": 0.0011,
+      "statistic": "mean",
+      "displayValue": "1.1 ms · mean half-width",
+      "species": "human",
+      "context": "Testa-Silva et al.: first action-potential half-width in 9 hippocampal pyramidal neurons, 1.1 ± 0.2 ms (mean ± SEM). Slices from epilepsy surgery, donors aged 20–66, recorded at 32–35 °C.",
+      "interpretation": "Width measured halfway up the spike. The point shows the sample mean, not a universal spike duration, firing rate or healthy-population reference.",
+      "sourceIds": ["testa-silva-2010"]
+    },
+    {
+      "id": "human-local-sequence",
+      "label": "One spike recruits a local sequence",
+      "minSeconds": 0.005,
+      "maxSeconds": 0.065,
+      "statistic": "observed-range",
+      "displayValue": "5–65 ms · observed range",
+      "species": "human",
+      "context": "Molnár et al.: the period of increased synaptic-event frequency following a single pyramidal spike. Range 5–65 ms, mean 37 ± 17 ms (SD); human cortical slices at about 36 °C.",
+      "interpretation": "A local sequence can outlast its triggering spike. This range describes the recorded microcircuits, not the duration of perception or memory.",
+      "sourceIds": ["molnar-2008"]
+    },
+    {
+      "id": "human-visual-erp",
+      "label": "A visual decision leaves an EEG signature",
+      "minSeconds": 0.15,
+      "maxSeconds": 0.15,
+      "statistic": "approximate-onset",
+      "displayValue": "≈150 ms · ERP onset",
+      "species": "human",
+      "context": "Thorpe, Fize and Marlot: people judged whether a photograph contained an animal. Each image appeared for 20 ms; a frontal event-related potential specific to no-go trials emerged roughly 150 ms after image onset.",
+      "interpretation": "A task-related difference in an electrical signal measured at the scalp. It is not button-press reaction time, a single-neuron measurement or the time required to see every image.",
+      "sourceIds": ["thorpe-1996"]
+    }
+  ],
+  "parts": [
+    {
+      "label": "Holding a changing state",
+      "silicon": "A CPU's register file holds explicitly addressed values, including intermediate results.",
+      "brain": "Neurons have changing membrane voltages; synaptic input changes those voltages.",
+      "limit": "A voltage is not a register word. This analogy concerns local state, not a mapping from neurons to bits or a model of human working memory.",
+      "sourceIds": ["boom-registers", "testa-silva-2010"]
+    },
+    {
+      "label": "Many things happening together",
+      "silicon": "GPU threads are organized into blocks and warps, with work scheduled on streaming multiprocessors.",
+      "brain": "Connected human cortical neurons can recruit sequences involving several cells.",
+      "limit": "Parallel activity is a shared theme. Neurons do not execute a warp's common instruction, and an atlas region is not a processor core.",
+      "sourceIds": ["cuda-model", "molnar-2008"]
+    },
+    {
+      "label": "Changing what happens next",
+      "silicon": "Software can write new values into memory; later computation can use those values.",
+      "brain": "Timed stimulation changed synaptic strength in surgically removed human hippocampal tissue.",
+      "limit": "A memory write and synaptic plasticity have different mechanisms. The experiment does not establish a universal learning rule or show that this atlas learns from your drawing.",
+      "sourceIds": ["cuda-model", "testa-silva-2010"]
+    }
+  ],
+  "sources": {
+    "molnar-2008": {
+      "title": "Complex Events Initiated by Individual Spikes in the Human Cerebral Cortex",
+      "authors": "Molnár and colleagues",
+      "year": 2008,
+      "url": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.0060222",
+      "locator": "Results, opening paragraphs and Figure 1; Materials and Methods, Electrophysiology",
+      "scope": "Human surgical cortical slices; sample statistics and local events, not whole-brain performance."
+    },
+    "testa-silva-2010": {
+      "title": "Human Synapses Show a Wide Temporal Window for Spike-Timing-Dependent Plasticity",
+      "authors": "Testa-Silva and colleagues",
+      "year": 2010,
+      "url": "https://www.frontiersin.org/journals/synaptic-neuroscience/articles/10.3389/fnsyn.2010.00012/full",
+      "locator": "Table 1; Human hippocampal slice preparation; Electrophysiology; Results",
+      "scope": "Human hippocampal tissue from epilepsy surgery; the half-width statistic is mean ± SEM, not a population range."
+    },
+    "thorpe-1996": {
+      "title": "Speed of processing in the human visual system",
+      "authors": "Thorpe, Fize and Marlot",
+      "year": 1996,
+      "url": "https://www.nature.com/articles/381520a0",
+      "locator": "Abstract: 20 ms image exposure and roughly 150 ms no-go ERP",
+      "scope": "Human animal/non-animal categorization; event-related potential timing, not motor reaction time."
+    },
+    "boom-registers": {
+      "title": "Berkeley BOOM: The Rename Stage",
+      "authors": "Berkeley Architecture Research",
+      "url": "https://docs.boom-core.org/en/latest/sections/rename-stage.html",
+      "locator": "The Explicit Renaming Design; The Rename Map Table",
+      "scope": "Open CPU register-state example; no claim that proprietary chips use identical internals."
+    },
+    "cuda-model": {
+      "title": "CUDA Programming Guide: Programming Model",
+      "authors": "NVIDIA",
+      "url": "https://docs.nvidia.com/cuda/cuda-programming-guide/01-introduction/programming-model.html",
+      "locator": "1.2.2.1 Thread Blocks and Grids; 1.2.2.2 Warps and SIMT; 1.2.2.3.1 Arrays and tiles",
+      "scope": "Documented programming model and mutable memory; biological comparisons are explanatory analogies."
+    }
+  }
+}

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#050606" />
     <meta
       name="description"
-      content="Look inside a CPU, a GPU and the human brain. Explore architecture, follow a value through an executable model, and compare how information moves."
+      content="Look inside a processor and the human brain. Explore architecture, follow a value through an executable model, and compare how information moves."
     />
     <title>doke</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -17,8 +17,21 @@
     <header>
       <a class="brand" href="./" aria-label="doke home">doke<span>◦</span></a>
       <nav class="worlds" aria-label="Explore">
-        <button data-world="cpu">CPU</button
-        ><button data-world="gpu" aria-pressed="true">GPU</button
+        <select id="hardware" aria-label="Select hardware">
+          <option value="" hidden>Select hardware</option>
+          <optgroup label="CPU">
+            <option value="ryzen-9950x">Ryzen 9 9950X · CPU</option>
+          </optgroup>
+          <optgroup label="GPU">
+            <option value="rtx-5090" selected>RTX 5090 · GPU</option>
+            <option value="h100-sxm">H100 SXM · GPU</option>
+          </optgroup>
+          <optgroup label="Tensor / NPU">
+            <option value="tpu-v1">Google TPU v1 · NPU</option>
+          </optgroup>
+          <optgroup label="Network ASIC">
+            <option value="silicon-one-g200">Cisco G200 · ASIC</option>
+          </optgroup></select
         ><button data-world="brain">Human brain</button>
       </nav>
       <div class="header-actions">
@@ -125,12 +138,6 @@
         <label
           ><span>Reduce motion</span><input type="checkbox" id="reduce-motion"
         /></label>
-        <label id="gpu-reference"
-          >GPU reference<select id="profile">
-            <option value="rtx-5090">RTX 5090 · Blackwell</option>
-            <option value="h100-sxm">H100 SXM · Hopper</option>
-          </select></label
-        >
         <label
           >Brain surface<select id="brain-quality">
             <option value="overview">Overview · 270k triangles</option>
@@ -152,7 +159,7 @@
           <button id="brain-guide-play">Play guide</button
           ><button id="brain-guide-next">Next</button
           ><button id="brain-guide-reset" aria-label="Reset guide">↺</button
-          ><button id="brain-guide-evidence">Explain ↗</button>
+          ><button id="brain-guide-evidence">Timing & parts ↗</button>
         </div>
         <canvas id="guide-stimulus" width="1" height="1" hidden></canvas>
       </div>

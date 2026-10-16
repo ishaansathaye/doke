@@ -136,6 +136,21 @@ header > * {
   background: #d5e6df1e;
   color: white;
 }
+.worlds select {
+  color: #f1faf5;
+  background: #c3e0cf13;
+  border: 0;
+  border-radius: 24px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 12px;
+  max-width: 250px;
+  cursor: pointer;
+}
+.worlds select option,
+.worlds select optgroup {
+  background: #101b16;
+}
 .header-actions {
   display: flex;
   gap: 10px;
@@ -1021,6 +1036,129 @@ body[data-world="brain"] #scene-description {
 .lane-label.pinned {
   border-color: #bfdfce88;
   color: #fff;
+}
+
+.traffic-ports {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+}
+.traffic-ports > div {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 7px;
+  align-items: center;
+}
+.traffic-ports button {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 7px 10px;
+  font-size: 11px;
+}
+.traffic-ports [aria-pressed="true"] {
+  color: #f4dec3;
+  border-color: #d6b79577;
+}
+#inspection .packet-queue {
+  display: grid;
+  grid-template-columns: 65px 1fr;
+  gap: 6px;
+  font-size: 11px;
+}
+.packet-queue span {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.packet-queue i {
+  font-style: normal;
+  border-radius: 5px;
+  background: #b7dfca15;
+  padding: 1px 4px;
+}
+.duration-axis {
+  position: relative;
+  height: 26px;
+  margin: 28px 0 14px;
+  border-bottom: 1px solid var(--line);
+  font:
+    9px ui-monospace,
+    monospace;
+  color: #c8d6d0;
+}
+.duration-axis span {
+  white-space: nowrap;
+  position: absolute;
+  transform: translateX(-50%);
+}
+.duration-axis span:last-child {
+  transform: translateX(-100%);
+}
+.duration-reference > strong,
+.rate-reference > strong {
+  display: block;
+  font-size: 28px;
+  margin-top: 8px;
+  font-weight: 500;
+}
+.duration-rail {
+  position: relative;
+  height: 18px;
+  margin: 8px 0;
+  background: linear-gradient(
+    transparent 8px,
+    #bedbcb2b 8px,
+    #bedbcb2b 9px,
+    transparent 9px
+  );
+}
+.duration-point,
+.duration-range {
+  position: absolute;
+  top: 5px;
+  height: 7px;
+  border-radius: 7px;
+  background: #b7ddc8;
+  box-shadow: 0 0 12px #c1f9d764;
+}
+.duration-point {
+  width: 7px;
+  transform: translateX(-50%);
+}
+.duration-range {
+  min-width: 7px;
+}
+#inspection .duration-event summary {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  font-size: 12px;
+}
+.duration-event summary > strong {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #c4d8cd;
+}
+.duration-event summary > .duration-rail {
+  grid-column: 1 / -1;
+  margin: 6px 0 0;
+}
+.duration-event summary > span::after {
+  content: " +";
+  color: #9eafa6;
+}
+.duration-event[open] summary > span::after {
+  content: " −";
+}
+@media (max-width: 700px) {
+  .worlds select {
+    max-width: min(230px, 57vw);
+    font-size: 11px;
+    padding: 9px 10px;
+  }
+  .worlds button {
+    padding: 9px 13px;
+  }
 }
 
 body[data-world="brain"]:has(#reader:not([hidden])) #brain-guide {

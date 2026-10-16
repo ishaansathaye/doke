@@ -4,12 +4,15 @@ export function makeLayout(
   level = "processor",
   profile = "rtx-5090",
   selectedUnit = 0,
+  queueMode = "voq",
 ) {
   if (
-    !["cpu", "gpu"].includes(family) ||
+    !["cpu", "gpu", "tensor", "switch"].includes(family) ||
     !["processor", "core", "execution"].includes(level)
   )
     throw new RangeError("Unknown exploration level");
+  if (family === "switch" && !["fifo", "voq"].includes(queueMode))
+    throw new RangeError("Unknown switch queue mode");
   const blocks = [],
     links = [],
     parts = [];
@@ -61,8 +64,523 @@ export function makeLayout(
         );
   }
   let board = { position: [0, -0.18, 0], size: [6.4, 0.14, 4.65] },
-    camera = [12.6, -0.22, 0.83, 0, 0, 0];
-  if (level === "processor" && family === "gpu") {
+    camera = [12.6, -0.22, 0.83, 0, 0, 0],
+    detailNote =
+      "Original functional schematic; positions and areas are not a physical floorplan.";
+  if (family === "tensor") {
+    if (level === "processor") {
+      const matrix = block(
+        "matrix",
+        "256 × 256 MAC array",
+        "matrix",
+        0.35,
+        -0.05,
+        3.2,
+        2.55,
+        {
+          label: true,
+          enter: "core",
+          representative: true,
+          documentedMacs: 65_536,
+          nodes: ["compute", "scheduler", "registers"],
+        },
+      );
+      // Sampled surface texture: one decorative cell is not one physical MAC.
+      banks(matrix, 16, 16);
+      const buffer = block(
+        "buffer",
+        "Unified buffer",
+        "buffer",
+        -2.2,
+        -0.15,
+        0.7,
+        2.8,
+        {
+          style: "memory",
+          label: true,
+          nodes: ["scratch"],
+        },
+      );
+      banks(buffer, 2, 12);
+      const weights = block(
+        "weights",
+        "Weight memory",
+        "weights",
+        2.55,
+        -0.15,
+        0.62,
+        2.8,
+        {
+          style: "memory",
+          label: true,
+        },
+      );
+      banks(weights, 2, 12);
+      block(
+        "instruction",
+        "Instruction control",
+        "instruction",
+        0,
+        -1.8,
+        5.3,
+        0.38,
+        {
+          style: "control",
+          label: true,
+        },
+      );
+      const accumulator = block(
+        "accumulator",
+        "Accumulators",
+        "accumulator",
+        0.35,
+        1.55,
+        3.2,
+        0.5,
+        {
+          style: "memory",
+          label: true,
+          nodes: ["output"],
+        },
+      );
+      banks(accumulator, 16, 2);
+      block(
+        "interface",
+        "Host interface",
+        "interface",
+        -2.1,
+        1.65,
+        1.35,
+        0.42,
+        {
+          style: "io",
+          nodes: ["memory"],
+        },
+      );
+      for (const pair of [
+        ["interface", "buffer"],
+        ["weights", "matrix"],
+        ["buffer", "matrix"],
+        ["instruction", "matrix"],
+        ["matrix", "accumulator"],
+      ])
+        link(...pair);
+      detailNote =
+        "TPU v1 reference: 65,536 MACs. Visible cells sample the array; positions and counts of drawn decorations are illustrative.";
+    } else if (level === "core") {
+      board.size = [6.4, 0.14, 5.0];
+      for (let i = 0; i < 64; i++) {
+        const window = block(
+          "array-window-" + i,
+          "Array window " + (i + 1),
+          "matrix",
+          -1.13 + (i % 8) * 0.4,
+          -1.4 + Math.floor(i / 8) * 0.4,
+          0.31,
+          0.31,
+          {
+            enter: "execution",
+            representative: true,
+            nodes: i === 0 ? ["compute", "registers"] : [],
+          },
+        );
+        banks(window, 2, 2);
+      }
+      const buffer = block(
+        "buffer",
+        "Activation buffer",
+        "buffer",
+        -2.25,
+        0,
+        0.7,
+        3.2,
+        {
+          style: "memory",
+          label: true,
+          nodes: ["scratch"],
+        },
+      );
+      banks(buffer, 2, 16);
+      const weights = block(
+        "weights",
+        "Weight staging",
+        "weights",
+        2.55,
+        0,
+        0.65,
+        3.2,
+        {
+          style: "memory",
+          label: true,
+        },
+      );
+      banks(weights, 2, 16);
+      block(
+        "instruction",
+        "Instruction decode",
+        "instruction",
+        0,
+        -2.03,
+        5.6,
+        0.34,
+        {
+          style: "control",
+          label: true,
+          nodes: ["scheduler"],
+        },
+      );
+      block(
+        "accumulator",
+        "Accumulated results",
+        "accumulator",
+        0.2,
+        1.98,
+        3.8,
+        0.38,
+        {
+          style: "memory",
+          label: true,
+          nodes: ["output"],
+        },
+      );
+      block("interface", "Host", "interface", -2.45, 1.98, 0.8, 0.38, {
+        style: "io",
+        nodes: ["memory"],
+      });
+      for (const pair of [
+        ["interface", "buffer"],
+        ["buffer", "array-window-0"],
+        ["weights", "array-window-7"],
+        ["instruction", "array-window-0"],
+        ["array-window-56", "accumulator"],
+      ])
+        link(...pair);
+      camera = [13.2, -0.18, 0.9, 0, 0, 0];
+      detailNote =
+        "Sampled windows into the documented matrix array; 64 drawn windows are not 64 documented hardware partitions. Open one for a separate 4 × 4 teaching array.";
+    } else {
+      board.size = [6.4, 0.14, 4.9];
+      block("memory", "Operand memory", "memory", -2.8, 0, 0.42, 3.2, {
+        style: "memory",
+        label: true,
+        nodes: ["memory"],
+      });
+      const scratch = block(
+        "scratch",
+        "Loaded A & B",
+        "buffer",
+        -1.85,
+        0,
+        0.75,
+        3.2,
+        {
+          style: "memory",
+          label: true,
+          nodes: ["scratch"],
+        },
+      );
+      banks(scratch, 2, 16);
+      block("scheduler", "Tile issue", "scheduler", 0.3, -1.85, 2.85, 0.32, {
+        style: "control",
+        label: true,
+        nodes: ["scheduler"],
+      });
+      for (let i = 0; i < 16; i++)
+        block(
+          "pe" + i,
+          "PE " + (i + 1),
+          "pe",
+          -0.85 + (i % 4) * 0.62,
+          -1.04 + Math.floor(i / 4) * 0.68,
+          0.48,
+          0.48,
+          {
+            pe: i,
+            lane: i,
+            nodes: ["pe" + i],
+          },
+        );
+      block("registers", "Wave operands", "registers", 2.15, -0.9, 1.0, 0.65, {
+        style: "memory",
+        nodes: ["registers"],
+      });
+      block("compute", "Wave step", "compute", 2.15, 0.3, 1.0, 0.65, {
+        label: true,
+        nodes: ["compute"],
+      });
+      block("output", "Stored results", "output", 0.3, 1.85, 3.8, 0.35, {
+        style: "memory",
+        label: true,
+        nodes: ["output"],
+      });
+      link("memory", "scratch");
+      link("scheduler", "compute");
+      for (let i = 0; i < 16; i++) {
+        if (i % 4 < 3) link("pe" + i, "pe" + (i + 1));
+        if (i < 12) link("pe" + i, "pe" + (i + 4));
+        if (i % 4 === 0 || i < 4) link("scratch", "pe" + i);
+        if (i >= 12) link("pe" + i, "output");
+      }
+      detailNote =
+        "Actual 4 × 4 output-stationary teaching array. This executes real integer products, not TPU v1 instruction timing or its weight-stationary dataflow.";
+    }
+  } else if (family === "switch") {
+    if (level === "processor") {
+      block("ingress", "Packet inputs", "ingress", -2.6, 0, 0.55, 3.25, {
+        style: "io",
+        label: true,
+        nodes: ["ingress-0", "ingress-1", "ingress-2"],
+      });
+      const packet = block(
+        "pipeline",
+        "Packet processing",
+        "parser",
+        -1.25,
+        -0.75,
+        1.7,
+        1.3,
+        {
+          enter: "core",
+          label: true,
+        },
+      );
+      banks(packet, 4, 3);
+      const queues = block(
+        "queues",
+        "Buffer & queues",
+        "queues",
+        -1.25,
+        0.9,
+        1.7,
+        1.35,
+        {
+          style: "memory",
+          label: true,
+          enter: "core",
+          nodes: [
+            "fifo-0",
+            "fifo-1",
+            "fifo-2",
+            ...Array.from(
+              { length: 9 },
+              (_, i) => `voq-${Math.floor(i / 3)}-${i % 3}`,
+            ),
+          ],
+        },
+      );
+      banks(queues, 6, 5);
+      const fabric = block(
+        "fabric",
+        "Switch fabric",
+        "fabric",
+        1.0,
+        0,
+        1.85,
+        2.8,
+        {
+          label: true,
+          enter: "core",
+          nodes: ["fabric", "scheduler"],
+        },
+      );
+      banks(fabric, 7, 7);
+      block("egress", "Packet outputs", "egress", 2.6, 0, 0.55, 3.25, {
+        style: "io",
+        label: true,
+        nodes: ["egress-0", "egress-1", "egress-2"],
+      });
+      block("interface", "Ethernet & SerDes", "interface", 0, -1.92, 4.1, 0.3, {
+        style: "control",
+      });
+      block("drop", "Admission limit", "drop", 0, 1.93, 1.75, 0.3, {
+        style: "control",
+        nodes: ["drop"],
+      });
+      for (const pair of [
+        ["ingress", "pipeline"],
+        ["pipeline", "queues"],
+        ["queues", "fabric"],
+        ["fabric", "egress"],
+      ])
+        link(...pair);
+      detailNote =
+        "Public packet-switch functions, not the G200 physical floorplan. Decorative banks do not assert queue, port or pipeline counts.";
+    } else if (level === "core") {
+      block("ingress", "Receive", "ingress", -2.5, -1.2, 0.7, 1.2, {
+        style: "io",
+        label: true,
+        nodes: ["ingress-0", "ingress-1", "ingress-2"],
+      });
+      block("parser", "Parse headers", "parser", -1.3, -1.2, 1.1, 1.2, {
+        style: "control",
+        label: true,
+      });
+      const lookup = block(
+        "lookup",
+        "Forwarding lookup",
+        "lookup",
+        0.25,
+        -1.2,
+        1.5,
+        1.2,
+        { style: "memory", label: true },
+      );
+      banks(lookup, 6, 5);
+      block("scheduler", "Scheduling", "scheduler", 2.0, -1.2, 1.35, 1.2, {
+        style: "control",
+        label: true,
+        nodes: ["scheduler"],
+      });
+      const queues = block(
+        "queues",
+        "Destination queues",
+        "queues",
+        -1.6,
+        0.7,
+        2.3,
+        1.7,
+        {
+          style: "memory",
+          label: true,
+          enter: "execution",
+          nodes: [
+            "fifo-0",
+            "fifo-1",
+            "fifo-2",
+            ...Array.from(
+              { length: 9 },
+              (_, i) => `voq-${Math.floor(i / 3)}-${i % 3}`,
+            ),
+          ],
+        },
+      );
+      banks(queues, 8, 6);
+      const fabric = block(
+        "fabric",
+        "Transfer fabric",
+        "fabric",
+        0.7,
+        0.7,
+        1.55,
+        1.7,
+        { label: true, enter: "execution", nodes: ["fabric"] },
+      );
+      banks(fabric, 5, 5);
+      block("egress", "Transmit", "egress", 2.3, 0.7, 0.75, 1.7, {
+        style: "io",
+        label: true,
+        nodes: ["egress-0", "egress-1", "egress-2"],
+      });
+      block("drop", "Admission limit", "drop", -1.6, 1.93, 2.3, 0.3, {
+        style: "control",
+        nodes: ["drop"],
+      });
+      for (const pair of [
+        ["ingress", "parser"],
+        ["parser", "lookup"],
+        ["lookup", "queues"],
+        ["queues", "fabric"],
+        ["scheduler", "fabric"],
+        ["fabric", "egress"],
+      ])
+        link(...pair);
+      detailNote =
+        "Functional packet path. Parser and lookup are context; only queue admission, arbitration and delivery execute in the teaching model.";
+    } else {
+      board.size = [6.5, 0.14, 4.8];
+      for (let ingress = 0; ingress < 3; ingress++) {
+        const z = -1.2 + ingress * 1.2;
+        block(
+          `ingress-${ingress}`,
+          `Input ${String.fromCharCode(65 + ingress)}`,
+          "ingress",
+          -2.72,
+          z,
+          0.5,
+          0.78,
+          { style: "io", label: true, nodes: [`ingress-${ingress}`] },
+        );
+        if (queueMode === "fifo") {
+          const queue = block(
+            `fifo-${ingress}`,
+            `Input ${String.fromCharCode(65 + ingress)} FIFO`,
+            "queues",
+            -1.22,
+            z,
+            1.74,
+            0.78,
+            {
+              style: "memory",
+              label: true,
+              ingress,
+              queueMode,
+              nodes: [`fifo-${ingress}`],
+            },
+          );
+          banks(queue, 6, 2);
+          link(`ingress-${ingress}`, queue.key);
+        } else
+          for (let destination = 0; destination < 3; destination++) {
+            const queue = block(
+              `voq-${ingress}-${destination}`,
+              `Input ${String.fromCharCode(65 + ingress)} → ${String.fromCharCode(65 + destination)}`,
+              "queues",
+              -1.85 + destination * 0.63,
+              z,
+              0.48,
+              0.78,
+              {
+                style: "memory",
+                ingress,
+                destination,
+                queueMode,
+                nodes: [`voq-${ingress}-${destination}`],
+              },
+            );
+            banks(queue, 1, 5);
+            link(`ingress-${ingress}`, queue.key);
+          }
+        block(
+          `egress-${ingress}`,
+          `Output ${String.fromCharCode(65 + ingress)}`,
+          "egress",
+          2.62,
+          z,
+          0.55,
+          0.78,
+          { style: "io", label: true, nodes: [`egress-${ingress}`] },
+        );
+      }
+      block("fabric", "Transfer fabric", "fabric", 1.0, 0, 1.3, 3.2, {
+        label: true,
+        nodes: ["fabric"],
+      });
+      block(
+        "scheduler",
+        "Round-robin grants",
+        "scheduler",
+        0.5,
+        -2.03,
+        2.25,
+        0.32,
+        { style: "control", label: true, nodes: ["scheduler"] },
+      );
+      block("drop", "Capacity drops", "drop", -1.55, 2.03, 1.8, 0.32, {
+        style: "control",
+        label: true,
+        nodes: ["drop"],
+      });
+      for (let ingress = 0; ingress < 3; ingress++) {
+        if (queueMode === "fifo") link(`fifo-${ingress}`, "fabric");
+        else
+          for (let destination = 0; destination < 3; destination++)
+            link(`voq-${ingress}-${destination}`, "fabric");
+        link("fabric", `egress-${ingress}`);
+      }
+      link("scheduler", "fabric");
+      detailNote = `Actual three-input, three-output teaching switch with 32 shared packet slots and ${queueMode === "fifo" ? "three arrival-ordered FIFOs" : "nine logical destination queues"}. This is not G200 port count, buffer size or proprietary scheduling.`;
+    }
+  } else if (level === "processor" && family === "gpu") {
     const count = profile === "h100-sxm" ? 132 : 170,
       cols = profile === "h100-sxm" ? 12 : 17,
       rows = Math.ceil(count / cols);
@@ -458,7 +976,17 @@ export function makeLayout(
       link(...pair);
     for (const b of blocks.filter((b) => b.style === "memory")) banks(b, 5, 3);
   }
-  return { family, level, blocks, links, parts, board, camera };
+  return {
+    family,
+    level,
+    blocks,
+    links,
+    parts,
+    board,
+    camera,
+    detailNote,
+    queueMode,
+  };
 }
 export function resolveBlock(layout, nodeId) {
   return (

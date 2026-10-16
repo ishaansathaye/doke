@@ -12,6 +12,7 @@ if [ ! -x "$DOKE_BINDGEN" ]; then DOKE_BINDGEN=wasm-bindgen; fi
 python3 tools/check_content.py
 node tests/hardware-catalog.mjs
 node tests/architecture.mjs
+node tests/timescales.mjs
 python3 tools/notices.py
 python3 - <<'PY'
 from pathlib import Path

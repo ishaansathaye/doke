@@ -18,6 +18,8 @@ for (const required of [
   "architecture.json",
   "brain.json",
   "comparison.json",
+  "timescales.json",
+  "timescales-view.js",
   "pkg/doke_bg.wasm",
   "assets/brain.bin",
   "assets/fine/manifest.json",
@@ -126,12 +128,20 @@ try {
     backend === "webgl" ? /\bGl\b/ : /BrowserWebGpu/,
   );
   assert.deepEqual(await page.locator(".worlds button").allTextContents(), [
-    "CPU",
-    "GPU",
     "Human brain",
   ]);
+  assert.deepEqual(
+    await page
+      .locator("#hardware option")
+      .evaluateAll((items) => items.map((item) => item.value).filter(Boolean)),
+    ["ryzen-9950x", "rtx-5090", "h100-sxm", "tpu-v1", "silicon-one-g200"],
+  );
+  const selectWorld = (family) =>
+    page
+      .locator("#hardware")
+      .selectOption({ cpu: "ryzen-9950x", gpu: "rtx-5090" }[family]);
   for (const family of ["gpu", "cpu"]) {
-    await page.locator(`button[data-world="${family}"]`).click();
+    await selectWorld(family);
     for (const level of ["processor", "core", "execution"]) {
       await page.locator(`button[data-level="${level}"]`).click();
       assert.equal(
@@ -194,7 +204,7 @@ try {
   checks.push(
     "actual reference atlas and fine chunked mesh under project path",
   );
-  await page.locator('button[data-world="gpu"]').click();
+  await selectWorld("gpu");
   await page.locator("#compare-toggle").click();
   await page.waitForFunction(
     () =>

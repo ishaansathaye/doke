@@ -1,4 +1,5 @@
 import { hdrCapable, configureHDR, HDRText } from "./display.js";
+import { timingPanel } from "./timescales-view.js";
 import { makeLayout, resolveBlock } from "./silicon-layouts.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
@@ -17,6 +18,7 @@ let wasm,
   architecture,
   brainContent,
   comparison,
+  timescales,
   brain,
   brainPromise,
   model,
@@ -39,6 +41,15 @@ let playing = false,
   drag,
   paint,
   brush = 0;
+let operation = "difference",
+  queueMode = "voq";
+const defaults = {
+  cpu: "ryzen-9950x",
+  gpu: "rtx-5090",
+  tensor: "tpu-v1",
+  switch: "silicon-one-g200",
+};
+const familyNames = { cpu: "CPU", gpu: "GPU", tensor: "NPU", switch: "ASIC" };
 let cacheEnabled = true,
   memoryLayout = "packed",
   speed = 1,
@@ -134,11 +145,9 @@ function showSource(key) {
   );
 }
 function profileData() {
-  return (
-    architecture.profiles[family === "cpu" ? "ryzen-9950x" : profile] ||
-    Object.values(architecture.profiles).find((p) => p.family === family)
-  );
+  return architecture.profiles[profile];
 }
+
 function showOverview() {
   if (world === "brain") {
     showBrainEvidence();
@@ -147,21 +156,23 @@ function showOverview() {
   const f = family,
     p = profileData(),
     lev = level,
-    overviewBlocks = layout.blocks,
-    description = architecture.families[f].levels.find((l) => l.id === lev);
-  openPanel(
-    `overview:${f}:${lev}`,
+    blocks = layout.blocks,
+    note = layout.detailNote,
+    desc = architecture.families[f].levels.find((l) => l.id === lev);
+  const title =
     lev === "processor"
       ? "Processor"
       : lev === "core"
-        ? f === "cpu"
-          ? "Core"
-          : "SM"
-        : "Execution",
+        ? { cpu: "Core", gpu: "SM", tensor: "Array", switch: "Packet path" }[f]
+        : "Execution";
+  openPanel(
+    `overview:${f}:${lev}`,
+    title,
     () =>
-      `<span class="eyebrow">${lev === "execution" ? "EXECUTABLE TEACHING MODEL" : "SOURCE-LINKED ARCHITECTURE"}</span><h2>${esc(description.title)}</h2><p>${esc(description.description)}</p><p>${esc(architecture.families[f].overview)}</p>${lev === "processor" ? `<dl>${p.facts.map((x) => `<dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd>`).join("")}</dl><p class="limit">${esc(p.topology_note)}</p><button class="action" data-enter="core">Enter one ${f === "cpu" ? "core" : "SM"} ↘</button>` : lev === "core" ? `<p>Choose any component to see what it does, what connects to it, and the evidence behind it.</p><button class="action" data-enter="execution">Follow an actual value ↘</button>` : `<p>Paint an 8 × 8 input. The model calculates C = A × B using a fixed first-difference matrix B. Each output accumulates eight integer products. CPU and GPU produce the same exact result through different schedules.</p><p class="limit">Ticks are authored model steps, not vendor clock cycles. The CPU does not decode x86 or speculate. The GPU runs two logical warps, not a whole GPU or its compiler. This model cannot benchmark products.</p><button class="action" data-value="${pinnedOutput}">Inspect output ${pinnedOutput} →</button><button class="action" data-input>Change the input →</button><label class="inline-controls">Playback speed <select id="pace"><option value="0.25">¼×</option><option value="1">1×</option><option value="4">4×</option></select></label>`}${lev !== "execution" ? `<details><summary>Find a component</summary>${overviewBlocks.map((b) => `<button class="source-link" data-inspect-level="${lev}" data-inspect="${esc(b.key)}">${esc(b.title)} →</button>`).join("")}</details>` : ""}${sourceButtons(p.sources)}`,
+      `<span class="eyebrow">${lev === "execution" ? "EXECUTABLE TEACHING MODEL" : "SOURCE-LINKED ARCHITECTURE"}</span><h2>${esc(desc.title)}</h2><p>${esc(desc.description)}</p><p>${esc(architecture.families[f].overview)}</p><p class="limit">${esc(note)}</p>${lev === "processor" ? `<dl>${p.facts.map((x) => `<dt>${esc(x.label)}</dt><dd>${esc(x.value)}</dd>`).join("")}</dl><p class="limit">${esc(p.topology_note)}</p><button class="action" data-enter="core">Explore the internals ↘</button>` : lev === "core" ? `<p>Choose a component to explore its role, connections and sources.</p><button class="action" data-enter="execution">${f === "switch" ? "Follow a packet" : "Follow an actual value"} ↘</button>` : `<p>${f === "switch" ? "Eighteen packets begin in a three-port teaching switch. Each tick delivers prior transfers, then arbitrates new requests. Block an output or change FIFO to virtual output queues and inspect which packets can progress." : "An 8 × 8 input matrix A is multiplied by B. Each output accumulates eight integer products. CPU, GPU and tensor schedules produce the same exact result. Choose the matrix transform in Input."}</p><p class="limit">Timing and resource limits are authored teaching rules. Reference chip clocks and bandwidth do not calibrate this model.</p><button class="action" data-value="${pinnedOutput}">${f === "switch" ? "Inspect packet traffic" : "Inspect a value"} →</button><label class="inline-controls">Playback speed <select id="pace"><option value="0.25">¼×</option><option value="1">1×</option><option value="4">4×</option></select></label>`}${lev !== "execution" ? `<details><summary>Find a component</summary>${blocks.map((b) => `<button class="source-link" data-inspect-level="${lev}" data-inspect="${esc(b.key)}">${esc(b.title)} →</button>`).join("")}</details>` : ""}${sourceButtons(p.sources)}`,
   );
 }
+
 function showBlock(b) {
   if (!b) return;
   const f = family,
@@ -175,15 +186,68 @@ function showBlock(b) {
     id,
     b.title,
     () =>
-      `<span class="eyebrow">${lev === "execution" ? "EXECUTED MODEL COMPONENT" : "INSIDE THE " + (f === "gpu" ? "GPU" : "CPU")}</span><h2>${esc(b.title)}</h2><p>${esc(content.summary)}</p>${content.detail.map((t) => `<p>${esc(t)}</p>`).join("")}<h3>Where it fits</h3><p>${esc(content.path.join(" → "))}</p><p class="limit">${esc(content.modelNote)}${lev === "core" ? " Highlighted activity represents one teaching-model resource; it does not distribute or schedule work across these physical units." : ""}</p>${b.enter ? `<button class="action" data-enter="${b.enter}" data-unit="${b.unit ?? selectedUnit}">Enter ${b.enter === "core" ? (f === "cpu" ? "core " + ((b.unit ?? 0) + 1) : "SM " + ((b.unit ?? 0) + 1)) : "the execution model"} ↘</button>` : ""}${Number.isInteger(b.lane) ? `<button class="action" data-value="${Math.min(63, (snap.group_index || 0) * 32 + b.lane)}">Follow this lane's output →</button>` : ""}${lev === "execution" ? '<button class="action" data-state>Inspect live machine state →</button>' : ""}${sourceButtons(content.sources)}`,
+      `<span class="eyebrow">${lev === "execution" ? "EXECUTED MODEL COMPONENT" : "INSIDE THE " + familyNames[f]}</span><h2>${esc(b.title)}</h2><p>${esc(content.summary)}</p>${content.detail.map((t) => `<p>${esc(t)}</p>`).join("")}<h3>Where it fits</h3><p>${esc(content.path.join(" → "))}</p><p class="limit">${esc(content.modelNote)}${lev === "core" ? " Highlighted activity represents one teaching-model resource; it does not distribute or schedule work across these schematic components." : ""}</p>${b.enter ? `<button class="action" data-enter="${b.enter}" data-unit="${b.unit ?? selectedUnit}">Enter ${b.enter === "core" ? (f === "cpu" ? "core " + ((b.unit ?? 0) + 1) : f === "gpu" ? "SM " + ((b.unit ?? 0) + 1) : f === "tensor" ? "the matrix unit" : "the packet path") : "the execution model"} ↘</button>` : ""}${Number.isInteger(b.lane) ? `<button class="action" data-follow-lane="${b.lane}">Follow this lane’s output →</button>` : ""}${lev === "execution" ? '<button class="action" data-state>Inspect live machine state →</button>' : ""}${sourceButtons(content.sources)}`,
   );
 }
+function outputForLane(index) {
+  return (
+    snap.lanes?.find((l) => l.lane === index)?.output_index ??
+    (family === "tensor"
+      ? Math.floor((snap.group_index || 0) / 2) * 32 +
+        Math.floor(index / 4) * 8 +
+        ((snap.group_index || 0) % 2) * 4 +
+        (index % 4)
+      : (snap.group_index || 0) * 32 + index)
+  );
+}
+function trafficBody() {
+  return `<span class="eyebrow">LIVE PACKETS · TICK ${snap.tick}</span><h2>Where can this packet go?</h2><p>Three inputs and outputs share 32 packet slots. Change a destination's availability and watch the queue consequences.</p><label class="inline-controls">Queue discipline<select id="queue-mode"><option value="voq">Virtual output queues</option><option value="fifo">One FIFO per input</option></select></label><div class="traffic-ports">${[0, 1, 2].map((i) => `<div><span>Output ${"ABC"[i]}</span><button data-inject="${i}">Send 6</button><button data-block="${i}" aria-pressed="${snap.blocked[i]}">${snap.blocked[i] ? "Unblock" : "Block"}</button></div>`).join("")}</div><dl><dt>Delivered / admitted</dt><dd>${snap.delivered} / ${snap.admitted}</dd><dt>Buffered / in flight</dt><dd>${snap.buffered} / ${snap.in_flight}</dd><dt>Rejected because the buffer was full</dt><dd>${snap.dropped}</dd></dl><h3>Actual queues</h3>${snap.queues.map((q) => `<p class="packet-queue"><b>${esc(q.node)}</b><span>${q.packet_ids.map((id) => `<i>#${id}</i>`).join("") || "empty"}</span></p>`).join("")}<p class="limit">This bounded model explains queueing and contention. Its three ports, 32 slots, arbitration and tick latency are authored; they are not G200's internal resources or latency.</p>`;
+}
+function showTraffic() {
+  openPanel("traffic", "Packet traffic", trafficBody, true);
+}
+function renderFabric() {
+  const activity = new Float32Array(256),
+    flows = [];
+  for (const p of snap.packets) {
+    const b = resolveBlock(layout, p.node);
+    if (b) activity[b.region] = Math.min(0.85, activity[b.region] + 0.18);
+  }
+  for (const e of snap.events
+    .filter(
+      (e) =>
+        e.tick === snap.tick &&
+        ["transfer", "deliver", "admit"].includes(e.kind),
+    )
+    .slice(-32)) {
+    const a = resolveBlock(layout, e.from),
+      b = resolveBlock(layout, e.to);
+    if (!a || !b) continue;
+    activity[a.region] = 0.65;
+    activity[b.region] = Math.max(activity[b.region], 0.4);
+    flows.push(
+      a.position[0],
+      a.position[1] + 0.14,
+      a.position[2],
+      b.position[0],
+      b.position[1] + 0.14,
+      b.position[2],
+      reduced ? 0.5 : phase,
+    );
+  }
+  renderer.activity(activity);
+  renderer.chip_flows(new Float32Array(flows));
+}
 function showInput() {
+  if (family === "switch") {
+    showTraffic();
+    return;
+  }
   openPanel(
     "input",
     "Input",
     () =>
-      `<span class="eyebrow">SAME INPUT · DIFFERENT SCHEDULE</span><h2>Make a pattern.</h2><p>Draw on the left. Follow its values through memory and arithmetic. Click an output square to inspect every product that built it.</p><div class="tile-pair"><div><div class="eyebrow">INPUT · A</div><canvas id="input-tile" width="256" height="256" tabindex="0" aria-label="Editable 8 by 8 input. Arrow keys move; Space toggles a cell."></canvas><p>Click or drag to paint.</p></div><div><div class="eyebrow">OUTPUT · C</div><canvas id="output-tile" width="256" height="256" tabindex="0" aria-label="Output values. Arrow keys move; Enter inspects selected output."></canvas><p id="output-count"></p></div></div><label class="inline-controls">Pattern<select id="input-preset"><option value="custom">Custom</option><option value="diagonal">Diagonal</option><option value="stripes">Stripes</option><option value="checker">Checker</option><option value="clear">Clear</option></select></label>${family === "cpu" ? `<label class="inline-controls">Four-line model cache<input type="checkbox" id="cache-enabled" ${cacheEnabled ? "checked" : ""}></label>` : `<label class="inline-controls">Operand B addresses<select id="memory-layout"><option value="packed">Contiguous</option><option value="strided">Strided</option></select></label><p class="muted">Strided storage puts B in column-major order. Adjacent output lanes request values 32 bytes apart. Logical values stay identical; more 32-byte sectors may be requested.</p>`}<button class="action" data-value="${pinnedOutput}">Follow output ${pinnedOutput} →</button><p class="limit">This small difference filter demonstrates data movement. It does not recognize images or predict what a person perceives.</p>`,
+      `<span class="eyebrow">SAME INPUT · DIFFERENT SCHEDULE</span><h2>Make a pattern.</h2><p>Draw on the left. Follow its values through memory and arithmetic. Click an output square to inspect every product that built it.</p><div class="tile-pair"><div><div class="eyebrow">INPUT · A</div><canvas id="input-tile" width="256" height="256" tabindex="0" aria-label="Editable 8 by 8 input. Arrow keys move; Space toggles a cell."></canvas><p>Click or drag to paint.</p></div><div><div class="eyebrow">OUTPUT · C</div><canvas id="output-tile" width="256" height="256" tabindex="0" aria-label="Output values. Arrow keys move; Enter inspects selected output."></canvas><p id="output-count"></p></div></div><label class="inline-controls">Operation<select id="operation"><option value="difference">Find edges · A × B</option><option value="mix">Weighted neighbors · A × B</option><option value="identity">Copy · A × I</option></select></label><label class="inline-controls">Pattern<select id="input-preset"><option value="custom">Custom</option><option value="diagonal">Diagonal</option><option value="stripes">Stripes</option><option value="checker">Checker</option><option value="clear">Clear</option></select></label>${family === "cpu" ? `<label class="inline-controls">Four-line model cache<input type="checkbox" id="cache-enabled" ${cacheEnabled ? "checked" : ""}></label>` : family === "gpu" ? `<label class="inline-controls">Operand B addresses<select id="memory-layout"><option value="packed">Contiguous</option><option value="strided">Strided</option></select></label><p class="muted">Strided storage puts B in column-major order. Adjacent output lanes request values 32 bytes apart. Logical values stay identical; more 32-byte sectors may be requested.</p>` : `<p class="muted">Operand tiles stream through a 4 × 4 array. Adjacent cells reuse values while accumulating each output.</p>`}<button class="action" data-value="${pinnedOutput}">Follow output ${pinnedOutput} →</button><p class="limit">These small matrix transforms demonstrate data movement. The model does not recognize images or predict what a person perceives.</p>`,
   );
 }
 function valueBody() {
@@ -192,7 +256,22 @@ function valueBody() {
     warp = snap.detail.warps.find((w) =>
       w.lanes.some((l) => l.output_index === pinnedOutput),
     );
-  const active = family === "cpu" ? job : warp,
+  const tensorState =
+    family === "tensor"
+      ? {
+          stage: o.stored
+            ? "stored"
+            : o.retired_terms === 8
+              ? "waiting_store"
+              : o.retired_terms
+                ? "accumulating"
+                : "awaiting wave",
+          reason:
+            "Operands travel between neighboring cells in the teaching array. Only completed products appear below.",
+        }
+      : null;
+  const active =
+      family === "cpu" ? job : family === "tensor" ? tensorState : warp,
     lane = warp?.lanes.find((l) => l.output_index === pinnedOutput),
     operands = family === "cpu" ? job : lane;
   return `<span class="eyebrow">ACTUAL MODEL STATE · TICK ${snap.tick}</span><h2>One value, eight products.</h2><label class="inline-controls">Output <select id="pinned-output">${Array.from({ length: 64 }, (_, i) => `<option value="${i}" ${i === pinnedOutput ? "selected" : ""}>C[${Math.floor(i / 8)}, ${i % 8}] · ${i}</option>`).join("")}</select></label><div class="term-value">${o.accumulated_sum}</div><p>${o.stored ? "Completed and stored." : o.retired_terms === 8 ? "All products complete; the store is still pending." : `${o.retired_terms} of 8 products have completed.`}</p><span class="state-tag">${esc(active?.stage || "awaiting work")}</span><p>${esc(active?.reason || "This output has not entered the visible work group yet.")}</p>${operands ? `<div class="equation">A ${operands.a ?? "…"} × B ${operands.b ?? "…"}</div><p class="muted">Loaded operands · ${operands.a_address == null ? "no pending address" : `addresses ${operands.a_address} and ${operands.b_address} bytes`}</p>` : ""}<table aria-label="Completed products"><thead><tr><th>k</th><th>A × B</th><th>Product</th><th>Sum</th></tr></thead><tbody>${Array.from(
@@ -203,13 +282,18 @@ function valueBody() {
     },
   ).join(
     "",
-  )}</tbody></table><p class="muted">Only completed arithmetic appears here. The final output becomes visible after its modeled store completes.</p><button class="action" data-state>Inspect ${family === "cpu" ? "cache and work queue" : "warp and memory sectors"} →</button>`;
+  )}</tbody></table><p class="muted">Only completed arithmetic appears here. The final output becomes visible after its modeled store completes.</p><button class="action" data-state>Inspect ${family === "cpu" ? "cache and work queue" : family === "tensor" ? "the operand wave" : "warp and memory sectors"} →</button>`;
 }
 function showValue(id) {
+  if (family === "switch") {
+    showTraffic();
+    return;
+  }
   pinnedOutput = Math.max(0, Math.min(63, Number(id) || 0));
   openPanel("value", "Follow a value", valueBody, true);
 }
 function stateBody() {
+  if (family === "switch") return trafficBody();
   const d = snap.detail;
   return `<span class="eyebrow">LIVE MODEL STATE · TICK ${snap.tick}</span><h2>What is waiting?</h2>${
     family === "cpu"
@@ -223,7 +307,9 @@ function stateBody() {
             )
             .join("") || "<p>All outputs stored.</p>"
         }`
-      : `${d.warps.map((w) => `<h3>Warp ${w.warp} · k = ${w.k}</h3><span class="state-tag">${esc(w.stage)}</span><p>${esc(w.reason)}</p><p class="muted">Requested 32-byte sectors for the current operand step</p><div class="sector-grid">${[...w.requested_a_sectors.map((s) => "A " + s), ...w.requested_b_sectors.map((s) => "B " + s)].map((s) => `<span>${esc(s)}</span>`).join("") || "<span>none requested</span>"}</div>`).join("")}`
+      : family === "tensor"
+        ? `<h3>4 × 4 teaching array</h3><p>Tile ${(snap.group_index ?? 0) + 1} of 4. Each output is an eight-product dot product. Values move right and down between neighboring processing elements.</p><div class="sector-grid">${snap.lanes.map((l) => `<span>PE ${l.lane + 1} · ${l.output_index == null ? "idle" : `C${l.output_index} = ${d.outputs[l.output_index].accumulated_sum}`}</span>`).join("")}</div>`
+        : `${d.warps.map((w) => `<h3>Warp ${w.warp} · k = ${w.k}</h3><span class="state-tag">${esc(w.stage)}</span><p>${esc(w.reason)}</p><p class="muted">Requested 32-byte sectors for the current operand step</p><div class="sector-grid">${[...w.requested_a_sectors.map((s) => "A " + s), ...w.requested_b_sectors.map((s) => "B " + s)].map((s) => `<span>${esc(s)}</span>`).join("") || "<span>none requested</span>"}</div>`).join("")}`
   }<h3>Completed work</h3><dl><dt>Integer multiply-adds</dt><dd>${snap.counters.macs} / 512</dd><dt>Modeled bytes transferred</dt><dd>${pretty(snap.counters.bytes_moved)}</dd><dt>Output values stored</dt><dd>${snap.counters.completed_outputs} / 64</dd></dl><p class="limit">These are teaching-model transactions, not measurements of ${esc(profileData().name)}.</p>`;
 }
 function showState() {
@@ -234,23 +320,23 @@ function showAbout() {
     "about",
     "Evidence",
     () =>
-      `<span class="eyebrow">FOLLOW THE EVIDENCE</span><h2>Three ways to look inside.</h2><p>Explore documented processor structures, follow a calculation through an executable teaching model, and locate the human brain's visual anatomy.</p><p>Processor counts and architectural roles come from AMD and NVIDIA documentation. Geometry is an original functional schematic: positions, areas and wiring do not reproduce a physical die.</p><p>Model latencies, cache capacity and issue rules are deliberately small and authored. Product selection changes architectural context; it does not turn the model into a benchmark of that chip.</p><p>Brain anatomy comes from a human reference atlas. Its pathway guide highlights landmarks at an authored reading pace. It predicts neither neural firing nor your perception.</p><p class="limit">A model tick, a hardware cycle and a physiological response time are different quantities. doke does not claim a CPU-versus-brain speed ranking.</p>${sourceButtons(profileData().sources)}${sourceButtons(["allen"], "brain")}<details><summary>Data attribution and licenses</summary><p>${esc(brain?.getAtlas?.()?.attribution || "Anatomical meshes derived from the Allen Human Reference Atlas, Ding and colleagues, 2020.")}</p><a href="assets/NOTICE.md" target="_blank" rel="noopener">Atlas attribution</a> · <a href="licenses/rust-dependencies.txt" target="_blank" rel="noopener">Software notices</a></details>`,
+      `<span class="eyebrow">FOLLOW THE EVIDENCE</span><h2>Inside the computation.</h2><p>Explore documented processor structures, follow a calculation through an executable teaching model, and locate the human brain's visual anatomy.</p><p>Processor counts and architectural roles come from AMD, NVIDIA, Google and Cisco documentation. Geometry is an original functional schematic: positions, areas and wiring do not reproduce a physical die.</p><p>Model latencies, cache capacity and issue rules are deliberately small and authored. Product selection changes architectural context; it does not turn the model into a benchmark of that chip.</p><p>Brain anatomy comes from a human reference atlas. Its pathway guide highlights landmarks at an authored reading pace. It predicts neither neural firing nor your perception.</p><p class="limit">A model tick, a hardware cycle and a physiological response time are different quantities. doke does not claim a CPU-versus-brain speed ranking.</p>${sourceButtons(profileData().sources)}${sourceButtons(["allen"], "brain")}<details><summary>Data attribution and licenses</summary><p>${esc(brain?.getAtlas?.()?.attribution || "Anatomical meshes derived from the Allen Human Reference Atlas, Ding and colleagues, 2020.")}</p><a href="assets/NOTICE.md" target="_blank" rel="noopener">Atlas attribution</a> · <a href="licenses/rust-dependencies.txt" target="_blank" rel="noopener">Software notices</a></details>`,
   );
 }
 function showBrainEvidence() {
+  showTiming();
+}
+function showTiming() {
+  const p = profileData();
   openPanel(
-    "brain:evidence",
-    "Brain evidence",
+    "timing:" + profile,
+    "Timing & parts",
     () =>
-      `<span class="eyebrow">ANATOMY · NOT A PREDICTION</span><h2>The same image. Different mechanisms.</h2><p>${esc(comparison.summary)}</p><p>${esc(comparison.input.scope)}</p><p>${esc(comparison.brain.scope)}</p><p class="limit">The guide clock is authored reading pace. It is independent of the processor model's ticks. There is no direct conversion between operations per second and cognition.</p>${comparison.mechanisms
-        .filter((m) => ["cpu", "gpu", "human"].includes(m.id))
-        .map(
-          (m) =>
-            `<h3>${esc(m.label)}</h3><p>${esc(m.organization)} ${esc(m.tradeoff)}</p>`,
-        )
-        .join("")}${sourceButtons(comparison.evidenceSourceIds, "comparison")}`,
+      timingPanel(timescales, p, sourceButtons) +
+      `<details><summary>About the atlas guide</summary><p>${esc(comparison.brain.scope)}</p><p>${family === "switch" ? "Packet routing and visual anatomy are independent demonstrations." : esc(comparison.input.scope)}</p>${sourceButtons(comparison.evidenceSourceIds, "comparison")}</details>`,
   );
 }
+
 function showAnatomy() {
   openPanel(
     "anatomy",
@@ -295,6 +381,26 @@ function showCutaway() {
   );
 }
 function bindPanel() {
+  const op = $("#operation");
+  if (op) {
+    op.value = operation;
+    op.onchange = () => {
+      operation = op.value;
+      resetModel();
+    };
+  }
+  const queue = $("#queue-mode");
+  if (queue) {
+    queue.value = queueMode;
+    queue.onchange = () => {
+      queueMode = queue.value;
+      snap = JSON.parse(model.queue_mode(queueMode));
+      setLevel(level);
+      showTraffic();
+      updateSnapshot();
+    };
+  }
+
   const pace = $("#pace");
   if (pace) {
     pace.value = String(speed);
@@ -416,6 +522,7 @@ function bindPanel() {
   }
 }
 function drawTiles() {
+  if (family === "switch") return;
   for (const [selector, values, valid] of [
     ["#input-tile", input, null],
     ["#output-tile", snap?.output || [], snap?.valid || []],
@@ -427,12 +534,16 @@ function drawTiles() {
     ctx.clearRect(0, 0, c.width, c.height);
     for (let i = 0; i < 64; i++) {
       const v = values[i] || 0;
+      const shade = Math.min(
+        7,
+        (Math.abs(v) * 7) / (valid && operation === "mix" ? 28 : 7),
+      );
       ctx.fillStyle =
         valid && !valid[i]
           ? "#111c17"
           : v < 0
-            ? `rgb(${60 + Math.min(7, -v) * 12},${70 + Math.min(7, -v) * 13},${72 + Math.min(7, -v) * 15})`
-            : `rgb(${25 + v * 29},${37 + v * 29},${31 + v * 29})`;
+            ? `rgb(${60 + shade * 12},${70 + shade * 13},${72 + shade * 15})`
+            : `rgb(${25 + shade * 29},${37 + shade * 29},${31 + shade * 29})`;
       ctx.fillRect((i % 8) * s + 1, Math.floor(i / 8) * s + 1, s - 2, s - 2);
       if (
         document.activeElement === c &&
@@ -459,42 +570,55 @@ function pause() {
   updateControls();
   if (snap && !reader.hidden && tabs.get(currentTab)?.live) renderPanel();
 }
+function isComplete() {
+  return family === "switch"
+    ? snap?.occupied === 0 && snap?.admitted > 0
+    : snap?.status === "complete";
+}
 function updateControls() {
   $("#run").disabled = !model;
   $("#run").textContent =
     level !== "execution"
-      ? "Follow a value ↗"
+      ? family === "switch"
+        ? "Follow a packet ↗"
+        : "Run a matrix ↗"
       : playing
         ? "Pause Ⅱ"
-        : snap?.status === "complete"
+        : isComplete()
           ? "Replay ↗"
           : "Play ↗";
   $("#run").setAttribute("aria-pressed", String(playing));
   $("#step").hidden = $("#reset").hidden = level !== "execution";
-  $("#step").disabled = !model || snap?.status === "complete";
+  $("#step").disabled = !model || isComplete();
   $("#run-summary").textContent =
     level === "execution" && snap
-      ? `tick ${snap.tick} · ${snap.counters.completed_outputs}/64 stored`
+      ? `tick ${snap.tick} · ${family === "switch" ? snap.delivered + " delivered" : snap.counters.completed_outputs + "/64 stored"}`
       : "";
 }
+
 function resetModel() {
   if (!wasm) return;
   pause();
   model?.free();
-  model = new wasm.SiliconSimulation(
-    JSON.stringify({
-      mode: family,
-      input,
-      filter: "difference",
-      layout: memoryLayout,
-      cache_enabled: cacheEnabled,
-      issue_width: 2,
-    }),
-  );
+  if (family === "switch") {
+    model = new wasm.FabricSimulation(queueMode);
+    for (let i = 0; i < 3; i++) model.inject(i, 6);
+  } else
+    model = new wasm.SiliconSimulation(
+      JSON.stringify({
+        mode: family,
+        input,
+        filter: operation,
+        layout: memoryLayout,
+        cache_enabled: cacheEnabled,
+        issue_width: 2,
+      }),
+    );
   snap = JSON.parse(model.snapshot());
   phase = 0.5;
   updateSnapshot();
 }
+
 function updateSnapshot() {
   updateControls();
   drawTiles();
@@ -508,25 +632,35 @@ function updateSnapshot() {
 }
 function advance(count = 1) {
   snap = JSON.parse(model.advance(count));
-  if (snap.status === "complete") playing = false;
+  if (isComplete()) playing = false;
   updateSnapshot();
   return snap;
 }
 function finish() {
   pause();
-  for (let i = 0; i < 400 && snap.status !== "complete"; i++)
+  for (let i = 0; i < 400 && !isComplete(); i++) {
+    const occupied = snap.occupied,
+      delivered = snap.delivered;
     snap = JSON.parse(model.advance(256));
-  if (snap.status !== "complete")
+    if (
+      family === "switch" &&
+      snap.occupied === occupied &&
+      snap.delivered === delivered
+    )
+      break;
+  }
+  if (family !== "switch" && !isComplete())
     throw Error("Model exceeded bounded run budget");
   updateSnapshot();
   return structuredClone(snap);
 }
+
 function setLevel(next) {
   if (!["processor", "core", "execution"].includes(next)) return;
   if (world === "brain") setWorld(family);
   level = next;
   document.body.dataset.level = level;
-  layout = makeLayout(family, level, profile, selectedUnit);
+  layout = makeLayout(family, level, profile, selectedUnit, queueMode);
   renderer?.chip_scene(JSON.stringify(layout));
   if (renderer) {
     const target = layout.camera;
@@ -546,63 +680,85 @@ function setLevel(next) {
   closePanel();
 }
 function updateHeading() {
-  const p = profileData();
+  const p = profileData(),
+    name = familyNames[family];
+  const coreTitles = {
+    cpu: `Inside core ${selectedUnit + 1}`,
+    gpu: `Inside SM ${selectedUnit + 1}`,
+    tensor: "Inside the matrix unit",
+    switch: "Inside the packet path",
+  };
+  const executionTitles = {
+    cpu: "A value through a CPU",
+    gpu: "One warp. 32 lanes.",
+    tensor: "A wave of multiply-adds.",
+    switch: "One packet. A path through.",
+  };
+  const summaries = {
+    cpu: "16 cores. Two compute groups. Start with one.",
+    gpu: `${p.counts.sms} streaming multiprocessors. Start with one.`,
+    tensor:
+      "65,536 multiply-accumulate units. Explore a representative window.",
+    switch: "From ingress to queues, scheduling and egress.",
+  };
   $("#eyebrow").textContent =
     world === "brain"
       ? "HUMAN REFERENCE ATLAS"
       : level === "execution"
         ? "FOLLOW THE COMPUTATION"
-        : "INSIDE THE " + family.toUpperCase();
+        : "INSIDE THE " + name;
   $("#scene-title").textContent =
     world === "brain"
       ? "The human brain"
       : level === "processor"
-        ? family === "cpu"
-          ? "Ryzen 9 9950X"
-          : profile === "h100-sxm"
-            ? "H100 SXM"
-            : "RTX 5090"
+        ? p.name
         : level === "core"
-          ? family === "cpu"
-            ? `Inside core ${selectedUnit + 1}`
-            : `Inside SM ${selectedUnit + 1}`
-          : family === "cpu"
-            ? "A value through a CPU"
-            : "One warp. 32 lanes.";
+          ? coreTitles[family]
+          : executionTitles[family];
   $("#scene-description").textContent =
     world === "brain"
-      ? "A reference anatomy. Explore the structures that support seeing and thinking."
+      ? "Reference anatomy. Explore the structures that support seeing and thinking."
       : level === "processor"
-        ? family === "cpu"
-          ? "16 cores. Two compute groups. Start with one."
-          : `${p.counts.sms} streaming multiprocessors. Start with one.`
-        : level === "core"
-          ? family === "cpu"
-            ? "Prediction, dispatch, registers, execution and memory."
-            : "Four partitions. Registers, arithmetic, tensor units and shared memory."
-          : "Your input. Real arithmetic. Every wait and every product is inspectable.";
+        ? summaries[family]
+        : architecture.families[family].levels.find((l) => l.id === level)
+            .description;
   $("#depth-nav").hidden = world === "brain";
   $$("button[data-level]").forEach((b) => {
     b.toggleAttribute("aria-current", b.dataset.level === level);
     if (b.dataset.level === level) b.setAttribute("aria-current", "step");
     if (b.dataset.level === "core")
-      b.textContent = family === "cpu" ? "Inside a core" : "Inside an SM";
+      b.textContent = {
+        cpu: "Inside a core",
+        gpu: "Inside an SM",
+        tensor: "Inside the array",
+        switch: "Inside the path",
+      }[family];
+    if (b.dataset.level === "execution")
+      b.textContent =
+        family === "switch" ? "Follow a packet" : "Follow a value";
   });
   $("#level-enter").hidden = world === "brain" || level === "execution";
   $("#level-enter").innerHTML =
     (level === "processor"
-      ? family === "cpu"
-        ? "Explore one core"
-        : "Explore one SM"
+      ? {
+          cpu: "Explore one core",
+          gpu: "Explore one SM",
+          tensor: "Explore the array",
+          switch: "Explore the packet path",
+        }[family]
       : "Follow the data") + " <span>↘</span>";
   $("#scene-note").textContent =
     world === "brain"
       ? "Human reference atlas · authored pathway guide"
       : level === "execution"
         ? "Executable teaching model · ticks are not vendor cycles"
-        : "Original functional schematic · source-linked architecture";
+        : layout?.representative
+          ? "Representative functional view · source-linked architecture"
+          : "Original functional schematic · source-linked architecture";
+  $("#input-toggle").textContent = family === "switch" ? "Traffic" : "Input";
   hdrText?.redraw();
 }
+
 async function ensureBrain() {
   if (brain) return brain;
   if (!brainPromise)
@@ -640,7 +796,8 @@ function syncSurfaces() {
   $("#brain-controls").hidden = world !== "brain";
   $("#compare-toggle").hidden = world === "brain";
   $("#compare-toggle").setAttribute("aria-pressed", String(comparing));
-  $("#gpu-reference").hidden = world !== "gpu";
+  $("#hardware").value = world === "brain" ? "" : profile;
+  $("#brain-stimulus").hidden = family === "switch";
   $$("button[data-world]").forEach((b) =>
     b.setAttribute("aria-pressed", String(b.dataset.world === world)),
   );
@@ -649,31 +806,48 @@ function syncSurfaces() {
   brain?.redraw();
 }
 function setWorld(next) {
-  if (!["cpu", "gpu", "brain"].includes(next) || !wasm) return;
-  pause();
-  closePanel();
-  $("#settings").hidden = true;
-  world = next;
-  if (next !== "brain") {
-    if (family !== next) {
-      family = next;
-      selectedUnit = 0;
-      tabs.clear();
-      currentTab = null;
-      resetModel();
-    }
-    syncSurfaces();
-    setLevel("processor");
-  } else {
+  if (next === "brain") {
+    pause();
+    closePanel();
+    $("#settings").hidden = true;
+    world = "brain";
     syncSurfaces();
     updateHeading();
     ensureBrain();
+    location.hash = "brain";
+    dirty = true;
+  } else if (defaults[next])
+    setHardware(family === next ? profile : defaults[next]);
+}
+function setHardware(id) {
+  const p = architecture?.profiles[id];
+  if (!p || !wasm) return;
+  pause();
+  closePanel();
+  $("#settings").hidden = true;
+  tabs.clear();
+  currentTab = null;
+  const same = id === profile && model;
+  profile = id;
+  family = p.family;
+  world = family;
+  if (!same) {
+    selectedUnit = 0;
+    snap = null;
+    resetModel();
   }
-  location.hash = next;
+  syncSurfaces();
+  setLevel(same ? level : "processor");
+  location.hash = id;
   dirty = true;
 }
+
 function rendererState() {
   if (!renderer || !layout || !snap) return;
+  if (family === "switch") {
+    renderFabric();
+    return;
+  }
   const activity = new Float32Array(256),
     flows = [];
   for (const n of snap.nodes) {
@@ -687,7 +861,10 @@ function rendererState() {
             : 0.018;
   }
   for (const l of snap.lanes || []) {
-    const b = resolveBlock(layout, "lane" + l.lane);
+    const b = resolveBlock(
+      layout,
+      (family === "tensor" ? "pe" : "lane") + l.lane,
+    );
     if (b && l.active) activity[b.region] = 0.8;
   }
   for (const t of snap.transfers
@@ -730,7 +907,7 @@ function labels() {
         b.position[2],
       );
     if (Number.isInteger(b.lane)) {
-      const outputIndex = (snap.group_index || 0) * 32 + b.lane;
+      const outputIndex = outputForLane(b.lane);
       const output = snap.detail.outputs[outputIndex];
       el.textContent = output?.retired_terms
         ? String(output.accumulated_sum)
@@ -814,6 +991,7 @@ function pick(e) {
   );
 }
 function bind() {
+  $("#hardware").onchange = (e) => setHardware(e.target.value);
   for (const b of $$("button[data-world]"))
     b.onclick = () => setWorld(b.dataset.world);
   for (const b of $$("button[data-level]"))
@@ -841,11 +1019,12 @@ function bind() {
   $("#run").onclick = () => {
     if (level !== "execution") {
       setLevel("execution");
-      showValue(pinnedOutput);
+      if (family === "switch") showTraffic();
+      else showValue(pinnedOutput);
     }
     if (playing) pause();
     else {
-      if (snap.status === "complete") resetModel();
+      if (isComplete()) resetModel();
       playing = true;
       accumulator = 0;
       advance(1);
@@ -872,6 +1051,16 @@ function bind() {
     const b = e.target.closest("button");
     if (!b) return;
     if (b.dataset.source) showSource(b.dataset.source);
+    if (b.hasAttribute("data-inject")) {
+      snap = JSON.parse(model.inject(Number(b.dataset.inject), 6));
+      updateSnapshot();
+    }
+    if (b.hasAttribute("data-block")) {
+      const port = Number(b.dataset.block);
+      snap = JSON.parse(model.block(port, !snap.blocked[port]));
+      updateSnapshot();
+    }
+
     if (b.dataset.inspect) {
       if (b.dataset.inspectLevel !== level) setLevel(b.dataset.inspectLevel);
       showBlock(layout.blocks.find((x) => x.key === b.dataset.inspect));
@@ -881,6 +1070,8 @@ function bind() {
       setLevel(b.dataset.enter);
     }
     if (b.hasAttribute("data-value")) showValue(b.dataset.value);
+    if (b.hasAttribute("data-follow-lane"))
+      showValue(outputForLane(Number(b.dataset.followLane)));
     if (b.hasAttribute("data-state")) showState();
     if (b.hasAttribute("data-input")) showInput();
     if (b.dataset.region) brain?.selectRegion(b.dataset.region, false);
@@ -904,13 +1095,6 @@ function bind() {
   $("#about").onclick = showAbout;
   $("#light-mode").onchange = updateLight;
   $("#resolution").onchange = resize;
-  $("#profile").onchange = (e) => {
-    profile = e.target.value;
-    selectedUnit = 0;
-    tabs.clear();
-    setLevel(level);
-    resetModel();
-  };
   $("#reduce-motion").checked = reduced;
   $("#reduce-motion").onchange = (e) => {
     reduced = e.target.checked;
@@ -942,6 +1126,7 @@ function bind() {
     syncSurfaces();
   };
   $("#brain-evidence").onclick = showBrainEvidence;
+  $("#brain-guide-evidence").onclick = showTiming;
   canvas.onpointerdown = (e) => {
     if (e.button !== 0) return;
     transition = null;
@@ -1063,13 +1248,9 @@ function bind() {
   window.addEventListener("doke-comparison-evidence", (e) => {
     const d = e.detail;
     if (d.regionId) showRegion(d.regionId, d.region);
-    else
-      openPanel(
-        d.panel.id,
-        d.title,
-        () =>
-          `<span class="eyebrow">ANATOMY · AUTHORED GUIDE</span><h2>${esc(d.title)}</h2>${d.panel.paragraphs.map((p) => `<p>${esc(p)}</p>`).join("")}${sourceButtons(d.sourceIds, "comparison")}`,
-      );
+    else {
+      showTiming();
+    }
   });
 }
 function frame(time) {
@@ -1077,7 +1258,8 @@ function frame(time) {
   last = time;
   if (!document.hidden) {
     if (playing && model) {
-      accumulator += dt * (family === "cpu" ? 80 : 12) * speed;
+      accumulator +=
+        dt * { cpu: 80, gpu: 12, tensor: 10, switch: 4 }[family] * speed;
       const n = Math.min(256, Math.floor(accumulator));
       accumulator -= n;
       if (n) advance(n);
@@ -1121,19 +1303,23 @@ function frame(time) {
 }
 async function boot() {
   try {
-    [architecture, brainContent, comparison] = await Promise.all(
-      ["architecture.json", "brain.json", "comparison.json"].map(
-        async (path) => {
-          const r = await fetch(path);
-          if (!r.ok) throw Error(path + " unavailable");
-          return r.json();
-        },
-      ),
+    [architecture, brainContent, comparison, timescales] = await Promise.all(
+      [
+        "architecture.json",
+        "brain.json",
+        "comparison.json",
+        "timescales.json",
+      ].map(async (path) => {
+        const r = await fetch(path);
+        if (!r.ok) throw Error(path + " unavailable");
+        return r.json();
+      }),
     );
     for (const [prefix, data] of [
       ["chip", architecture],
       ["brain", brainContent],
       ["comparison", comparison],
+      ["timescales", timescales],
     ])
       for (const [id, s] of Object.entries(data.sources))
         sources.set(prefix + ":" + id, s);
@@ -1166,11 +1352,12 @@ async function boot() {
   if (wasm && architecture) {
     bind();
     resetModel();
-    setWorld(
-      ["cpu", "gpu", "brain"].includes(location.hash.slice(1))
-        ? location.hash.slice(1)
-        : "gpu",
-    );
+    const route = location.hash.slice(1);
+    if (architecture.profiles[route]) setHardware(route);
+    else
+      setWorld(
+        [...Object.keys(defaults), "brain"].includes(route) ? route : "gpu",
+      );
     if (comparing) ensureBrain();
   }
   document.documentElement.dataset.ready = "true";
@@ -1188,11 +1375,13 @@ window.dokeFocused = {
     selectedUnit,
     pinnedOutput,
     comparing,
+    operation,
   }),
   input: () => [...input],
   finish,
   reset: resetModel,
   setWorld,
+  setHardware,
   setLevel,
   advance: () => {
     pause();

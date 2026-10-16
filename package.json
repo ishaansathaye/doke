@@ -3,12 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/hardware-catalog.mjs && node tests/architecture.mjs && node tests/silicon-wasm.mjs && node tests/focused-browser.mjs",
+    "test": "node tests/hardware-catalog.mjs && node tests/architecture.mjs && node tests/timescales.mjs && node tests/silicon-wasm.mjs && node tests/focused-browser.mjs && node tests/hardware-expansion.mjs && node tests/interaction-review.mjs",
     "build": "bash tools/build.sh",
-    "test:browser": "node tests/focused-browser.mjs",
+    "test:browser": "node tests/focused-browser.mjs && node tests/hardware-expansion.mjs && node tests/interaction-review.mjs",
     "test:portable": "node tests/portable-demo.mjs",
-    "format": "prettier --write public/silicon.js public/silicon-layouts.js public/brain-comparison.js public/silicon.css public/index.html tests/*.mjs",
-    "test:silicon": "node tests/hardware-catalog.mjs && node tests/architecture.mjs && node tests/silicon-wasm.mjs"
+    "format": "prettier --write public/silicon.js public/silicon-layouts.js public/timescales-view.js public/brain-comparison.js public/silicon.css public/index.html tests/*.mjs",
+    "test:silicon": "node tests/hardware-catalog.mjs && node tests/architecture.mjs && node tests/timescales.mjs && node tests/silicon-wasm.mjs"
   },
   "devDependencies": {
     "playwright": "1.58.2",

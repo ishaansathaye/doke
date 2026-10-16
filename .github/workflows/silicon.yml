@@ -14,6 +14,7 @@ jobs:
           node-version: "22"
       - run: node tests/hardware-catalog.mjs
       - run: node tests/architecture.mjs
+      - run: node tests/timescales.mjs
       - run: python3 tools/check_content.py
       - run: cargo test -p doke-core --locked
   browser-and-wasm:
@@ -39,3 +40,5 @@ jobs:
           DOKE_SERVER_PID=$!
           trap 'kill "$DOKE_SERVER_PID"' EXIT
           DOKE_SKIP_BRAIN=1 node tests/focused-browser.mjs
+          DOKE_SKIP_BRAIN=1 node tests/hardware-expansion.mjs
+          node tests/interaction-review.mjs

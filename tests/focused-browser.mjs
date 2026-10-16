@@ -31,6 +31,15 @@ const browser = await chromium.launch({
 });
 const snapshot = (page) => page.evaluate(() => window.dokeFocused.snapshot());
 const state = (page) => page.evaluate(() => window.dokeFocused.getState());
+const selectWorld = (page, family) =>
+  page.locator("#hardware").selectOption(
+    {
+      cpu: "ryzen-9950x",
+      gpu: "rtx-5090",
+      tensor: "tpu-v1",
+      switch: "silicon-one-g200",
+    }[family],
+  );
 const brainState = (page) =>
   page.evaluate(() => window.dokeBrainComparison.snapshot());
 const finish = (page) => page.evaluate(() => window.dokeFocused.finish());
@@ -142,7 +151,7 @@ async function savedOverview(page, prefix, count) {
     .locator("#inspection [data-inspect]")
     .evaluateAll((items) => items.map((item) => item.dataset.inspect));
   assert.equal(original.filter((key) => key.startsWith(prefix)).length, count);
-  await page.locator('[data-level="core"]').click();
+  await page.locator('button[data-level="core"]').click();
   await page.locator("#explain").click();
   await page.locator(`#reader-tabs [data-tab="${savedKey}"]`).click();
   assert.deepEqual(
@@ -164,7 +173,7 @@ async function savedOverview(page, prefix, count) {
     prefix === "sm-" ? /^SM 1$/ : /^Core 1$/,
   );
   await closePanel(page);
-  await page.locator('[data-level="core"]').click();
+  await page.locator('button[data-level="core"]').click();
 }
 async function enterBrain(page, missing = false) {
   await page.locator('[data-world="brain"]').click();
@@ -177,6 +186,11 @@ async function enterBrain(page, missing = false) {
     { timeout: 90000 },
   );
   assert.equal((await state(page)).world, "brain");
+  assert.equal(
+    await page.locator("#hardware").inputValue(),
+    "",
+    "Brain selection leaves a placeholder so the current hardware can be selected again",
+  );
   if (missing) {
     assert.equal((await brainState(page)).ready, false);
     assert.equal(await page.locator("#brain-loading").isVisible(), true);
@@ -297,7 +311,7 @@ try {
     4,
   );
   await shot(page, "gpu-sm");
-  await page.locator('[data-level="execution"]').click();
+  await page.locator('button[data-level="execution"]').click();
   assert.equal((await state(page)).level, "execution");
   assert.equal(
     await page.evaluate(
@@ -308,10 +322,8 @@ try {
     ),
     32,
   );
-  await page.locator('[data-level="processor"]').click();
-  await page.locator("#settings-toggle").click();
-  await page.locator("#profile").selectOption("h100-sxm");
-  await page.locator("#settings-toggle").click();
+  await page.locator('button[data-level="processor"]').click();
+  await page.locator("#hardware").selectOption("h100-sxm");
   assert.equal(
     await page.evaluate(
       () =>
@@ -324,7 +336,7 @@ try {
   assert.match(await page.locator("#scene-title").textContent(), /H100/);
   await shot(page, "h100-processor");
   await savedOverview(page, "sm-", 132);
-  await page.locator('[data-world="cpu"]').click();
+  await selectWorld(page, "cpu");
   assert.equal(
     await page.evaluate(
       () =>
@@ -343,7 +355,7 @@ try {
     ),
   );
   await shot(page, "cpu-core");
-  await page.locator('[data-level="execution"]').click();
+  await page.locator('button[data-level="execution"]').click();
   checks.push(
     "Three reference profiles, processor/core/execution levels, and real high-index SM picking",
   );
@@ -445,8 +457,8 @@ try {
   );
   await shot(page, "cpu-value");
   await closePanel(page);
-  await page.locator('[data-world="gpu"]').click();
-  await page.locator('[data-level="execution"]').click();
+  await selectWorld(page, "gpu");
+  await page.locator('button[data-level="execution"]').click();
   await page.locator("#input-toggle").click();
   await page.locator("#input-preset").selectOption("checker");
   await page.locator("#memory-layout").selectOption("packed");
@@ -523,7 +535,7 @@ try {
     await page.waitForFunction(
       () => window.dokeBrainComparison.snapshot().time > 4.1,
     );
-    await page.locator('[data-world="gpu"]').click();
+    await selectWorld(page, "gpu");
     const hiddenGuide = await brainState(page);
     assert.equal(
       hiddenGuide.playing,
@@ -593,7 +605,7 @@ try {
     );
     checks.push("Unavailable atlas retains a visible explanation");
   }
-  await page.locator('[data-world="gpu"]').click();
+  await selectWorld(page, "gpu");
   await page.locator("#compare-toggle").click();
   assert.equal((await state(page)).comparing, true);
   assert.equal(await page.locator("#brain-canvas").isVisible(), true);
@@ -652,7 +664,7 @@ try {
   );
   await touchSession.detach();
   await mobile.locator("#reset-camera").tap();
-  await mobile.locator('[data-level="execution"]').tap();
+  await mobile.locator('button[data-level="execution"]').tap();
   await mobile.locator("#input-toggle").tap();
   await visiblePanelBounds(mobile);
   const mobileInput = (await snapshot(mobile)).input;
@@ -698,7 +710,7 @@ try {
     const glUrl = new URL(app);
     glUrl.searchParams.set("backend", "webgl");
     await ready(gl, glUrl.href, skipBrain);
-    await gl.locator('[data-level="execution"]').click();
+    await gl.locator('button[data-level="execution"]').click();
     complete(await finish(gl));
     await shot(gl, "webgl");
     await enterBrain(gl, skipBrain);

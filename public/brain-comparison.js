@@ -13,7 +13,6 @@ export async function initBrainComparison(wasm) {
     play: $("#brain-guide-play"),
     next: $("#brain-guide-next"),
     reset: $("#brain-guide-reset"),
-    evidence: $("#brain-guide-evidence"),
     stimulus: $("#brain-stimulus"),
   };
   const abort = new AbortController();
@@ -382,7 +381,6 @@ export async function initBrainComparison(wasm) {
     if (controls.next)
       controls.next.disabled = !comparison || index >= stages().length - 1;
     if (controls.reset) controls.reset.disabled = !comparison;
-    if (controls.evidence) controls.evidence.disabled = !comparison;
     canvas.dataset.guideStage = stage?.id || "loading";
     canvas.dataset.guidePlaying = String(playing);
   }
@@ -695,7 +693,6 @@ export async function initBrainComparison(wasm) {
   listen(controls.play, "click", () => (playing ? pause() : play()));
   listen(controls.next, "click", next);
   listen(controls.reset, "click", reset);
-  listen(controls.evidence, "click", () => evidence());
   listen(window, "doke-silicon-state", (event) =>
     drawStimulus(event.detail?.input),
   );

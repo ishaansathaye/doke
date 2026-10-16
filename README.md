@@ -1,10 +1,10 @@
 # doke
 
-Look inside a CPU, a GPU and the human brain. A floating 3D explorer with source-linked architecture, close-up execution, and an input you can change.
+Look inside CPUs, GPUs, a tensor processor, a network ASIC and the human brain. A floating 3D explorer with source-linked architecture, close-up execution, and an input you can change.
 
-Start with the whole processor, open a core or streaming multiprocessor, then follow one value through actual operand reads and arithmetic. The Ryzen 9 9950X view has 16 cores; RTX 5090 has 170 enabled SMs; H100 SXM5 has 132. These are original functional schematics, not physical die floorplans.
+Start with the whole processor, open a core or streaming multiprocessor, then follow one value through actual operand reads and arithmetic. Choose Ryzen 9 9950X, RTX 5090, H100 SXM, Google TPU v1 or Cisco Silicon One G200 from one hardware selector. These are original functional schematics, not physical die floorplans.
 
-The Rust models compute a small image transform. Inspect returned operands, cache residency, requested GPU sectors and each completed product. Model ticks are authored teaching time, not vendor cycles or chip benchmarks. The human reference atlas remains available on its own or alongside the chip, with sourced anatomy and a visual-processing guide rather than a predicted response to your input.
+The Rust models compute editable matrix transforms or route packets through queues. Inspect returned operands, cache residency, requested GPU sectors and each completed product. Model ticks are authored teaching time, not vendor cycles or chip benchmarks. The human reference atlas remains available on its own or alongside the chip, with sourced anatomy and a visual-processing guide. A shared logarithmic time scale compares documented chip clock periods with human physiological measurements; their conditions and limits are one click away.
 
 ![Inside an RTX Blackwell streaming multiprocessor](docs/media/compute-explorer.webp)
 

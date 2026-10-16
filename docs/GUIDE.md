@@ -2,19 +2,21 @@
 
 ## Explore
 
-Choose **CPU**, **GPU** or **Human brain**. Drag the scene to orbit, scroll to zoom, or use the camera buttons. Select a component to read its explanation and sources in the floating panel. Related explanations open as tabs, so a source does not replace the page that led to it.
+Choose a product from the **hardware selector**, or open **Human brain**. Drag the scene to orbit, scroll to zoom, or use the camera buttons. Select a component to read its explanation and sources in the floating panel. Related explanations open as tabs, so a source does not replace the page that led to it.
 
-CPU and GPU have three depths:
+Every hardware family has three depths:
 
-| View               | What it shows                                                                                 |
-| ------------------ | --------------------------------------------------------------------------------------------- |
-| Processor          | The selected product's documented core or SM count, arranged as a functional map.             |
-| Inside a core / SM | Scheduling, storage and execution resources, with explanations on demand.                     |
-| Follow a value     | Actual state from the small Rust execution model: operands, addresses, waiting work and sums. |
+| View                              | What it shows                                                                     |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| Processor                         | Documented product structure, arranged as a functional map; sampled where needed. |
+| Inside a core / SM / array / path | Scheduling, storage and execution resources, with explanations on demand.         |
+| Follow a value / packet           | Actual model state: operands, waiting work and sums, or packet IDs and queues.    |
 
-Open **Input** to change the 8 × 8 image. Follow a value to reveal playback and single-step controls. Pin an output to inspect only the products that have actually completed. CPU cache controls expose reuse. GPU packed/strided storage changes requested sectors while preserving the mathematical output. Chip selection changes architectural context, not undocumented model timing.
+Open **Input** to change the 8 × 8 image. Follow a value to reveal playback and single-step controls. Pin an output to inspect only the products that have actually completed. CPU cache controls expose reuse. GPU packed/strided storage changes requested sectors while preserving the mathematical output. The tensor model passes operands through a 4 × 4 multiply-accumulate array. The matrix operation selector offers edges, weighted neighbors or identity. Chip selection changes architectural context, not undocumented model timing.
 
-**Human brain** keeps anatomy, a cutaway, and the sourced visual-processing guide. **Compare brain** places that atlas beside the chip. The shared image is a comparison prompt: the numerical image transform does not model a person's perception. The guide's clock sets reading pace; it is separate from execution ticks and biological measurement.
+On **Cisco Silicon One G200**, open **Traffic** to send packets, block outputs and compare FIFO with virtual output queues. The geometry changes with the queue discipline. Packet identities, drops and delivery counts come from the bounded three-port model. It illustrates mechanisms without claiming to reproduce Cisco’s internal implementation.
+
+**Human brain** keeps anatomy, a cutaway, and the sourced visual-processing guide. **Compare brain** places that atlas beside the chip. The shared image is a comparison prompt: the numerical image transform does not model a person's perception. The guide's clock sets reading pace; it is separate from execution ticks and biological measurement. **Timing & parts** compares sourced chip clock periods and human synaptic, spike and visual-response durations on a logarithmic seconds axis. Expand a measurement for its preparation and primary paper. H100 memory bandwidth and G200 switching capacity remain separate rate references; neither is treated as a clock or cognition score.
 
 Display settings offer Balanced, Sharp and Ultra render resolution, HDR/SDR light, reduced motion, and the three anatomy mesh tiers. Overview has 270,212 triangles; Fine has 2,100,796; Native has 5,080,888 from 0.5 mm reference annotations. Higher tiers load on demand. More mesh detail does not add cellular or functional resolution to the atlas.
 
@@ -35,11 +37,13 @@ bash tools/build.sh
 python3 tools/serve.py
 ```
 
-Open `http://localhost:4173`. Anatomy generation is a separate, substantial one-time download and conversion; allow several GB of memory. It generates and validates three mesh tiers. Routine builds compile Wasm, validate source records, bundle dependency notices and create a release manifest. Source records are maintained directly in `public/architecture.json`, `public/hardware.json`, `public/brain.json` and `public/comparison.json`.
+Open `http://localhost:4173`. Anatomy generation is a separate, substantial one-time download and conversion; allow several GB of memory. It generates and validates three mesh tiers. Routine builds compile Wasm, validate source records, bundle dependency notices and create a release manifest. Source records are maintained directly in `public/architecture.json`, `public/hardware.json`, `public/brain.json` `public/comparison.json` and `public/timescales.json`.
 
 For hardware development without generated anatomy, build `doke-web` for `wasm32-unknown-unknown`, run the matching `wasm-bindgen` command from `tools/build.sh`, and serve `public/`. Brain views require the anatomy assets.
 
 ## Verify
+
+On Linux, install the browser and its system dependencies once with `npx playwright install --with-deps chromium`. On macOS the checks use installed Google Chrome by default.
 
 With the built app running:
 
