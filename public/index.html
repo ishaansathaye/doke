@@ -40,6 +40,8 @@
         ><button
           id="settings-toggle"
           aria-label="Display and reference settings"
+          aria-controls="settings"
+          aria-expanded="false"
         >
           ⋯
         </button>
@@ -89,10 +91,23 @@
           aria-label="Same input image; no predicted neural response"
         ></canvas>
       </div>
-      <div class="view-tools" aria-label="Camera">
+      <div id="view-tools" class="view-tools" role="group" aria-label="Camera">
         <button id="zoom-in" aria-label="Zoom in">+</button
         ><button id="zoom-out" aria-label="Zoom out">−</button
         ><button id="reset-camera" aria-label="Reset view">↺</button>
+      </div>
+      <div
+        id="brain-view-tools"
+        class="view-tools"
+        role="group"
+        aria-label="Brain camera"
+        hidden
+      >
+        <button id="brain-zoom-in" aria-label="Zoom into brain">+</button
+        ><button id="brain-zoom-out" aria-label="Zoom out of brain">−</button
+        ><button id="brain-reset-camera" aria-label="Reset brain view">
+          ↺
+        </button>
       </div>
       <button id="level-enter" class="enter-cue">
         Explore one SM <span>↘</span>
@@ -113,7 +128,7 @@
           ></div>
           <button id="reader-close" aria-label="Close panel">×</button>
         </div>
-        <div id="inspection" tabindex="0"></div>
+        <div id="inspection" role="tabpanel" tabindex="0"></div>
       </aside>
       <aside
         id="settings"
@@ -121,6 +136,10 @@
         hidden
         aria-label="Display and reference settings"
       >
+        <div class="settings-top">
+          <span>Display & reference</span>
+          <button id="settings-close" aria-label="Close settings">×</button>
+        </div>
         <label
           >Image clarity<select id="resolution">
             <option value="balanced">Balanced</option>

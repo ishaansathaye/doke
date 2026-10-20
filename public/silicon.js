@@ -1,6 +1,9 @@
 import { hdrCapable, configureHDR, HDRText } from "./display.js";
 import { timingPanel } from "./timescales-view.js";
 import { makeLayout, resolveBlock } from "./silicon-layouts.js";
+import { initSelectControls } from "./select-control.js";
+import { bindCameraControls } from "./camera-controls.js";
+import { installPanelLayout } from "./panel-layout.js";
 const $ = (s) => document.querySelector(s),
   $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (s) =>
@@ -38,7 +41,6 @@ let playing = false,
   accumulator = 0,
   phase = 0.5,
   dirty = true,
-  drag,
   paint,
   brush = 0;
 let operation = "difference",
@@ -59,8 +61,6 @@ let tabs = new Map(),
   currentTab = null,
   liveRefresh = 0,
   transition = null;
-const chipPointers = new Map();
-let pinch = null;
 const sources = new Map(),
   reader = $("#reader");
 function pattern(id) {
@@ -97,32 +97,46 @@ function sourceButtons(ids, prefix = "chip") {
     .join("");
 }
 function openPanel(id, title, render, live = false) {
-  tabs.set(id, { title, render, live });
+  savePanelScroll();
+  tabs.set(id, { ...tabs.get(id), title, render, live });
   if (tabs.size > 7) tabs.delete(tabs.keys().next().value);
-  if (currentTab !== id) $("#inspection").scrollTop = 0;
   currentTab = id;
   reader.hidden = false;
-  $("#settings").hidden = true;
+  closeSettings();
   renderTabs();
-  renderPanel();
+  renderPanel(true);
   dirty = true;
+}
+function savePanelScroll() {
+  const tab = tabs.get(currentTab);
+  if (tab) tab.scrollTop = $("#inspection").scrollTop;
+}
+function selectPanelTab(id) {
+  savePanelScroll();
+  currentTab = id;
+  renderTabs();
+  renderPanel(true);
 }
 function renderTabs() {
   $("#reader-tabs").innerHTML = [...tabs]
     .map(
-      ([id, t]) =>
-        `<button role="tab" aria-selected="${id === currentTab}" data-tab="${esc(id)}">${esc(t.title)}</button>`,
+      ([id, t], index) =>
+        `<button id="reader-tab-${index}" role="tab" aria-controls="inspection" aria-selected="${id === currentTab}" tabindex="${id === currentTab ? 0 : -1}" data-tab="${esc(id)}">${esc(t.title)}</button>`,
     )
     .join("");
   $("#reader-tabs [aria-selected=true]")?.scrollIntoView({
     block: "nearest",
     inline: "nearest",
   });
+  $("#inspection").setAttribute(
+    "aria-labelledby",
+    $("#reader-tabs [aria-selected=true]").id,
+  );
 }
-function renderPanel() {
+function renderPanel(restoreScroll = false) {
   const t = tabs.get(currentTab);
   if (!t) return;
-  const old = $("#inspection").scrollTop;
+  const old = restoreScroll ? t.scrollTop || 0 : $("#inspection").scrollTop;
   $("#inspection").innerHTML = t.render();
   $("#inspection").scrollTop = old;
   bindPanel();
@@ -130,9 +144,14 @@ function renderPanel() {
   hdrText?.redraw();
 }
 function closePanel() {
+  savePanelScroll();
   reader.hidden = true;
   dirty = true;
   hdrText?.redraw();
+}
+function closeSettings() {
+  $("#settings").hidden = true;
+  $("#settings-toggle").setAttribute("aria-expanded", "false");
 }
 function showSource(key) {
   const s = sources.get(key);
@@ -787,9 +806,18 @@ function syncSurfaces() {
   );
   document.body.dataset.world = world;
   document.body.dataset.comparisonView ||= "chip";
+  $$("button[data-comparison-view]").forEach((button) =>
+    button.setAttribute(
+      "aria-pressed",
+      String(
+        button.dataset.comparisonView === document.body.dataset.comparisonView,
+      ),
+    ),
+  );
   $("#chip-stage").hidden = world === "brain";
   $("#brain-stage").hidden = world !== "brain" && !comparing;
   $("#brain-label").hidden = !comparing || world === "brain";
+  $("#brain-view-tools").hidden = !comparing || world === "brain";
   $("#brain-guide").hidden = world === "brain" ? !guideVisible : !comparing;
   $("#comparison-mobile").hidden = !comparing || world === "brain";
   $("#compute-controls").hidden = world === "brain";
@@ -809,7 +837,7 @@ function setWorld(next) {
   if (next === "brain") {
     pause();
     closePanel();
-    $("#settings").hidden = true;
+    closeSettings();
     world = "brain";
     syncSurfaces();
     updateHeading();
@@ -824,13 +852,14 @@ function setHardware(id) {
   if (!p || !wasm) return;
   pause();
   closePanel();
-  $("#settings").hidden = true;
+  closeSettings();
   tabs.clear();
   currentTab = null;
   const same = id === profile && model;
   profile = id;
   family = p.family;
   world = family;
+  document.body.dataset.comparisonView = "chip";
   if (!same) {
     selectedUnit = 0;
     snap = null;
@@ -1042,10 +1071,22 @@ function bind() {
   $("#reader-tabs").onclick = (e) => {
     const b = e.target.closest("[data-tab]");
     if (b) {
-      currentTab = b.dataset.tab;
-      renderTabs();
-      renderPanel();
+      selectPanelTab(b.dataset.tab);
+      $("#reader-tabs [aria-selected=true]").focus({ preventScroll: true });
     }
+  };
+  $("#reader-tabs").onkeydown = (e) => {
+    const items = [...tabs.keys()];
+    let index = items.indexOf(currentTab);
+    if (e.key === "ArrowRight") index = (index + 1) % items.length;
+    else if (e.key === "ArrowLeft")
+      index = (index - 1 + items.length) % items.length;
+    else if (e.key === "Home") index = 0;
+    else if (e.key === "End") index = items.length - 1;
+    else return;
+    e.preventDefault();
+    selectPanelTab(items[index]);
+    $("#reader-tabs [aria-selected=true]").focus({ preventScroll: true });
   };
   $("#inspection").onclick = (e) => {
     const b = e.target.closest("button");
@@ -1090,7 +1131,12 @@ function bind() {
   $("#settings-toggle").onclick = () => {
     const visible = $("#settings").hidden;
     $("#settings").hidden = !visible;
+    $("#settings-toggle").setAttribute("aria-expanded", String(visible));
     if (visible) closePanel();
+  };
+  $("#settings-close").onclick = () => {
+    closeSettings();
+    $("#settings-toggle").focus({ preventScroll: true });
   };
   $("#about").onclick = showAbout;
   $("#light-mode").onchange = updateLight;
@@ -1105,13 +1151,15 @@ function bind() {
     if (world === "brain") brain?.getRenderer()?.zoom(-0.15);
     else renderer?.zoom(-0.15);
     dirty = true;
-    brain?.redraw();
+    transition = null;
+    brain?.cameraChanged();
   };
   $("#zoom-out").onclick = () => {
     if (world === "brain") brain?.getRenderer()?.zoom(0.15);
     else renderer?.zoom(0.15);
     dirty = true;
-    brain?.redraw();
+    transition = null;
+    brain?.cameraChanged();
   };
   $("#reset-camera").onclick = () => {
     if (world === "brain") brain?.resetView();
@@ -1119,6 +1167,15 @@ function bind() {
     transition = null;
     dirty = true;
   };
+  for (const [id, amount] of [
+    ["brain-zoom-in", -0.15],
+    ["brain-zoom-out", 0.15],
+  ])
+    $("#" + id).onclick = () => {
+      brain?.getRenderer()?.zoom(amount);
+      brain?.cameraChanged();
+    };
+  $("#brain-reset-camera").onclick = () => brain?.resetView();
   $("#anatomy").onclick = showAnatomy;
   $("#brain-cutaway").onclick = showCutaway;
   $("#brain-vision").onclick = () => {
@@ -1127,79 +1184,32 @@ function bind() {
   };
   $("#brain-evidence").onclick = showBrainEvidence;
   $("#brain-guide-evidence").onclick = showTiming;
-  canvas.onpointerdown = (e) => {
-    if (e.button !== 0) return;
-    transition = null;
-    chipPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (chipPointers.size === 2) {
-      drag = null;
-      pinch = null;
-      canvas.setPointerCapture(e.pointerId);
-      return;
-    }
-    drag = {
-      x: e.clientX,
-      y: e.clientY,
-      pan: e.shiftKey,
-      sx: e.clientX,
-      sy: e.clientY,
-      moved: false,
-    };
-    canvas.setPointerCapture(e.pointerId);
-  };
-  canvas.onpointermove = (e) => {
-    if (chipPointers.has(e.pointerId))
-      chipPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    if (chipPointers.size === 2) {
-      const [a, b] = [...chipPointers.values()],
-        next = {
-          distance: Math.hypot(a.x - b.x, a.y - b.y),
-          x: (a.x + b.x) / 2,
-          y: (a.y + b.y) / 2,
-        };
-      if (pinch && next.distance > 0 && pinch.distance > 0) {
-        renderer?.zoom(Math.log(pinch.distance / next.distance));
-        renderer?.pan((next.x - pinch.x) * 0.006, (next.y - pinch.y) * 0.006);
-      }
-      pinch = next;
+  bindCameraControls(canvas, {
+    getRenderer: () => renderer,
+    onChange: () => {
       dirty = true;
-      return;
-    }
-    if (drag) {
-      const dx = e.clientX - drag.x,
-        dy = e.clientY - drag.y;
-      drag.moved ||= Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 4;
-      if (drag.moved) {
-        if (drag.pan) renderer?.pan(dx * 0.006, dy * 0.006);
-        else renderer?.orbit(dx * 0.005, dy * 0.005);
-      }
-      drag.x = e.clientX;
-      drag.y = e.clientY;
-      dirty = true;
-      $("#hover-label").style.display = "none";
-    } else {
-      const b = pick(e),
+    },
+    onInteract: () => {
+      transition = null;
+    },
+    onTap: (event) => showBlock(pick(event)),
+    onHover: (event) => {
+      const block = pick(event),
         label = $("#hover-label");
-      label.style.display = b ? "block" : "none";
-      if (b) {
-        label.textContent = b.title;
-        label.style.left = Math.min(innerWidth - 180, e.clientX + 15) + "px";
-        label.style.top = e.clientY + 16 + "px";
+      label.style.display = block ? "block" : "none";
+      if (block) {
+        label.textContent = block.title;
+        label.style.left =
+          Math.min(innerWidth - 180, event.clientX + 15) + "px";
+        label.style.top = event.clientY + 16 + "px";
       }
-    }
-  };
-  canvas.onpointerup = (e) => {
-    chipPointers.delete(e.pointerId);
-    pinch = null;
-    if (drag && !drag.moved) showBlock(pick(e));
-    drag = null;
-  };
-  canvas.onpointercancel = (e) => {
-    chipPointers.delete(e.pointerId);
-    pinch = null;
-    drag = null;
-  };
-  canvas.onpointerleave = () => ($("#hover-label").style.display = "none");
+    },
+    onLeave: () => {
+      $("#hover-label").style.display = "none";
+    },
+    onReset: () => renderer?.chip_camera(...layout.camera),
+    onInspect: showOverview,
+  });
   canvas.ondblclick = (e) => {
     const b = pick(e);
     if (b?.enter) {
@@ -1207,35 +1217,10 @@ function bind() {
       setLevel(b.enter);
     }
   };
-  canvas.onwheel = (e) => {
-    e.preventDefault();
-    transition = null;
-    renderer?.zoom(Math.max(-0.2, Math.min(0.2, e.deltaY * 0.001)));
-    dirty = true;
-  };
-  canvas.onkeydown = (e) => {
-    const m = {
-      ArrowLeft: [-0.1, 0],
-      ArrowRight: [0.1, 0],
-      ArrowUp: [0, -0.1],
-      ArrowDown: [0, 0.1],
-    }[e.key];
-    if (m) {
-      e.preventDefault();
-      renderer?.orbit(...m);
-    } else if (e.key === "+" || e.key === "=") renderer?.zoom(-0.15);
-    else if (e.key === "-") renderer?.zoom(0.15);
-    else if (e.key === "Home") {
-      e.preventDefault();
-      renderer?.chip_camera(...layout.camera);
-    } else if (e.key === "Enter") showOverview();
-    transition = null;
-    dirty = true;
-  };
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
+    if (e.key === "Escape" && !e.defaultPrevented) {
       closePanel();
-      $("#settings").hidden = true;
+      closeSettings();
     }
   });
   document.addEventListener("visibilitychange", () => {
@@ -1279,7 +1264,7 @@ function frame(time) {
       tabs.get(currentTab)?.live &&
       time - liveRefresh > 160 &&
       !document.activeElement?.matches(
-        "#inspection select, #inspection input, #inspection textarea",
+        "#inspection select, #inspection input, #inspection textarea, #inspection .select-trigger",
       )
     ) {
       renderPanel();
@@ -1361,6 +1346,7 @@ async function boot() {
     if (comparing) ensureBrain();
   }
   document.documentElement.dataset.ready = "true";
+  installPanelLayout(() => hdrText?.redraw());
   requestAnimationFrame(frame);
 }
 window.dokeFocused = {
@@ -1394,4 +1380,5 @@ window.dokeFocused = {
   layout: () => structuredClone(layout),
 };
 window.dokeSilicon = window.dokeFocused;
+initSelectControls();
 boot();

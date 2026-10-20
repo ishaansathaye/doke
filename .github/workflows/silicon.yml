@@ -42,3 +42,6 @@ jobs:
           DOKE_SKIP_BRAIN=1 node tests/focused-browser.mjs
           DOKE_SKIP_BRAIN=1 node tests/hardware-expansion.mjs
           node tests/interaction-review.mjs
+          DOKE_SKIP_BRAIN=1 node tests/camera-controls.mjs
+          node tests/select-controls.mjs
+          DOKE_SKIP_BRAIN=1 node tests/panel-layout.mjs

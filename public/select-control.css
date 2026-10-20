@@ -1,0 +1,154 @@
+.select-control {
+  display: inline-flex;
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+  vertical-align: middle;
+}
+/* Preserve the native value, form behavior and progressive fallback. */
+select.select-native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+}
+.select-control .select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  min-width: 0;
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #c3e4d52b;
+  border-radius: 9px;
+  background: #c3e0cf0d;
+  color: #eef7f2;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: left;
+}
+.select-control .select-trigger:hover,
+.select-control.is-open .select-trigger {
+  border-color: #c3e4d54f;
+  background: #c3e0cf19;
+}
+.select-control .select-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-chevron {
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  margin: -3px 2px 0 0;
+  border-right: 1.5px solid #aac6bc;
+  border-bottom: 1.5px solid #aac6bc;
+  transform: rotate(45deg);
+}
+.is-open .select-chevron {
+  margin-top: 3px;
+  transform: rotate(225deg);
+}
+.worlds .select-control {
+  max-width: 250px;
+}
+.worlds .select-trigger {
+  border-color: transparent;
+  border-radius: 24px;
+}
+#inspection .select-control {
+  max-width: 72%;
+}
+#inspection .select-trigger,
+#settings .select-trigger {
+  font-size: 11px;
+}
+#settings .select-control {
+  max-width: 190px;
+}
+.select-menu {
+  position: fixed;
+  z-index: 80;
+  padding: 7px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #64796f transparent;
+  border: 1px solid #c3e4d538;
+  border-radius: 15px;
+  background: #101713f5;
+  box-shadow:
+    0 18px 60px #000a,
+    0 2px 10px #0008;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  color: #e7f3eb;
+  font: 12px var(--sans);
+}
+.select-group + .select-group {
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid #c3e4d516;
+}
+.select-group-label {
+  padding: 8px 11px 5px;
+  color: #9db3a8;
+  font: 9px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 1.15px;
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 38px;
+  padding: 9px 11px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.select-option > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.select-option.is-active {
+  border-color: #c3e4d52d;
+  background: #cae8da15;
+  color: #fff;
+}
+.select-check {
+  color: #c7efda;
+  opacity: 0;
+  font-size: 13px;
+}
+.select-option[aria-selected="true"] .select-check {
+  opacity: 1;
+}
+.select-option[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@media (max-width: 700px) {
+  .worlds .select-control {
+    max-width: min(230px, 57vw);
+  }
+  .worlds .select-trigger {
+    padding: 9px 10px;
+    font-size: 11px;
+    gap: 9px;
+  }
+  .select-option {
+    min-height: 42px;
+  }
+}

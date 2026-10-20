@@ -1,4 +1,5 @@
 @import url("fonts/fonts.css");
+@import url("select-control.css");
 :root {
   color-scheme: dark;
   --bg: #000;
@@ -8,6 +9,14 @@
   --accent: #c0e8e2;
   --sans: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   --mono: "IBM Plex Mono", monospace;
+  --scene-top: 114px;
+  --switch-top: 122px;
+  --controls-bottom: 116px;
+  --panel-top: 280px;
+  --panel-bottom: 172px;
+  --chip-top: 250px;
+  --brain-top: 220px;
+  --brain-bottom: 270px;
 }
 * {
   box-sizing: border-box;
@@ -94,7 +103,9 @@ header {
   top: 25px;
   left: 34px;
   right: 34px;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 24px;
   align-items: center;
   justify-content: space-between;
   z-index: 15;
@@ -116,9 +127,9 @@ header > * {
 }
 .worlds {
   display: flex;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
+  justify-self: center;
+  min-width: 0;
   gap: 3px;
   padding: 5px;
   border: 1px solid var(--line);
@@ -182,6 +193,12 @@ header > * {
 .stage canvas:active {
   cursor: grabbing;
 }
+.stage canvas[data-dragging="true"] {
+  cursor: grabbing;
+}
+.stage canvas[data-camera-input="pointer"]:focus-visible {
+  outline: none;
+}
 #chip-labels {
   position: absolute;
   inset: 0;
@@ -202,7 +219,7 @@ header > * {
 }
 .scene-heading {
   position: fixed;
-  top: 123px;
+  top: var(--scene-top);
   left: 38px;
   pointer-events: none;
   max-width: 550px;
@@ -245,7 +262,7 @@ header > * {
 .view-tools {
   position: fixed;
   right: 28px;
-  top: 125px;
+  bottom: var(--controls-bottom);
   display: flex;
   border: 1px solid var(--line);
   background: #101714c2;
@@ -307,10 +324,9 @@ header > * {
 #reader {
   position: fixed;
   left: 30px;
-  top: 290px;
-  bottom: 130px;
+  top: var(--panel-top);
+  bottom: var(--panel-bottom);
   width: 360px;
-  max-height: 670px;
   z-index: 12;
   display: flex;
   flex-direction: column;
@@ -321,6 +337,7 @@ header > * {
   gap: 3px;
   padding: 8px;
   border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
 }
 #reader-tabs {
   display: flex;
@@ -328,6 +345,7 @@ header > * {
   gap: 4px;
   scrollbar-width: thin;
   flex: 1;
+  min-width: 0;
 }
 #reader-tabs button {
   font-size: 10px;
@@ -346,6 +364,9 @@ header > * {
   padding: 20px 22px;
   line-height: 1.7;
   font-size: 12px;
+  min-height: 0;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 #inspection h2 {
   font-size: 25px;
@@ -511,11 +532,28 @@ header > * {
 }
 #settings {
   position: fixed;
-  right: 28px;
-  top: 88px;
+  left: 30px;
+  top: var(--panel-top);
   padding: 23px;
-  width: 310px;
-  z-index: 20;
+  width: 360px;
+  max-height: calc(100dvh - var(--panel-top) - var(--panel-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  z-index: 12;
+}
+.settings-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -10px -8px 18px 0;
+  font-size: 12px;
+  color: #dceae2;
+}
+#settings-close {
+  font-size: 23px;
+  padding: 2px 9px;
 }
 #settings label {
   display: flex;
@@ -617,9 +655,9 @@ footer {
 }
 #brain-label {
   position: fixed;
-  left: 56%;
-  top: 138px;
-  right: 30px;
+  left: calc(50% + 32px);
+  top: var(--scene-top);
+  right: 32px;
   z-index: 3;
   pointer-events: none;
 }
@@ -628,20 +666,21 @@ footer {
   font-weight: 450;
   letter-spacing: -0.7px;
   margin: 13px 0;
+  max-width: calc(100% - 56px);
 }
 #brain-stimulus {
   position: absolute;
-  top: 15px;
-  right: 8px;
-  width: 40px;
-  height: 40px;
+  top: 32px;
+  right: 0;
+  width: 36px;
+  height: 36px;
   opacity: 0.75;
 }
 #brain-guide {
   position: fixed;
-  left: 56%;
-  right: 36px;
-  bottom: 145px;
+  left: calc(50% + 32px);
+  right: 32px;
+  bottom: calc(var(--controls-bottom) + 58px);
   z-index: 6;
 }
 .guide-heading .eyebrow {
@@ -649,12 +688,13 @@ footer {
   letter-spacing: 0.5px;
 }
 .guide-heading h2 {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 450;
-  margin: 9px 0 14px;
+  margin: 8px 0 12px;
 }
 .guide-controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
 }
 .guide-controls button {
@@ -664,26 +704,25 @@ footer {
 }
 .compare-mode #chip-stage {
   right: 50%;
-  top: 200px;
-  bottom: 150px;
+  top: var(--chip-top);
+  bottom: var(--panel-bottom);
 }
 .compare-mode #brain-stage {
-  left: 51%;
-  top: 210px;
-  bottom: 260px;
+  left: 50%;
+  top: var(--brain-top);
+  bottom: var(--brain-bottom);
 }
 .compare-mode .scene-heading {
-  max-width: 43%;
+  max-width: calc(50% - 70px);
 }
 .compare-mode #level-enter {
   left: 25%;
 }
-.compare-mode .view-tools {
-  right: calc(50% + 20px);
-  top: 310px;
+.compare-mode #view-tools {
+  right: calc(50% + 24px);
 }
-.compare-mode #reader {
-  top: 285px;
+#brain-view-tools {
+  right: 28px;
 }
 .compare-mode #chip-labels .chip-label {
   font-size: 9px;
@@ -691,11 +730,7 @@ footer {
 body[data-world="brain"] #brain-guide {
   left: 38px;
   right: auto;
-  bottom: 145px;
   max-width: 370px;
-}
-body[data-world="brain"] #reader {
-  top: 240px;
 }
 body[data-world="brain"] #scene-description {
   max-width: 320px;
@@ -703,20 +738,30 @@ body[data-world="brain"] #scene-description {
 #comparison-mobile {
   display: none;
 }
-@media (max-width: 1050px) {
+body:has(#reader:not([hidden]), #settings:not([hidden])) #level-enter {
+  display: none;
+}
+body[data-world="brain"]:has(#reader:not([hidden]), #settings:not([hidden]))
+  #brain-guide {
+  display: none;
+}
+@media (max-width: 1100px) {
   header {
     left: 22px;
     right: 22px;
+    gap: 16px;
   }
   .worlds button {
-    padding: 8px 17px;
+    padding: 9px 14px;
+  }
+  .header-actions {
+    gap: 4px;
   }
   .header-actions button {
-    font-size: 10px;
+    font-size: 11px;
   }
   .scene-heading {
     left: 27px;
-    top: 120px;
   }
   .scene-heading h1 {
     font-size: 29px;
@@ -725,7 +770,8 @@ body[data-world="brain"] #scene-description {
     font-size: 11px;
     max-width: 350px;
   }
-  #reader {
+  #reader,
+  #settings {
     left: 22px;
     width: 330px;
   }
@@ -739,46 +785,118 @@ body[data-world="brain"] #scene-description {
   #run-summary {
     display: none;
   }
-  #brain-label {
-    left: 55%;
-  }
-  .compare-mode #brain-guide {
-    left: 55%;
-  }
   #brain-label h2 {
     font-size: 26px;
-  }
-  .compare-mode .view-tools {
-    top: 275px;
   }
   .chip-label {
     font-size: 9px;
   }
 }
-@media (max-width: 700px) {
+@media (max-width: 1000px) and (min-height: 651px) {
   header {
-    top: 18px;
-    left: 19px;
-    right: 19px;
-    flex-wrap: wrap;
-    gap: 12px;
+    top: 16px;
+    gap: 10px 16px;
+  }
+  .header-actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .worlds {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+/* A single, switchable scene is more useful than two cramped canvases. */
+@media (max-width: 1000px), (max-height: 650px) {
+  .compare-mode #comparison-mobile {
+    display: flex;
+    position: fixed;
+    top: var(--switch-top);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8;
+    background: #101714e6;
+    border-radius: 22px;
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    padding: 3px;
+  }
+  #comparison-mobile button {
+    font-size: 11px;
+    padding: 7px 19px;
+    color: var(--muted);
+    border-radius: 18px;
+  }
+  #comparison-mobile [aria-pressed="true"] {
+    background: #c5e8d51f;
+    color: white;
+  }
+  .compare-mode #chip-stage {
+    inset: var(--chip-top) 0 var(--panel-bottom);
+  }
+  .compare-mode #brain-stage {
+    inset: var(--brain-top) 0 var(--brain-bottom);
+  }
+  .compare-mode .scene-heading {
+    max-width: calc(100% - 48px);
+  }
+  .compare-mode #view-tools {
+    right: 24px;
+  }
+  .compare-mode #level-enter {
+    left: 50%;
+  }
+  .compare-mode[data-comparison-view="chip"] #brain-stage,
+  .compare-mode[data-comparison-view="chip"] #brain-label,
+  .compare-mode[data-comparison-view="chip"] #brain-guide,
+  .compare-mode[data-comparison-view="chip"] #brain-view-tools,
+  .compare-mode[data-comparison-view="brain"] #chip-stage,
+  .compare-mode[data-comparison-view="brain"] .scene-heading,
+  .compare-mode[data-comparison-view="brain"] #level-enter,
+  .compare-mode[data-comparison-view="brain"] #dock,
+  .compare-mode[data-comparison-view="brain"] #view-tools {
+    display: none;
+  }
+  #brain-label {
+    left: 27px;
+    right: 27px;
+  }
+  #brain-guide {
+    left: 27px;
+    right: 27px;
+  }
+  .compare-mode:has(#reader:not([hidden]), #settings:not([hidden]))
+    #brain-guide {
+    display: none;
+  }
+  .compare-mode[data-comparison-view="brain"] #scene-note {
+    visibility: hidden;
+  }
+}
+@media (max-width: 600px) {
+  header {
+    top: 14px;
+    left: 18px;
+    right: 18px;
+    gap: 10px;
   }
   .brand {
     font-size: 29px;
   }
   .worlds {
-    position: static;
-    transform: none;
-    order: 3;
+    grid-column: 1 / -1;
+    grid-row: 2;
     width: 100%;
     justify-content: center;
     padding: 4px;
   }
   .worlds button {
     font-size: 11px;
-    padding: 8px 27px;
+    padding: 9px 13px;
   }
   .header-actions {
+    grid-column: 3;
+    grid-row: 1;
     gap: 3px;
   }
   .header-actions button {
@@ -787,17 +905,16 @@ body[data-world="brain"] #scene-description {
   }
   .scene-heading {
     left: 24px;
-    top: 146px;
-    max-width: calc(100% - 90px) !important;
+    max-width: calc(100% - 48px);
   }
   .scene-heading h1 {
-    font-size: 27px;
+    font-size: 25px;
     margin: 9px 0;
   }
   .scene-heading p {
     font-size: 10px;
-    max-width: 270px;
-    line-height: 1.7;
+    max-width: 310px;
+    line-height: 1.6;
   }
   #eyebrow {
     font-size: 8px;
@@ -805,25 +922,23 @@ body[data-world="brain"] #scene-description {
   }
   #depth-nav {
     gap: 0;
-    margin-top: 12px;
+    margin-top: 10px;
+    flex-wrap: wrap;
   }
   #depth-nav button {
-    font-size: 8px;
-    padding: 6px;
+    font-size: 9px;
+    padding: 7px 6px;
   }
-  .view-tools {
-    right: 14px;
-    top: 155px;
-    flex-direction: column;
-    border-radius: 17px;
-    padding: 2px;
+  .view-tools,
+  #brain-view-tools,
+  .compare-mode #view-tools {
+    right: 18px;
   }
   .view-tools button {
-    font-size: 18px;
-    padding: 3px 9px;
+    padding: 4px 13px;
   }
   .enter-cue {
-    bottom: 143px;
+    bottom: calc(var(--panel-bottom) + 6px);
     font-size: 10px;
     width: max-content;
   }
@@ -831,36 +946,31 @@ body[data-world="brain"] #scene-description {
     font-size: 8px;
     padding: 4px;
   }
-  #reader {
+  #reader,
+  #settings {
     left: 16px;
     right: 16px;
     width: auto;
-    top: 288px;
-    bottom: 122px;
-    max-height: none;
     border-radius: 15px;
   }
   #inspection {
     padding: 17px 20px;
-    font-size: 12px;
   }
   #inspection h2 {
     font-size: 23px;
   }
   #settings {
-    top: 110px;
-    left: 16px;
-    right: 16px;
-    width: auto;
+    padding: 20px;
   }
   #dock {
-    bottom: 38px;
+    bottom: 36px;
     padding: 6px;
     max-width: calc(100% - 24px);
+    width: max-content;
   }
   #dock button {
     font-size: 10px;
-    padding: 8px 10px;
+    padding: 8px 9px;
   }
   .divider {
     margin: 0 2px;
@@ -874,6 +984,8 @@ body[data-world="brain"] #scene-description {
   #compute-controls,
   #brain-controls {
     gap: 1px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   body[data-level="execution"] #dock .primary {
     min-width: 68px;
@@ -894,7 +1006,7 @@ body[data-world="brain"] #scene-description {
   footer {
     left: 18px;
     right: 18px;
-    bottom: 12px;
+    bottom: 10px;
     font-size: 7px;
   }
   footer #scene-note {
@@ -905,62 +1017,13 @@ body[data-world="brain"] #scene-description {
     font-size: 7px;
   }
   #toast {
-    top: 115px;
+    top: auto;
+    bottom: 12px;
     font-size: 10px;
     max-width: 95%;
     width: max-content;
   }
-  .compare-mode #chip-stage {
-    inset: 0;
-  }
-  .compare-mode #brain-stage {
-    inset: 265px 0 235px;
-  }
-  .compare-mode .scene-heading {
-    top: 181px;
-  }
-  .compare-mode .view-tools {
-    right: 14px;
-    top: 188px;
-  }
-  .compare-mode #level-enter {
-    left: 50%;
-  }
-  .compare-mode #comparison-mobile {
-    display: flex;
-    position: fixed;
-    top: 120px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 8;
-    background: #0009;
-    border-radius: 18px;
-    white-space: nowrap;
-    border: 1px solid var(--line);
-  }
-  #comparison-mobile button {
-    font-size: 10px;
-    padding: 6px 17px;
-    color: var(--muted);
-  }
-  #comparison-mobile [aria-pressed="true"] {
-    background: #c5e8d519;
-    color: white;
-  }
-  .compare-mode[data-comparison-view="chip"] #brain-stage,
-  .compare-mode[data-comparison-view="chip"] #brain-label,
-  .compare-mode[data-comparison-view="chip"] #brain-guide {
-    display: none;
-  }
-  .compare-mode[data-comparison-view="brain"] #chip-stage,
-  .compare-mode[data-comparison-view="brain"] .scene-heading,
-  .compare-mode[data-comparison-view="brain"] #level-enter,
-  .compare-mode[data-comparison-view="brain"] #dock,
-  .compare-mode[data-comparison-view="brain"] .view-tools {
-    display: none;
-  }
   #brain-label {
-    top: 180px;
     left: 24px;
     right: 24px;
   }
@@ -968,60 +1031,92 @@ body[data-world="brain"] #scene-description {
     font-size: 8px;
   }
   #brain-label h2 {
-    font-size: 26px;
+    font-size: 25px;
   }
   #brain-guide,
-  .compare-mode #brain-guide {
+  body[data-world="brain"] #brain-guide {
     left: 24px;
     right: 24px;
-    bottom: 80px;
+    max-width: none;
   }
   .guide-heading h2 {
-    font-size: 20px;
-    max-width: 300px;
+    font-size: 18px;
   }
-  body[data-world="brain"] #brain-guide {
-    bottom: 130px;
-    left: 24px;
-    right: 24px;
+  .guide-controls button {
+    padding: 7px 9px;
   }
-  body[data-world="brain"] #reader {
-    top: 255px;
+}
+@media (max-height: 650px) {
+  .compare-mode #chip-stage {
+    top: var(--scene-top);
+    bottom: 28px;
   }
-  .compare-mode #reader {
-    top: 270px;
+  header {
+    top: 10px;
+    left: 18px;
+    right: 18px;
+    gap: 10px;
   }
-  .compare-mode[data-comparison-view="brain"] #reader {
-    top: 170px;
-    bottom: 50px;
+  .brand {
+    font-size: 26px;
   }
-  .compare-mode #scene-note {
-    max-width: 70%;
+  .worlds {
+    padding: 3px;
   }
-  .compare-mode[data-comparison-view="brain"] #scene-note {
+  .scene-heading h1 {
+    font-size: 23px;
+    margin: 7px 0;
+  }
+  .scene-heading p {
+    display: none;
+  }
+  #eyebrow,
+  #brain-label .eyebrow {
+    display: none;
+  }
+  #depth-nav {
+    margin-top: 4px;
+  }
+  #brain-label h2 {
+    font-size: 23px;
+    margin: 7px 0;
+  }
+  #brain-stimulus {
+    top: 0;
+    width: 28px;
+    height: 28px;
+  }
+  #dock {
+    bottom: 27px;
+    padding: 5px;
+  }
+  .enter-cue {
+    display: none;
+  }
+  footer {
+    bottom: 8px;
+    font-size: 7px;
+  }
+  .guide-heading {
+    display: none;
+  }
+  #reader,
+  #settings {
+    left: 18px;
+    width: min(360px, calc(100% - 36px));
+  }
+  body:has(#reader:not([hidden]), #settings:not([hidden])) .scene-heading,
+  body:has(#reader:not([hidden]), #settings:not([hidden])) #brain-label {
     visibility: hidden;
   }
 }
-@media (max-height: 760px) and (min-width: 701px) {
-  .scene-heading {
-    top: 105px;
-  }
-  #reader {
-    top: 255px;
-    bottom: 110px;
-  }
-  .compare-mode #brain-stage {
-    top: 210px;
-    bottom: 240px;
-  }
-  #brain-guide {
-    bottom: 135px;
-  }
-  #dock {
-    bottom: 32px;
-  }
-  .enter-cue {
-    bottom: 130px;
+@media (max-height: 650px) and (min-width: 601px) {
+  #brain-guide,
+  body[data-world="brain"] #brain-guide {
+    left: 24px;
+    right: 175px;
+    bottom: var(--controls-bottom);
+    max-width: none;
   }
 }
 
@@ -1158,14 +1253,5 @@ body[data-world="brain"] #scene-description {
   }
   .worlds button {
     padding: 9px 13px;
-  }
-}
-
-body[data-world="brain"]:has(#reader:not([hidden])) #brain-guide {
-  display: none;
-}
-@media (max-width: 700px) {
-  .compare-mode:has(#reader:not([hidden])) #brain-guide {
-    display: none;
   }
 }
