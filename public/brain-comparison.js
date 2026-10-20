@@ -1,4 +1,5 @@
 import { configureHDR, hdrCapable } from "./display.js";
+import { bindCameraControls } from "./camera-controls.js";
 
 /** A source-guided atlas tour. Its authored clock never consumes silicon ticks. */
 export async function initBrainComparison(wasm) {
@@ -33,8 +34,6 @@ export async function initBrainComparison(wasm) {
   let lastStage = -1;
   let lastTimeText = "";
   let resizeObserver = null;
-  let pointers = new Map();
-  let pinchDistance = null;
   let lastInputKey = "";
   let input = Array(64).fill(0);
   let selectedRegion = null;
@@ -517,100 +516,30 @@ export async function initBrainComparison(wasm) {
     canvas.tabIndex = 0;
     canvas.setAttribute(
       "aria-label",
-      "Reference brain atlas. Drag to orbit, pinch or scroll to zoom. Arrow keys orbit, plus and minus zoom, Home resets the camera. The guide highlights anatomical landmarks, not a simulated response.",
+      "Reference brain atlas. Drag to rotate; Shift-drag or right-drag to pan. Pinch to zoom and use two fingers to pan. Scroll to zoom. Arrow keys rotate, Shift and arrows pan, plus and minus zoom, Home resets. The guide highlights anatomy, not a simulated response.",
     );
-    canvas.style.touchAction = "none";
-    listen(canvas, "pointerdown", (event) => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
-      canvas.focus({ preventScroll: true });
-      canvas.setPointerCapture(event.pointerId);
-      pointers.set(event.pointerId, {
-        x: event.clientX,
-        y: event.clientY,
-        startX: event.clientX,
-        startY: event.clientY,
-        moved: pointers.size > 0,
-      });
-      if (pointers.size > 1) {
-        for (const point of pointers.values()) point.moved = true;
-        const [a, b] = [...pointers.values()];
-        pinchDistance = Math.hypot(a.x - b.x, a.y - b.y);
-      }
-    });
-    listen(canvas, "pointermove", (event) => {
-      const point = pointers.get(event.pointerId);
-      if (!point) return;
-      const dx = event.clientX - point.x,
-        dy = event.clientY - point.y;
-      point.x = event.clientX;
-      point.y = event.clientY;
-      if (Math.hypot(point.x - point.startX, point.y - point.startY) > 4)
-        point.moved = true;
-      if (pointers.size > 1) {
-        const [a, b] = [...pointers.values()];
-        const distance = Math.hypot(a.x - b.x, a.y - b.y);
-        if (distance > 0 && pinchDistance > 0)
-          renderer?.zoom(Math.log(pinchDistance / distance));
-        pinchDistance = distance;
-      } else renderer?.orbit(dx * 0.005, dy * 0.005);
-      dirty = true;
-    });
-    listen(canvas, "pointerup", (event) => {
-      const point = pointers.get(event.pointerId);
-      if (point && !point.moved && renderer && atlas) {
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width && rect.height) {
-          const index = renderer.pick(
-            (event.clientX - rect.left) / rect.width,
-            (event.clientY - rect.top) / rect.height,
-          );
-          const region = atlas.regions.find((region) => region.index === index);
-          if (region) selectRegion(region.id);
-        }
-      }
-      pointers.delete(event.pointerId);
-      pinchDistance = null;
-    });
-    const release = (event) => {
-      pointers.delete(event.pointerId);
-      pinchDistance = null;
-    };
-    listen(canvas, "pointercancel", release);
-    listen(canvas, "lostpointercapture", release);
-    listen(
-      canvas,
-      "wheel",
-      (event) => {
-        event.preventDefault();
-        renderer?.zoom(Math.max(-0.2, Math.min(0.2, event.deltaY * 0.001)));
+    bindCameraControls(canvas, {
+      getRenderer: () => renderer,
+      onChange: () => {
         dirty = true;
       },
-      { passive: false },
-    );
-    listen(canvas, "keydown", (event) => {
-      const move = {
-        ArrowLeft: [-0.1, 0],
-        ArrowRight: [0.1, 0],
-        ArrowUp: [0, -0.1],
-        ArrowDown: [0, 0.1],
-      }[event.key];
-      if (move) {
-        event.preventDefault();
-        renderer?.orbit(...move);
-      } else if (event.key === "+" || event.key === "=") {
-        event.preventDefault();
-        renderer?.zoom(-0.15);
-      } else if (event.key === "-") {
-        event.preventDefault();
-        renderer?.zoom(0.15);
-      } else if (event.key === "Home") {
-        event.preventDefault();
-        initialView();
-      } else if (event.key === "Enter") evidence();
-      else return;
-      dirty = true;
+      onTap: (event) => {
+        if (!renderer || !atlas) return;
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const index = renderer.pick(
+          (event.clientX - rect.left) / rect.width,
+          (event.clientY - rect.top) / rect.height,
+        );
+        const region = atlas.regions.find((region) => region.index === index);
+        if (region) selectRegion(region.id);
+      },
+      onReset: initialView,
+      onInspect: evidence,
+      signal: abort.signal,
     });
   }
+
   function frame(now) {
     if (disposed) return;
     const dt =
@@ -657,7 +586,6 @@ export async function initBrainComparison(wasm) {
     overviewMesh = null;
     activeMesh = null;
     resizeObserver?.disconnect();
-    pointers.clear();
     renderer?.free?.();
     renderer = null;
     ready = false;
@@ -676,6 +604,9 @@ export async function initBrainComparison(wasm) {
     selectRegion,
     setCutaway,
     resetView,
+    cameraChanged: () => {
+      dirty = true;
+    },
     redraw: () => {
       resize();
       highlight();

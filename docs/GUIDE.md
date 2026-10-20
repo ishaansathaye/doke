@@ -2,7 +2,9 @@
 
 ## Explore
 
-Choose a product from the **hardware selector**, or open **Human brain**. Drag the scene to orbit, scroll to zoom, or use the camera buttons. Select a component to read its explanation and sources in the floating panel. Related explanations open as tabs, so a source does not replace the page that led to it.
+Choose a product from the **hardware selector**, or open **Human brain**. Drag to turn the model; Shift-drag or right-drag to move it across the screen. Pinch to zoom and use two fingers to pan on a touch screen, or scroll to zoom with a mouse or trackpad. Each scene has its own zoom and reset buttons. Select a component to read its explanation and sources in the left floating panel. Related explanations open as tabs and retain their scroll position. Arrow keys move between focused tabs; Escape closes an open menu before closing its panel.
+
+Comparison shows both scenes side by side when there is room. On narrow or short screens, switch between **Processor** and **Brain** above the scene. Information and display settings share a bounded panel so navigation, camera controls and playback remain reachable.
 
 Every hardware family has three depths:
 

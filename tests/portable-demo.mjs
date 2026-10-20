@@ -15,6 +15,10 @@ for (const required of [
   "index.html",
   "silicon.js",
   "silicon.css",
+  "camera-controls.js",
+  "panel-layout.js",
+  "select-control.js",
+  "select-control.css",
   "architecture.json",
   "brain.json",
   "comparison.json",
@@ -127,9 +131,19 @@ try {
     await page.locator("#render-status").textContent(),
     backend === "webgl" ? /\bGl\b/ : /BrowserWebGpu/,
   );
-  assert.deepEqual(await page.locator(".worlds button").allTextContents(), [
-    "Human brain",
-  ]);
+  assert.deepEqual(
+    await page.locator(".worlds button[data-world]").allTextContents(),
+    ["Human brain"],
+  );
+  const hardwarePicker = page.getByRole("combobox", {
+    name: "Select hardware",
+  });
+  await hardwarePicker.click();
+  assert.equal(
+    await page.getByRole("listbox", { name: "Select hardware" }).isVisible(),
+    true,
+  );
+  await hardwarePicker.press("Escape");
   assert.deepEqual(
     await page
       .locator("#hardware option")

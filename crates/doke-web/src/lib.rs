@@ -70,6 +70,35 @@ pub struct BrainRenderer {
     hdr: bool,
     target_format: wgpu::TextureFormat,
 }
+// Share projection math with panning; output resolution must never change the
+// apparent speed of a gesture measured in CSS pixels.
+fn camera_fov(aspect: f32, mode: f32) -> f32 {
+    let fit = if aspect < 0.9 && mode > 0. { 1.0 } else { 0.9 };
+    2. * ((0.64_f32 / 2.).tan() * (fit / aspect).max(1.)).atan()
+}
+fn camera_shift(aspect: f32, mode: f32) -> f32 {
+    if mode == 4. {
+        if aspect < 0.9 {
+            -0.03
+        } else {
+            0.10
+        }
+    } else if aspect < 0.9 && mode > 0. {
+        0.14
+    } else {
+        0.
+    }
+}
+fn pan_offset(yaw: f32, pitch: f32, dx: f32, dy: f32) -> Vec3 {
+    let right = Vec3::new(yaw.cos(), 0., -yaw.sin());
+    let up = Vec3::new(
+        -yaw.sin() * pitch.sin(),
+        pitch.cos(),
+        -yaw.cos() * pitch.sin(),
+    );
+    -right * dx + up * dy
+}
+
 // This resource factory receives the shared pipelines and bindings together.
 #[allow(clippy::too_many_arguments)]
 fn targets(
@@ -668,10 +697,16 @@ impl BrainRenderer {
         );
     }
     pub fn orbit(&mut self, dx: f32, dy: f32) {
+        if !dx.is_finite() || !dy.is_finite() {
+            return;
+        }
         self.yaw += dx;
         self.pitch = (self.pitch + dy).clamp(-1.45, 1.45);
     }
     pub fn zoom(&mut self, delta: f32) {
+        if !delta.is_finite() {
+            return;
+        }
         self.distance = (self.distance * delta.exp()).clamp(
             if self.state.params[2] == 4. {
                 0.25
@@ -681,9 +716,40 @@ impl BrainRenderer {
             if self.state.params[2] == 4. { 24. } else { 7. },
         );
     }
+    /// Keep the point on the focal plane under the cursor while changing zoom.
+    /// x/y are normalized canvas coordinates, independent of render resolution.
+    pub fn zoom_at(&mut self, delta: f32, x: f32, y: f32) {
+        if ![delta, x, y].iter().all(|v| v.is_finite()) {
+            return;
+        }
+        let previous = self.distance;
+        self.zoom(delta);
+        let aspect = self.config.width as f32 / self.config.height as f32;
+        let mode = self.state.params[2];
+        let center_y = 0.5 - camera_shift(aspect, mode) / 2.;
+        let scale = 2. * (previous - self.distance) * (camera_fov(aspect, mode) / 2.).tan();
+        self.target -= pan_offset(
+            self.yaw,
+            self.pitch,
+            (x - 0.5) * aspect * scale,
+            (y - center_y) * scale,
+        );
+    }
+    /// Pan in CSS pixels so the focal plane follows the pointer at any zoom,
+    /// pitch, resolution or viewport shape. Positive y points down the screen.
+    pub fn pan_pixels(&mut self, dx: f32, dy: f32, viewport_height: f32) {
+        if ![dx, dy, viewport_height].iter().all(|v| v.is_finite()) || viewport_height <= 0. {
+            return;
+        }
+        let aspect = self.config.width as f32 / self.config.height as f32;
+        let scale = 2. * self.distance * (camera_fov(aspect, self.state.params[2]) / 2.).tan()
+            / viewport_height;
+        self.target += pan_offset(self.yaw, self.pitch, dx * scale, dy * scale);
+    }
     pub fn pan(&mut self, dx: f32, dy: f32) {
-        let right = Vec3::new(self.yaw.cos(), 0., -self.yaw.sin());
-        self.target += right * (-dx * self.distance) + Vec3::Y * (dy * self.distance);
+        if dx.is_finite() && dy.is_finite() {
+            self.target += pan_offset(self.yaw, self.pitch, dx * self.distance, dy * self.distance);
+        }
     }
     pub fn view(&mut self, preset: u32) {
         if self.state.params[2] == 4. {
@@ -840,22 +906,21 @@ impl BrainRenderer {
                 self.pitch.sin(),
                 self.yaw.cos() * self.pitch.cos(),
             ) * self.distance;
-        let portrait_micro = self.config.width as f32 / (self.config.height as f32) < 0.9
-            && self.state.params[2] > 0.;
-        let fit = if portrait_micro { 1.0 } else { 0.9 };
         self.matrix = Mat4::perspective_rh(
-            2. * ((0.64_f32 / 2.).tan()
-                * (fit / (self.config.width as f32 / self.config.height as f32)).max(1.))
-            .atan(),
+            camera_fov(
+                self.config.width as f32 / self.config.height as f32,
+                self.state.params[2],
+            ),
             self.config.width as f32 / self.config.height as f32,
             0.02,
             30.,
         ) * Mat4::look_at_rh(self.eye, self.target, Vec3::Y);
-        if self.state.params[2] == 4. {
-            let shift = if portrait_micro { -0.03 } else { 0.10 };
+        let shift = camera_shift(
+            self.config.width as f32 / self.config.height as f32,
+            self.state.params[2],
+        );
+        if shift != 0. {
             self.matrix = Mat4::from_translation(Vec3::new(0., shift, 0.)) * self.matrix;
-        } else if portrait_micro {
-            self.matrix = Mat4::from_translation(Vec3::new(0., 0.14, 0.)) * self.matrix;
         }
         self.state.vp = self.matrix.to_cols_array_2d();
         self.state.eye = [self.eye.x, self.eye.y, self.eye.z, 1.];
