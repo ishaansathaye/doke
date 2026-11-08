@@ -4,6 +4,8 @@ pub mod silicon;
 
 use serde::{Deserialize, Serialize};
 
+pub mod plasticity;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Model {
     pub e: f64,

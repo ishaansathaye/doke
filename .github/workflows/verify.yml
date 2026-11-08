@@ -1,0 +1,31 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  model-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.92.0 --profile minimal --target wasm32-unknown-unknown
+      - name: Test numerical models
+        run: cargo +1.92.0 test -p doke-core --locked
+      - name: Check browser Rust target
+        run: cargo +1.92.0 check -p doke-web --target wasm32-unknown-unknown --locked
+      - name: Validate scientific references
+        run: python3 tools/check_content.py
+      - name: Check browser script syntax
+        run: |
+          for file in public/*.js tests/*.mjs tools/*.mjs; do
+            node --check "$file"
+          done
