@@ -1,0 +1,1430 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>doke · After a bite</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #060909;
+        color: #eef2ed;
+        font-family: Arial, sans-serif;
+      }
+      body {
+        overflow: hidden;
+      }
+      button,
+      a,
+      summary {
+        touch-action: manipulation;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        border: 1px solid #ffffff24;
+        background: #111918;
+        border-radius: 99px;
+        padding: 11px 17px;
+      }
+      button:hover,
+      a:hover {
+        color: #fff;
+        border-color: #c6eddf80;
+        background: #24322d;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 2px solid #d9efcd;
+        outline-offset: 5px;
+      }
+      button[aria-pressed="true"] {
+        background: #d7e7d9;
+        color: #101a15;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      header {
+        position: absolute;
+        inset: 27px 32px auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 5;
+      }
+      .brand {
+        font-weight: 750;
+        font-size: 31px;
+        letter-spacing: -2px;
+      }
+      .brand small {
+        font: 10px monospace;
+        color: #9ca9a3;
+        letter-spacing: 1px;
+        margin-left: 15px;
+      }
+      nav {
+        display: flex;
+        gap: 5px;
+        padding: 5px;
+        border: 1px solid #ffffff19;
+        border-radius: 99px;
+        background: #101614bb;
+      }
+      nav a {
+        font-size: 11px;
+        padding: 10px 17px;
+        border-radius: 99px;
+      }
+      nav a[aria-current] {
+        background: #e7f0e512;
+        color: #e6efdc;
+      }
+      .tag {
+        color: #9caaa3;
+        font: 10px monospace;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100dvh;
+        touch-action: none;
+        outline: none;
+      }
+      .intro {
+        position: absolute;
+        left: 4.5vw;
+        top: 21vh;
+        width: 310px;
+        pointer-events: none;
+      }
+      .eyebrow {
+        font: 10px monospace;
+        letter-spacing: 2px;
+        color: #98b9aa;
+      }
+      .intro h1 {
+        font-size: clamp(40px, 4.5vw, 66px);
+        font-weight: 400;
+        letter-spacing: -3px;
+        line-height: 1.05;
+        margin: 20px 0;
+      }
+      .intro h1 em {
+        font-family: Georgia, serif;
+        font-weight: 400;
+      }
+      .intro p {
+        max-width: 235px;
+        color: #a9b5ae;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+      .intro .line {
+        height: 1px;
+        width: 42px;
+        background: #cce5ce55;
+        margin: 25px 0;
+      }
+      .intro small {
+        font: 10px/1.8 monospace;
+        color: #91a299;
+        display: block;
+        max-width: 230px;
+      }
+      .views {
+        position: absolute;
+        right: 32px;
+        top: 99px;
+        display: flex;
+        gap: 6px;
+        z-index: 3;
+      }
+      .views button {
+        font-size: 11px;
+        padding: 9px 13px;
+      }
+      .status {
+        position: absolute;
+        left: 4.5vw;
+        bottom: 260px;
+        max-width: 280px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #c3d8c9;
+      }
+      .status b {
+        display: block;
+        color: #e4efdf;
+        font-weight: 400;
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+      .dock {
+        position: absolute;
+        left: 50%;
+        bottom: 26px;
+        transform: translateX(-50%);
+        width: min(850px, calc(100% - 48px));
+        padding: 17px 22px;
+        border-radius: 25px;
+        background: linear-gradient(125deg, #17211fef, #0d1211ef);
+        border: 1px solid #b7d8c62c;
+        box-shadow: 0 10px 65px #0008;
+        backdrop-filter: blur(24px);
+        z-index: 4;
+      }
+      .dock-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .dock-title {
+        font: 10px monospace;
+        letter-spacing: 1.4px;
+        color: #9aada0;
+      }
+      .ingredients {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .ingredient {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        border-radius: 15px;
+        padding: 12px 18px;
+        text-align: left;
+        min-width: 160px;
+      }
+      .ingredient svg {
+        width: 29px;
+        height: 29px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.4;
+      }
+      .ingredient span {
+        font-size: 13px;
+      }
+      .ingredient small {
+        display: block;
+        font-size: 10px;
+        color: #9db0a4;
+        margin-top: 5px;
+      }
+      .ingredient:active {
+        transform: scale(0.97);
+      }
+      .ripple {
+        border-style: dashed;
+        font-size: 11px;
+        max-width: 140px;
+        color: #cfe5d6;
+      }
+      .timeline {
+        height: 36px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 9px 0 0;
+        color: #83948a;
+        font: 10px monospace;
+      }
+      .trace {
+        height: 6px;
+        width: 27px;
+        border-radius: 9px;
+        background: #cfb08b;
+        box-shadow: 0 0 10px #cfb08b44;
+      }
+      .trace.coffee {
+        background: #b9dcd2;
+      }
+      .dock-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid #ffffff0d;
+        padding-top: 10px;
+        gap: 12px;
+      }
+      .dock-bottom p {
+        font: 10px monospace;
+        color: #a8b7ab;
+        margin: 0;
+      }
+      .transport {
+        display: flex;
+        gap: 4px;
+      }
+      .transport button {
+        font-size: 10px;
+        border: 0;
+        padding: 8px 10px;
+        background: transparent;
+      }
+      .transport button:hover {
+        background: #ffffff0b;
+      }
+      .legend {
+        position: absolute;
+        right: 35px;
+        bottom: 255px;
+        font: 10px/2 monospace;
+        color: #8fa59b;
+      }
+      .legend span {
+        display: inline-block;
+        width: 18px;
+        height: 2px;
+        background: #c5ead9;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+      .legend span.blood {
+        background: #b4bedc;
+      }
+      .legend span.food {
+        background: #d7b08c;
+      }
+      .help {
+        position: absolute;
+        left: 33px;
+        bottom: 27px;
+        z-index: 7;
+        font-size: 11px;
+      }
+      .help summary {
+        cursor: pointer;
+        color: #a9bab0;
+        list-style: none;
+        border-bottom: 1px solid #ffffff27;
+        padding-bottom: 5px;
+      }
+      .help[open] {
+        left: 30px;
+        bottom: 255px;
+        width: 330px;
+        border: 1px solid #ffffff26;
+        border-radius: 19px;
+        padding: 20px;
+        background: #101a16f5;
+        box-shadow: 0 15px 50px #0009;
+      }
+      .help[open] p {
+        font-size: 12px;
+        line-height: 1.65;
+        color: #b9c9bf;
+      }
+      .help a {
+        text-decoration: underline;
+      }
+      .float-label {
+        position: absolute;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        padding: 8px 12px;
+        border: 1px solid #d9e9d928;
+        border-radius: 30px;
+        background: #121d18ba;
+        backdrop-filter: blur(8px);
+        font: 10px monospace;
+        z-index: 2;
+      }
+      .mock {
+        position: absolute;
+        bottom: 9px;
+        right: 18px;
+        color: #829389;
+        font: 9px monospace;
+        pointer-events: none;
+      }
+      .halo {
+        position: absolute;
+        pointer-events: none;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 65% 43%,
+          transparent 20%,
+          #01030338 75%
+        );
+      }
+      @media (max-width: 900px) {
+        header {
+          inset: 20px 22px auto;
+        }
+        .brand small {
+          display: none;
+        }
+        .tag {
+          display: none;
+        }
+        nav a {
+          padding: 9px 11px;
+        }
+        .intro {
+          left: 25px;
+          top: 120px;
+          width: 250px;
+        }
+        .intro h1 {
+          font-size: 40px;
+        }
+        .intro .line,
+        .intro small {
+          display: none;
+        }
+        .status {
+          bottom: 265px;
+          left: 25px;
+          font-size: 11px;
+          max-width: 190px;
+        }
+        .status b {
+          font-size: 16px;
+        }
+        .legend {
+          right: 22px;
+          bottom: 260px;
+          font-size: 9px;
+        }
+        .help {
+          left: 24px;
+          bottom: 240px;
+        }
+        .help[open] {
+          bottom: 240px;
+          left: 20px;
+          width: 310px;
+          max-height: 55vh;
+          overflow: auto;
+        }
+        .dock {
+          bottom: 23px;
+        }
+        .mock {
+          bottom: 7px;
+          font-size: 8px;
+        }
+      }
+      @media (max-width: 600px) {
+        header {
+          display: block;
+          inset: 17px 21px auto;
+        }
+        .brand {
+          font-size: 27px;
+        }
+        nav {
+          position: absolute;
+          right: 0;
+          top: 2px;
+        }
+        nav a {
+          font-size: 10px;
+          padding: 8px 11px;
+        }
+        .intro {
+          top: 89px;
+          left: 24px;
+          width: 290px;
+        }
+        .intro .eyebrow {
+          font-size: 8px;
+        }
+        .intro h1 {
+          font-size: 33px;
+          letter-spacing: -1.7px;
+          margin: 10px 0;
+        }
+        .intro h1 br {
+          display: none;
+        }
+        .intro p {
+          font-size: 11px;
+          line-height: 1.5;
+          margin: 0;
+          max-width: 280px;
+        }
+        .views {
+          top: 190px;
+          right: 20px;
+        }
+        .views button {
+          font-size: 9px;
+          padding: 8px 10px;
+        }
+        .status {
+          left: 24px;
+          bottom: 255px;
+          max-width: 205px;
+          font-size: 10px;
+        }
+        .status b {
+          font-size: 13px;
+          margin-bottom: 2px;
+        }
+        .legend {
+          right: 20px;
+          bottom: 258px;
+          font-size: 8px;
+          line-height: 1.8;
+        }
+        .help {
+          bottom: 231px;
+          font-size: 9px;
+        }
+        .dock {
+          bottom: 24px;
+          width: calc(100% - 28px);
+          padding: 13px 14px;
+          border-radius: 20px;
+        }
+        .dock-top {
+          display: block;
+        }
+        .dock-title {
+          font-size: 8px;
+          margin-bottom: 10px;
+        }
+        .ingredients {
+          gap: 6px;
+        }
+        .ingredient {
+          min-width: 0;
+          padding: 10px 9px;
+          gap: 6px;
+          flex: 1;
+        }
+        .ingredient svg {
+          width: 21px;
+          height: 21px;
+        }
+        .ingredient span {
+          font-size: 11px;
+        }
+        .ingredient small {
+          font-size: 8px;
+        }
+        .ripple {
+          font-size: 9px;
+          max-width: 80px;
+          padding: 10px 9px;
+        }
+        .timeline {
+          height: 23px;
+          font-size: 8px;
+        }
+        .dock-bottom {
+          gap: 2px;
+          padding-top: 6px;
+        }
+        .dock-bottom p {
+          font-size: 8px;
+          max-width: 110px;
+          line-height: 1.5;
+        }
+        .transport button {
+          font-size: 9px;
+          padding: 9px 7px;
+        }
+        .float-label {
+          font-size: 8px;
+          padding: 6px 8px;
+        }
+        .help[open] {
+          bottom: 241px;
+          left: 14px;
+          width: calc(100% - 28px);
+        }
+        .mock {
+          left: 15px;
+          right: auto;
+        }
+      }
+      @media (max-height: 740px) and (max-width: 600px) {
+        .intro {
+          top: 79px;
+        }
+        .intro p {
+          display: none;
+        }
+        .views {
+          top: 153px;
+        }
+        .status {
+          display: none;
+        }
+        .legend {
+          bottom: 237px;
+        }
+        .help {
+          bottom: 218px;
+        }
+        .dock {
+          bottom: 18px;
+        }
+        .float-label {
+          display: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <canvas
+      id="world"
+      tabindex="0"
+      aria-label="Schematic body. Click or press Space to send a gut ripple; choose food buttons to add a bite."
+    ></canvas>
+    <div class="halo"></div>
+    <header>
+      <a class="brand" href="index.html">doke<small>POSSIBLE FUTURES</small></a>
+      <nav aria-label="Concepts">
+        <a aria-current="page" href="body.html">Body</a
+        ><a href="creature.html">Creature</a><a href="echo.html">Memory</a>
+      </nav>
+      <a class="tag" href="index.html">← ALL CONCEPTS</a>
+    </header>
+    <section class="intro">
+      <span class="eyebrow">01 / AFTER A BITE</span>
+      <h1>
+        A bite.<br />
+        A whole <em>body.</em>
+      </h1>
+      <p>
+        Drop something in. Follow the ripple.<br />Play the body from the
+        inside.
+      </p>
+      <div class="line"></div>
+      <small
+        >A food-to-body playground.<br />One small choice, several
+        routes.</small
+      >
+    </section>
+    <div class="views" aria-label="Camera">
+      <button id="whole" aria-pressed="true">Whole body</button
+      ><button id="gut" aria-pressed="false">Into the gut ↗</button>
+    </div>
+    <div class="status" aria-live="polite">
+      <b id="headline">What happens after a bite?</b
+      ><span id="message"
+        >Add a bite, then tap the body to launch a local wave.</span
+      >
+    </div>
+    <div id="label" class="float-label" hidden>local nerve → muscle wave</div>
+    <div class="legend">
+      <div><span class="food"></span>food / contents</div>
+      <div><span></span>neural signal</div>
+      <div><span class="blood"></span>blood-borne route</div>
+    </div>
+    <section class="dock" aria-label="Food playground controls">
+      <div class="dock-top">
+        <div class="dock-title">MAKE A LITTLE SEQUENCE</div>
+        <div class="ingredients">
+          <button
+            class="ingredient"
+            id="bread"
+            aria-label="Add a bite of bread"
+          >
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+              <path
+                d="M6 27V13C0 8 7 3 16 3s16 5 10 10v14Z M12 10l-1 4m7-5-1 5m7-3-1 4"
+              /></svg
+            ><span>A bite<small>bread scenario</small></span></button
+          ><button
+            class="ingredient"
+            id="coffee"
+            aria-label="Add a sip of coffee"
+          >
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+              <path
+                d="M5 11h18v9c0 9-18 9-18 0Z M23 12c9-2 9 9 0 8 M3 29h24M10 7c-3-3 3-3 0-6M17 7c-3-3 3-3 0-6"
+              /></svg
+            ><span>A sip<small>coffee scenario</small></span></button
+          ><button class="ripple" id="ripple">Send a gut ripple ↝</button>
+        </div>
+      </div>
+      <div class="timeline" id="sequence" aria-label="Your sequence">
+        Your sequence starts here.
+      </div>
+      <div class="dock-bottom">
+        <p id="counter">0 additions · session only</p>
+        <div class="transport">
+          <button id="pause">Pause</button><button id="replay">Replay</button
+          ><button id="clear">Clear</button>
+        </div>
+      </div>
+    </section>
+    <details class="help">
+      <summary>What is real here? ↗</summary>
+      <p>
+        <b>This is a playable visual mock.</b> Bread and coffee are scenario
+        cues. Shapes, speeds, quantities and glow are authored; they do not
+        predict a meal's effect on your body.
+      </p>
+      <p>
+        Real interaction: adding contents, queueing a sequence, local wave
+        impulses, toy bolus movement, replay and a gut close-up. Neural flashes
+        and blood-borne particles are separate. A ripple is a player-controlled
+        abstraction, not an externally controllable human reflex.
+      </p>
+      <p>
+        The enteric nervous system can coordinate local movement. Caffeine acts
+        through receptor antagonism; it does not add energy. The coffee path
+        ends at a symbolic receptor gate; binding is not simulated. Absorption
+        and neural signaling do not share the same biological clock.
+      </p>
+      <p>
+        Sources:
+        <a
+          href="https://www.niddk.nih.gov/health-information/digestive-diseases/digestive-system-how-it-works"
+          target="_blank"
+          rel="noopener"
+          >NIDDK digestion</a
+        >
+        ·
+        <a
+          href="https://pubmed.ncbi.nlm.nih.gov/34376798/"
+          target="_blank"
+          rel="noopener"
+          >Spencer et al. (mouse colon)</a
+        >
+        ·
+        <a
+          href="https://pubmed.ncbi.nlm.nih.gov/22966134/"
+          target="_blank"
+          rel="noopener"
+          >Caffeine A1 occupancy</a
+        >.
+      </p>
+      <p>
+        No nutrient amounts, concentrations, health score, personal physiology
+        or biological timings are calculated. No data leaves this page.
+      </p>
+    </details>
+    <div class="mock">
+      INTERACTION MOCK · SCHEMATIC ROUTES · AUTHORED PACING · SDR GLOW
+    </div>
+    <script>
+      const $ = (id) => document.getElementById(id),
+        canvas = $("world"),
+        ctx = canvas.getContext("2d");
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let w = innerWidth,
+        h = innerHeight,
+        dpr = 1,
+        last = 0,
+        time = 0,
+        paused = reduced,
+        zoom = 1,
+        targetZoom = 1;
+      let additions = [],
+        boli = [],
+        waves = [],
+        signals = [],
+        trails = [],
+        completed = 0,
+        seed = 17;
+      const tastePath = [
+        [450, 226],
+        [438, 216],
+        [442, 197],
+        [451, 181],
+      ];
+      const rand = () => {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      const ink = {
+        food: "#e6bd93",
+        neural: "#bfe9d0",
+        blood: "#bcccf0",
+        coffee: "#bfded7",
+      };
+      const body =
+        "M430 237Q408 222 408 184Q400 130 450 125Q500 130 492 184Q492 222 470 237L475 267Q505 270 527 292L566 405L590 536Q603 551 599 580L590 599L582 570L574 589L570 555L535 457L504 366L510 490Q516 546 501 599L489 705L487 868L507 903Q494 917 463 903L456 723L450 642L444 723L437 903Q406 917 393 903L413 868L411 705L399 599Q384 546 390 490L396 366L365 457L330 555L326 589L318 570L310 599L301 580Q297 551 310 536L334 405L373 292Q395 270 425 267Z";
+      const stomach =
+        "M449 340C454 377 485 375 495 399C515 443 473 469 456 440C438 427 456 410 443 404C422 392 439 368 439 342";
+      const gutPoints = [
+        [478, 449],
+        [500, 467],
+        [493, 483],
+        [411, 484],
+        [408, 500],
+        [491, 501],
+        [493, 517],
+        [410, 519],
+        [412, 535],
+        [489, 536],
+        [490, 551],
+        [430, 553],
+        [437, 568],
+        [478, 577],
+      ];
+      const foodPath = [
+        [450, 226],
+        [450, 300],
+        [448, 350],
+        [475, 384],
+        [489, 415],
+        [473, 443],
+        ...gutPoints,
+      ];
+      const nervePath = [
+        [475, 513],
+        [411, 451],
+        [406, 383],
+        [411, 318],
+        [438, 253],
+        [445, 199],
+      ];
+      const bloodPath = [
+        [475, 540],
+        [418, 430],
+        [465, 347],
+        [476, 274],
+        [471, 198],
+      ];
+      const lengths = (pts) => {
+        let sums = [0];
+        for (let i = 1; i < pts.length; i++)
+          sums.push(
+            sums.at(-1) +
+              Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]),
+          );
+        return sums;
+      };
+      const tasteLengths = lengths(tastePath),
+        foodLengths = lengths(foodPath),
+        nerveLengths = lengths(nervePath),
+        bloodLengths = lengths(bloodPath);
+      function onPath(points, lens, p) {
+        let distance = Math.max(0, Math.min(0.999999, p)) * lens.at(-1),
+          i = 1;
+        while (lens[i] < distance) i++;
+        let t = (distance - lens[i - 1]) / (lens[i] - lens[i - 1]);
+        return [
+          points[i - 1][0] * (1 - t) + points[i][0] * t,
+          points[i - 1][1] * (1 - t) + points[i][1] * t,
+        ];
+      }
+      function line(points, color, width = 1, alpha = 1) {
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        points.forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p)));
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      function path(d, color, width = 1, fill = null) {
+        let p = new Path2D(d);
+        if (fill) {
+          ctx.fillStyle = fill;
+          ctx.fill(p);
+        }
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke(p);
+      }
+      function dot(x, y, r, color, glow = 0) {
+        ctx.fillStyle = color;
+        ctx.shadowBlur = glow;
+        ctx.shadowColor = color;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+      function say(title, message) {
+        $("headline").textContent = title;
+        $("message").textContent = message;
+      }
+      function transform() {
+        const mobile = w < 600,
+          scale =
+            Math.min(
+              (h - (mobile ? 355 : 270)) / 900,
+              (w * (mobile ? 0.9 : 0.55)) / 420,
+            ) * zoom;
+        const center = zoom > 1.2 ? [460, 500] : [450, 515];
+        return {
+          scale,
+          x: w * (mobile ? 0.5 : 0.64) - center[0] * scale,
+          y: h * (mobile ? 0.46 : 0.47) - center[1] * scale,
+        };
+      }
+      function screen(p) {
+        const t = transform();
+        return [p[0] * t.scale + t.x, p[1] * t.scale + t.y];
+      }
+      function resize() {
+        w = innerWidth;
+        h = innerHeight;
+        dpr = Math.min(devicePixelRatio || 1, 2);
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        draw();
+      }
+      function updateSequence() {
+        let parent = $("sequence");
+        parent.replaceChildren();
+        additions.forEach((a) => {
+          let s = document.createElement("span");
+          s.className = "trace " + a;
+          s.title = a === "coffee" ? "Coffee scenario" : "Bread scenario";
+          s.setAttribute("aria-label", s.title);
+          parent.append(s);
+        });
+        if (!additions.length)
+          parent.textContent = "Your sequence starts here.";
+        $("counter").textContent =
+          `${additions.length} additions · ${completed} passages`;
+      }
+      function spawn(kind, save = true) {
+        if (additions.length >= 12 && save) {
+          say(
+            "A full little sequence.",
+            "Replay it or clear the canvas to compose another.",
+          );
+          return;
+        }
+        if (save) additions.push(kind);
+        boli.push({
+          p: -boli.filter((b) => b.p < 0.1).length * 0.035,
+          kind,
+          size: kind === "bread" ? 5.5 : 3.5,
+          tasted: false,
+          signaled: false,
+        });
+        if (reduced) {
+          step(1.2);
+          draw();
+        }
+        say(
+          kind === "bread"
+            ? "A bite joins the journey."
+            : "A different passenger.",
+          "Tap the body or send a ripple. The toy wave moves contents along.",
+        );
+        updateSequence();
+        draw();
+      }
+      function ripple(p = 0.34) {
+        waves.push({ p, age: 0 });
+        waves = waves.slice(-32);
+        say(
+          "A local wave.",
+          "The gut has local circuitry. Every instruction need not visit the brain.",
+        );
+        if (reduced) {
+          step(1);
+        }
+        draw();
+      }
+      function step(dt) {
+        const previousCompleted = completed;
+        time += dt;
+        zoom += (targetZoom - zoom) * Math.min(1, dt * 6);
+        for (let a of waves) {
+          a.age += dt;
+          a.p += dt * 0.11;
+        }
+        waves = waves.filter((a) => a.age < 7);
+        boli.sort((a, b) => b.p - a.p);
+        for (let i = 0; i < boli.length; i++) {
+          const b = boli[i];
+          let push = waves.reduce(
+            (s, a) => s + Math.max(0, 1 - Math.abs(a.p - b.p) / 0.15) * 0.1,
+            0,
+          );
+          let next = b.p + dt * (0.045 + push);
+          if (i > 0) next = Math.min(next, boli[i - 1].p - 0.026);
+          b.p = next;
+          if (b.p >= 0 && !b.tasted) {
+            b.tasted = true;
+            signals.push({ p: 0, kind: "taste" });
+          }
+          if (b.p > 0.55 && !b.signaled) {
+            b.signaled = true;
+            signals.push({ p: 0, kind: "neural" });
+            signals.push({
+              p: -0.45,
+              kind: "blood",
+              coffee: b.kind === "coffee",
+            });
+            say(
+              "One arrival. Different routes.",
+              "Electrical messages and blood-borne substances follow separate paths.",
+            );
+          }
+          if (b.p >= 1) {
+            completed++;
+            trails.push({ kind: b.kind, at: time });
+          }
+        }
+        boli = boli.filter((b) => b.p < 1);
+        for (let s of signals)
+          s.p +=
+            dt * (s.kind === "taste" ? 1.3 : s.kind === "neural" ? 0.27 : 0.12);
+        signals = signals.filter((s) => s.p < 1.3);
+        trails = trails.slice(-12);
+        if (completed !== previousCompleted) updateSequence();
+      }
+      function brain() {
+        ctx.save();
+        ctx.translate(450, 178);
+        for (let side of [-1, 1]) {
+          ctx.save();
+          ctx.scale(side, 1);
+          path(
+            "M3 -47C23 -57 48 -40 49 -22C69 -3 51 28 33 33C19 48 6 35 4 28Z",
+            "#a7bfb078",
+            1.1,
+            "#13251e85",
+          );
+          for (let i = 0; i < 9; i++) {
+            let y = -37 + i * 8;
+            path(
+              `M8 ${y}C${22 + (i % 3) * 5} ${y - 15} ${43 - (i % 2) * 5} ${y + 13} ${31 - (i % 3) * 5} ${y + 15}`,
+              "#b8d3c057",
+              0.8,
+            );
+          }
+          ctx.restore();
+        }
+        for (let i = 0; i < 70; i++) {
+          let a = i * 2.4,
+            r = 7 + Math.sqrt(i / 70) * 43;
+          dot(Math.cos(a) * r, Math.sin(a) * r * 0.85, 0.7, "#9bb8a76a", 0);
+        }
+        ctx.restore();
+      }
+      function draw() {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        const bg = ctx.createRadialGradient(
+          w * 0.64,
+          h * 0.43,
+          5,
+          w * 0.64,
+          h * 0.43,
+          w * 0.6,
+        );
+        bg.addColorStop(0, "#13221b");
+        bg.addColorStop(0.5, "#0a100e");
+        bg.addColorStop(1, "#050707");
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, w, h);
+        const t = transform();
+        ctx.save();
+        ctx.translate(t.x, t.y);
+        ctx.scale(t.scale, t.scale);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        path(body, "#b9d4c43c", 1.25, "#abcdb707");
+        path(body, "#a3ddbb08", 8);
+        ctx.strokeStyle = "#b7d8bf2b";
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.ellipse(450, 920, 110, 14, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        // A schematic nerve tree. This is procedural illustration, not an atlas.
+        line(
+          [
+            [450, 214],
+            [450, 275],
+            [451, 355],
+            [449, 455],
+            [450, 580],
+          ],
+          "#b4d9c5a0",
+          2.2,
+        );
+        for (let i = 0; i < 19; i++) {
+          const y = 280 + i * 15;
+          dot(450, y, 2.4, "#d6e7d357");
+          for (let side of [-1, 1]) {
+            let len = i < 11 ? 43 + Math.sin(i * 0.2) * 14 : 28;
+            line(
+              [
+                [450, y],
+                [450 + side * len * 0.48, y + 8],
+                [450 + side * len, y + 15],
+              ],
+              "#b1d2bf35",
+              0.7,
+            );
+          }
+        }
+        for (let side of [-1, 1]) {
+          const arm = [
+              [450, 278],
+              [450 + side * 66, 300],
+              [450 + side * 95, 390],
+              [450 + side * 115, 480],
+              [450 + side * 138, 553],
+            ],
+            leg = [
+              [450, 565],
+              [450 + side * 32, 633],
+              [450 + side * 27, 733],
+              [450 + side * 28, 875],
+            ];
+          for (let pts of [arm, leg]) {
+            line(pts, "#c4ddbe78", 1.35);
+            for (let i = 1; i < pts.length; i++) {
+              for (let k = 0; k < 5; k++) {
+                let q = k / 5,
+                  x = pts[i - 1][0] * (1 - q) + pts[i][0] * q,
+                  y = pts[i - 1][1] * (1 - q) + pts[i][1] * q;
+                line(
+                  [
+                    [x, y],
+                    [x + side * 14, y + 6],
+                    [x + side * 20, y + 19],
+                  ],
+                  "#bdd3b72d",
+                  0.65,
+                );
+              }
+            }
+          }
+          for (let j = 0; j < 5; j++)
+            line(
+              [
+                [450 + side * 138, 553],
+                [450 + side * (132 + j * 3), 574 + j * 3],
+              ],
+              "#d5e9c954",
+              0.7,
+            );
+        }
+        // Quiet organs give the routing sculpture a body.
+        path(
+          "M430 300C391 290 389 332 395 370Q401 390 432 369Z",
+          "#a6c7b930",
+          1,
+          "#739b8410",
+        );
+        path(
+          "M470 300C509 290 511 332 505 370Q499 390 468 369Z",
+          "#a6c7b930",
+          1,
+          "#739b8410",
+        );
+        path(
+          "M465 337C457 316 438 326 444 343Q453 360 466 367Q485 348 481 335Q476 323 465 337",
+          "#c4d5c96b",
+          1.2,
+          "#9cad9218",
+        );
+        path(
+          "M406 405Q439 393 466 414L450 437Q416 451 399 429Z",
+          "#c3ab8955",
+          1,
+          "#c3ab8910",
+        );
+        path(stomach, "#c8b19c65", 1.4, "#d0b3900b");
+        line(foodPath.slice(0, 6), "#d6bb9c4a", 3);
+        line(gutPoints, "#e3c9a329", 17);
+        line(gutPoints, "#bca38c66", 1.5);
+        for (let i = 0; i < 100; i++) {
+          let p = onPath(gutPoints, lengths(gutPoints), i / 100),
+            a = i * 2.4;
+          dot(
+            p[0] + Math.cos(a) * 10,
+            p[1] + Math.sin(a) * 10,
+            1.15,
+            "#bee8cb52",
+          );
+          if (i % 3 === 0)
+            line(
+              [p, [p[0] + Math.cos(a) * 14, p[1] + Math.sin(a) * 14]],
+              "#ccead333",
+              0.5,
+            );
+        }
+        line(nervePath, "#bcead040", 1.7);
+        line(bloodPath, "#aebde32b", 2.5);
+        brain();
+        // Persistent traces encode this composition's history, never chemical levels.
+        for (let i = 0; i < trails.length; i++) {
+          ctx.globalAlpha = 0.12;
+          line(
+            bloodPath.map(([x, y]) => [x + (i - 5) * 1.2, y]),
+            ink[trails[i].kind === "coffee" ? "coffee" : "food"],
+            0.6,
+            0.14,
+          );
+        }
+        for (const a of waves) {
+          const p = onPath(foodPath, foodLengths, a.p);
+          ctx.strokeStyle = "#d6f8db";
+          ctx.globalAlpha = Math.max(0, 1 - a.age / 7) * 0.7;
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.ellipse(
+            p[0],
+            p[1],
+            14 + Math.sin(a.age * 4) * 3,
+            9,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+        for (const b of boli) {
+          if (b.p < 0) continue;
+          const p = onPath(foodPath, foodLengths, b.p);
+          dot(...p, b.size, ink[b.kind === "coffee" ? "coffee" : "food"], 12);
+          for (let i = 1; i < 5; i++) {
+            const q = onPath(foodPath, foodLengths, b.p - i * 0.004);
+            dot(
+              ...q,
+              b.size * (1 - i * 0.18),
+              ink[b.kind === "coffee" ? "coffee" : "food"] + "66",
+              4,
+            );
+          }
+        }
+        for (const s of signals) {
+          if (s.p < 0 || s.p > 1.2) continue;
+          let route =
+              s.kind === "taste"
+                ? tastePath
+                : s.kind === "neural"
+                  ? nervePath
+                  : bloodPath,
+            lens =
+              s.kind === "taste"
+                ? tasteLengths
+                : s.kind === "neural"
+                  ? nerveLengths
+                  : bloodLengths;
+          let color = ink[s.kind === "taste" ? "neural" : s.kind];
+          const p = onPath(route, lens, s.p);
+          if (s.p <= 1) {
+            dot(...p, s.kind === "neural" ? 2.2 : 3, color, 12);
+            for (let i = 1; i < 10; i++) {
+              const q = onPath(route, lens, s.p - i * 0.008);
+              dot(...q, Math.max(0.5, 2 - i * 0.15), color + "55", 5);
+            }
+          } else if (s.coffee) {
+            ctx.strokeStyle = ink.coffee;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(460, 178, 14, 14);
+            dot(467, 185, 4, ink.coffee, 8);
+          } else if (s.kind !== "blood") {
+            const endpoint = route[route.length - 1];
+            dot(...endpoint, 3, ink.neural, 9);
+          }
+        }
+        ctx.restore();
+        if (
+          zoom < 1.2 &&
+          signals.some((s) => s.coffee && s.p > 1 && s.p < 1.2)
+        ) {
+          const arrival = screen([480, 185]);
+          ctx.font = "12px system-ui";
+          ctx.fillStyle = ink.coffee;
+          ctx.fillText(
+            "Symbolic receptor arrival",
+            Math.min(w - 230, arrival[0]),
+            arrival[1],
+          );
+          ctx.fillStyle = "#acbcb5";
+          ctx.fillText(
+            "Binding not simulated",
+            Math.min(w - 230, arrival[0]),
+            arrival[1] + 18,
+          );
+        }
+        const p = screen([519, 520]);
+        $("label").style.left = p[0] + "px";
+        $("label").style.top = p[1] + "px";
+        $("label").hidden = zoom < 1.2;
+      }
+      function frame(now) {
+        let dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+        last = now;
+        if (!paused && !document.hidden) step(dt);
+        if (!paused || Math.abs(zoom - targetZoom) > 0.005) {
+          if (paused) zoom += (targetZoom - zoom) * 0.12;
+          draw();
+        }
+        requestAnimationFrame(frame);
+      }
+      function togglePause() {
+        paused = !paused;
+        $("pause").textContent = paused ? "Resume" : "Pause";
+        draw();
+      }
+      function setView(value) {
+        targetZoom = value;
+        $("whole").setAttribute("aria-pressed", String(value === 1));
+        $("gut").setAttribute("aria-pressed", String(value !== 1));
+        if (reduced) zoom = value;
+        draw();
+      }
+      let suppressClickUntil = 0;
+      for (const kind of ["bread", "coffee"]) {
+        const button = $(kind);
+        button.onclick = () => {
+          if (performance.now() > suppressClickUntil) spawn(kind);
+        };
+        button.onpointerdown = (e) => {
+          if (e.button !== 0) return;
+          const start = [e.clientX, e.clientY];
+          let moved = false,
+            ghost = null;
+          button.setPointerCapture(e.pointerId);
+          button.onpointermove = (move) => {
+            if (
+              Math.hypot(move.clientX - start[0], move.clientY - start[1]) <
+                8 &&
+              !moved
+            )
+              return;
+            moved = true;
+            if (!ghost) {
+              ghost = document.createElement("div");
+              ghost.className = "float-label";
+              ghost.textContent = kind === "bread" ? "a bite ↘" : "a sip ↘";
+              ghost.style.zIndex = 20;
+              document.body.append(ghost);
+            }
+            ghost.style.left = move.clientX + "px";
+            ghost.style.top = move.clientY + "px";
+          };
+          button.onpointerup = (up) => {
+            button.onpointermove = null;
+            button.onpointerup = null;
+            if (moved) {
+              suppressClickUntil = performance.now() + 250;
+              ghost?.remove();
+              if (
+                up.clientY <
+                document.querySelector(".dock").getBoundingClientRect().top
+              )
+                spawn(kind);
+            }
+          };
+          button.onpointercancel = () => {
+            ghost?.remove();
+            button.onpointermove = null;
+          };
+        };
+      }
+      $("ripple").onclick = () => ripple();
+      $("pause").onclick = togglePause;
+      $("whole").onclick = () => setView(1);
+      $("gut").onclick = () => setView(2.8);
+      $("clear").onclick = () => {
+        additions = [];
+        boli = [];
+        signals = [];
+        waves = [];
+        trails = [];
+        completed = 0;
+        time = 0;
+        updateSequence();
+        say(
+          "A fresh beginning.",
+          "Try a different sequence, or play a ripple in the empty gut.",
+        );
+        draw();
+      };
+      $("replay").onclick = () => {
+        let saved = [...additions];
+        boli = [];
+        signals = [];
+        waves = [];
+        trails = [];
+        completed = 0;
+        time = 0;
+        for (let i = 0; i < saved.length; i++)
+          boli.push({
+            p: -i * 0.07,
+            kind: saved[i],
+            size: saved[i] === "bread" ? 5.5 : 3.5,
+            tasted: false,
+            signaled: false,
+          });
+        paused = false;
+        $("pause").textContent = "Pause";
+        say(
+          "Your sequence, again.",
+          "Same additions. Add a ripple to change the journey.",
+        );
+        updateSequence();
+      };
+      canvas.onpointerdown = (e) => {
+        if (e.button !== 0) return;
+        const t = transform(),
+          x = (e.clientX - t.x) / t.scale,
+          y = (e.clientY - t.y) / t.scale;
+        let best = 0.34,
+          dist = Infinity;
+        for (let p = 0.34; p < 0.95; p += 0.005) {
+          const q = onPath(foodPath, foodLengths, p),
+            d = Math.hypot(q[0] - x, q[1] - y);
+          if (d < dist) {
+            dist = d;
+            best = p;
+          }
+        }
+        ripple(dist < 90 ? best : 0.34);
+      };
+      canvas.onkeydown = (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          ripple();
+        }
+      };
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          paused = true;
+          $("pause").textContent = "Resume";
+        }
+        last = 0;
+      });
+      window.addEventListener("resize", resize);
+      $("pause").textContent = paused ? "Resume" : "Pause";
+      resize();
+      requestAnimationFrame(frame);
+      window.mockState = () => ({
+        additions: [...additions],
+        boli: boli.map((b) => ({ p: b.p, kind: b.kind })),
+        waves: waves.length,
+        signals: signals.length,
+        signalKinds: signals.map((s) => s.kind),
+        completed,
+        paused,
+        zoom,
+        time,
+      });
+    </script>
+  </body>
+</html>

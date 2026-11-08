@@ -1,0 +1,1390 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Memory Loom · doke concept</title>
+    <style>
+      :root {
+        --paper: #efeee7;
+        --mint: #c4e8d5;
+        --muted: #9da9a1;
+        --line: #d8eed122;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #080b0a;
+        color: var(--paper);
+        font-family: Arial, Helvetica, sans-serif;
+        overflow: hidden;
+      }
+      button,
+      a {
+        touch-action: manipulation;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        background: none;
+        border: 0;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      canvas:focus-visible {
+        outline: 2px solid var(--mint);
+        outline-offset: 5px;
+      }
+      button:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      header {
+        position: fixed;
+        z-index: 12;
+        top: 0;
+        left: 0;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 29px 45px;
+      }
+      .brand {
+        font-size: 31px;
+        font-weight: 750;
+        letter-spacing: -2px;
+      }
+      .brand i {
+        font-size: 25px;
+        font-style: normal;
+        color: var(--mint);
+        font-weight: 400;
+      }
+      header nav {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        font-size: 11px;
+        color: #a8afa9;
+      }
+      header nav a:hover {
+        color: #fff;
+      }
+      .current {
+        color: var(--paper) !important;
+      }
+      .concept {
+        font: 9px monospace;
+        letter-spacing: 2px;
+        color: #86968b;
+      }
+      #field {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+        cursor: crosshair;
+        outline-offset: -8px;
+      }
+      .heading {
+        position: fixed;
+        z-index: 3;
+        top: 154px;
+        left: 48px;
+        pointer-events: none;
+      }
+      .eyebrow {
+        font: 10px monospace;
+        letter-spacing: 2px;
+        color: #acbbaf;
+      }
+      .heading h1 {
+        font-size: clamp(65px, 6.7vw, 102px);
+        line-height: 0.98;
+        letter-spacing: -5px;
+        margin: 21px 0 25px;
+        font-weight: 400;
+      }
+      .heading h1 span {
+        display: block;
+      }
+      .heading h1 em {
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+      }
+      .heading p {
+        max-width: 245px;
+        font-size: 13px;
+        line-height: 1.8;
+        color: #a7b3a9;
+      }
+      .heading .rule {
+        display: block;
+        width: 38px;
+        height: 1px;
+        background: #7f9d89;
+        margin-top: 24px;
+      }
+      .shelf {
+        position: fixed;
+        right: 48px;
+        top: 150px;
+        z-index: 8;
+        width: 105px;
+      }
+      .shelf-label {
+        display: flex;
+        justify-content: space-between;
+        font: 9px monospace;
+        letter-spacing: 1px;
+        color: #a7b6ab;
+        margin-bottom: 15px;
+      }
+      .memories {
+        display: grid;
+        gap: 12px;
+      }
+      .memory {
+        position: relative;
+      }
+      .memory button.load {
+        display: block;
+        width: 100%;
+        height: 82px;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        background: #111914a6;
+        backdrop-filter: blur(12px);
+        padding: 8px;
+      }
+      .memory.selected button.load {
+        border-color: #b0d7bf88;
+      }
+      .memory.candidate button.load {
+        border-color: #e5cf9e88;
+      }
+      .memory img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+      }
+      .memory button.forget {
+        position: absolute;
+        right: -7px;
+        top: -7px;
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+        background: #17201b;
+        border: 1px solid var(--line);
+        font-size: 14px;
+        color: #b6c7bb;
+      }
+      .shelf-empty {
+        color: #617367;
+        font: 10px/1.8 monospace;
+      }
+      .shelf-note {
+        font: 9px/1.7 monospace;
+        color: #718778;
+        margin: 12px 0;
+      }
+      .dock {
+        position: fixed;
+        z-index: 10;
+        bottom: 62px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(690px, calc(100% - 56px));
+        border: 1px solid #dce9d42b;
+        border-radius: 23px;
+        padding: 17px 20px 15px;
+        background: linear-gradient(135deg, #1c2821d9, #101713e8);
+        box-shadow:
+          0 12px 60px #0006,
+          inset 0 1px #effff509;
+        backdrop-filter: blur(24px);
+      }
+      .dock-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #b6cbbb16;
+      }
+      .status {
+        font-size: 12px;
+        line-height: 1.5;
+        color: #d9e5db;
+        max-width: 490px;
+      }
+      .status strong {
+        font-weight: 400;
+        color: var(--mint);
+      }
+      .density {
+        white-space: nowrap;
+        font: 9px monospace;
+        color: #869c8d;
+      }
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        padding-top: 13px;
+      }
+      .tools {
+        display: flex;
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid #b9ddc21e;
+        border-radius: 11px;
+        background: #070e0950;
+      }
+      .tools button {
+        font-size: 11px;
+        padding: 9px 11px;
+        border-radius: 8px;
+        color: #a9beb1;
+      }
+      .tools button[aria-pressed="true"] {
+        background: #bdd7c51c;
+        color: #e9f4ea;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .actions button {
+        font-size: 12px;
+        min-height: 38px;
+        padding: 9px 12px;
+        border: 1px solid #d7edd02c;
+        border-radius: 9px;
+        white-space: nowrap;
+      }
+      .actions .primary {
+        background: #dbe9dc;
+        color: #111c15;
+        border-color: #dbe9dc;
+      }
+      .actions .quiet {
+        border-color: transparent;
+        color: #a8bbad;
+      }
+      .pause {
+        width: 35px;
+        flex-shrink: 0;
+        padding: 7px !important;
+      }
+      .footer {
+        position: fixed;
+        z-index: 13;
+        left: 46px;
+        right: 46px;
+        bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+      }
+      .badge {
+        font: 9px monospace;
+        color: #8c9e90;
+        letter-spacing: 0.6px;
+      }
+      .footer button {
+        font-size: 11px;
+        color: #b9cbbc;
+        padding: 7px 0;
+      }
+      .footer button span {
+        margin-left: 9px;
+      }
+      .shortcut {
+        position: fixed;
+        left: 48px;
+        bottom: 250px;
+        max-width: 230px;
+        color: #738a7b;
+        font: 10px/1.9 monospace;
+        pointer-events: none;
+      }
+      .shortcut button {
+        pointer-events: auto;
+        text-decoration: underline;
+        color: #acc5b4;
+        padding: 6px 0;
+      }
+      .about {
+        position: fixed;
+        z-index: 20;
+        left: 46px;
+        bottom: 72px;
+        width: 350px;
+        max-height: calc(100dvh - 180px);
+        overflow: auto;
+        padding: 26px;
+        border: 1px solid #e6f4df30;
+        border-radius: 20px;
+        background: #101813f5;
+        box-shadow: 0 15px 70px #000a;
+        backdrop-filter: blur(26px);
+      }
+      .about h2 {
+        font:
+          italic 30px/1.2 Georgia,
+          serif;
+        font-weight: 400;
+        letter-spacing: -0.5px;
+        margin: 17px 0;
+      }
+      .about h3 {
+        font-size: 12px;
+        margin: 24px 0 9px;
+      }
+      .about p {
+        font-size: 12px;
+        line-height: 1.85;
+        color: #b6c8ba;
+      }
+      .about button.close {
+        position: absolute;
+        right: 17px;
+        top: 15px;
+        font-size: 22px;
+        padding: 4px;
+      }
+      .about a {
+        color: #d8e9dd;
+        text-decoration: underline;
+      }
+      .about .clear {
+        font-size: 11px;
+        color: #c1d1c5;
+        border: 1px solid #d1e6cb2b;
+        border-radius: 8px;
+        padding: 10px 13px;
+        margin-top: 14px;
+      }
+      .reading .heading,
+      .reading .shortcut {
+        visibility: hidden;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+      }
+      @media (max-width: 1000px) {
+        header {
+          padding: 25px 28px;
+        }
+        .heading {
+          left: 30px;
+          top: 130px;
+        }
+        .heading h1 {
+          font-size: 65px;
+        }
+        .heading p {
+          max-width: 220px;
+        }
+        .shelf {
+          right: 30px;
+          top: 140px;
+          width: 83px;
+        }
+        .memory button.load {
+          height: 65px;
+        }
+        .shortcut {
+          left: 30px;
+          bottom: 250px;
+          font-size: 9px;
+          max-width: 180px;
+        }
+        .footer {
+          left: 28px;
+          right: 28px;
+        }
+        .dock {
+          width: min(660px, calc(100% - 48px));
+        }
+      }
+      @media (max-width: 600px) {
+        header {
+          padding: 23px 23px;
+        }
+        .brand {
+          font-size: 29px;
+        }
+        header nav {
+          font-size: 10px;
+          gap: 15px;
+        }
+        .concept {
+          display: none;
+        }
+        .heading {
+          top: 111px;
+          left: 25px;
+        }
+        .heading h1 {
+          font-size: 48px;
+          letter-spacing: -2.6px;
+          margin: 16px 0 10px;
+        }
+        .heading h1 span {
+          display: inline;
+        }
+        .heading p {
+          font-size: 11px;
+          max-width: 280px;
+          line-height: 1.7;
+          margin: 0;
+        }
+        .heading .rule {
+          display: none;
+        }
+        .eyebrow {
+          font-size: 8px;
+          letter-spacing: 1.5px;
+        }
+        .shelf {
+          right: 23px;
+          left: 23px;
+          top: auto;
+          bottom: 235px;
+          width: auto;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+        .shelf-label {
+          width: 59px;
+          flex-shrink: 0;
+          font-size: 8px;
+          letter-spacing: 0.5px;
+          display: block;
+          line-height: 1.8;
+          margin: 0;
+        }
+        .shelf-label output {
+          display: block;
+        }
+        .memories {
+          display: flex;
+          gap: 9px;
+        }
+        .memory button.load {
+          width: 64px;
+          height: 50px;
+          padding: 4px;
+          border-radius: 9px;
+        }
+        .memory button.forget {
+          width: 21px;
+          height: 21px;
+          font-size: 12px;
+          right: -5px;
+          top: -8px;
+        }
+        .shelf-empty {
+          font-size: 9px;
+        }
+        .shelf-note {
+          display: none;
+        }
+        .dock {
+          bottom: 64px;
+          width: calc(100% - 32px);
+          padding: 13px 13px 12px;
+          border-radius: 18px;
+        }
+        .dock-top {
+          padding-bottom: 10px;
+          min-height: 47px;
+        }
+        .status {
+          font-size: 10px;
+          line-height: 1.6;
+        }
+        .density {
+          font-size: 8px;
+        }
+        .controls {
+          padding-top: 10px;
+          gap: 8px;
+          align-items: stretch;
+          flex-direction: column;
+        }
+        .tools {
+          align-self: flex-start;
+          padding: 2px;
+        }
+        .tools button {
+          font-size: 10px;
+          padding: 7px 10px;
+        }
+        .actions {
+          gap: 5px;
+          justify-content: space-between;
+        }
+        .actions button {
+          font-size: 11px;
+          padding: 9px 11px;
+          min-height: 38px;
+        }
+        .actions .pause {
+          margin-left: auto;
+        }
+        .footer {
+          left: 23px;
+          right: 23px;
+          bottom: 20px;
+          align-items: center;
+        }
+        .badge {
+          font-size: 8px;
+          max-width: 160px;
+          line-height: 1.6;
+        }
+        .footer button {
+          font-size: 10px;
+          white-space: nowrap;
+        }
+        .shortcut {
+          display: none;
+        }
+        .about {
+          left: 16px;
+          bottom: 64px;
+          width: calc(100% - 32px);
+          max-height: calc(100dvh - 160px);
+        }
+        .reading .dock,
+        .reading .shelf {
+          visibility: hidden;
+        }
+      }
+      @media (max-height: 720px) and (max-width: 600px) {
+        .heading {
+          top: 96px;
+        }
+        .heading h1 {
+          font-size: 40px;
+          margin: 10px 0 7px;
+        }
+        .heading p {
+          font-size: 10px;
+        }
+        .shelf {
+          bottom: 226px;
+        }
+        .dock {
+          bottom: 56px;
+        }
+        .footer {
+          bottom: 12px;
+        }
+        .shelf-empty {
+          font-size: 8px;
+        }
+      }
+      @media (max-height: 560px) and (min-width: 601px) {
+        .heading {
+          top: 104px;
+          left: 25px;
+        }
+        .heading h1 {
+          font-size: 44px;
+          letter-spacing: -2px;
+          margin: 10px 0;
+        }
+        .heading p {
+          font-size: 11px;
+          max-width: 180px;
+        }
+        .shelf {
+          top: 110px;
+          right: 22px;
+          width: 62px;
+        }
+        .memory button.load {
+          height: 48px;
+        }
+        .dock {
+          left: auto;
+          right: 20px;
+          transform: none;
+          bottom: 60px;
+          width: 430px;
+        }
+        .dock-top {
+          padding-bottom: 8px;
+        }
+        .controls {
+          padding-top: 8px;
+        }
+        .tools button {
+          padding: 7px;
+          font-size: 10px;
+        }
+        .actions button {
+          font-size: 10px;
+          padding: 8px;
+        }
+        .shortcut {
+          display: none;
+        }
+        .shelf-note {
+          display: none;
+        }
+        .about {
+          max-height: calc(100dvh - 130px);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="index.html">doke<i>◦</i></a
+      ><span class="concept">CONCEPT 03 / MEMORY LOOM</span>
+      <nav aria-label="Concepts">
+        <a href="index.html">All ideas</a><a href="body.html">Body</a
+        ><a href="creature.html">Creature</a
+        ><a class="current" href="echo.html" aria-current="page">Memory</a>
+      </nav>
+    </header>
+    <main>
+      <canvas
+        id="field"
+        tabindex="0"
+        role="img"
+        aria-label="A floating fabric for drawing a personal mark. Draw with pointer or touch. Keyboard: arrows move the brush, Space draws, Delete rubs away. Keep a mark, scatter it, then recall from the visible fragment."
+      ></canvas>
+      <section class="heading">
+        <div class="eyebrow">SOMETHING OF YOURS, HELD HERE.</div>
+        <h1><span>Leave a </span><em>trace.</em></h1>
+        <p>A mark. A missing piece.<br />Something that finds its way back.</p>
+        <span class="rule"></span>
+      </section>
+      <section class="shelf" aria-label="Saved marks">
+        <div class="shelf-label">
+          HELD HERE <output id="count">0 / 3</output>
+        </div>
+        <div id="memories" class="memories">
+          <p class="shelf-empty">Your marks will live here.</p>
+        </div>
+        <p class="shelf-note">Only in this page.<br />Gone when you leave.</p>
+      </section>
+      <div class="shortcut">
+        Draw with your finger or cursor.<br /><button id="sample">
+          Or begin with a loop ↗
+        </button>
+      </div>
+      <section class="dock" aria-label="Memory loom controls">
+        <div class="dock-top">
+          <div id="status" class="status" role="status" aria-live="polite">
+            Draw a little of yourself into the fabric.
+          </div>
+          <span id="density" class="density">EMPTY FIELD</span>
+        </div>
+        <div class="controls">
+          <div class="tools" role="group" aria-label="Brush">
+            <button id="draw" aria-pressed="true">✎ Draw</button
+            ><button id="erase" aria-pressed="false">◌ Rub away</button>
+          </div>
+          <div class="actions">
+            <button id="keep" disabled>Keep this</button
+            ><button id="scatter" disabled>Scatter</button
+            ><button id="recall" class="primary" disabled>Recall ↗</button
+            ><button id="new" class="quiet">New</button
+            ><button
+              id="pause"
+              class="quiet pause"
+              aria-label="Pause motion"
+              aria-pressed="false"
+            >
+              Ⅱ
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <span class="badge">INTERACTION MOCK · DATA PORTRAIT</span
+      ><button id="about-toggle" aria-expanded="false" aria-controls="about">
+        What is happening? <span>↗</span>
+      </button>
+    </footer>
+    <aside id="about" class="about" aria-label="Mapping and limits" hidden>
+      <button id="close-about" class="close" aria-label="Close explanation">
+        ×
+      </button>
+      <div class="eyebrow">MEMORY LOOM / CONCEPT ONLY</div>
+      <h2>Your marks.<br />Not a map of your mind.</h2>
+      <p>
+        Draw something, keep it, then rub or scatter part of it. Recall compares
+        the fragment against up to three marks you saved.
+      </p>
+      <h3>What is actually computed</h3>
+      <p>
+        This mock uses <b>masked nearest-pattern matching</b>. It compares
+        painted cells with stored patterns only where the fabric is still
+        observed; erased cells are unknown. The closest sufficiently matching
+        mark is restored. A nearly tied match stays unresolved. It cannot
+        recover a mark that was never kept.
+      </p>
+      <p>
+        This is template retrieval,
+        <b
+          >not a Hopfield network, learned synapses, or a model of your
+          memory</b
+        >. The luminous cloth and flowing reconstruction are original artistic
+        encodings. They are not growing brain tissue.
+      </p>
+      <h3>What the concept could become</h3>
+      <p>
+        A future associative-memory simulation could make interference, capacity
+        and partial-cue recall part of the play. It would need its own model and
+        validation. This mock tests whether making and recovering a personal
+        mark is compelling first.
+      </p>
+      <h3>Your input stays here</h3>
+      <p>
+        No uploads, external requests, accounts or persistence. Reloading clears
+        everything. Keyboard users can focus the fabric, move with arrows, draw
+        with Space, or rub with Delete. The loop button offers an optional
+        sample. Reduced-motion preferences stop the fabric drift and make recall
+        immediate.
+      </p>
+      <button id="about-sample" class="clear">Start with a sample loop</button
+      ><button id="forget-all" class="clear">Forget all marks</button>
+    </aside>
+    <script>
+      (() => {
+        "use strict";
+        const $ = (s) => document.querySelector(s),
+          canvas = $("#field"),
+          ctx = canvas.getContext("2d");
+        const COLS = 52,
+          ROWS = 36,
+          N = COLS * ROWS,
+          ink = new Float32Array(N),
+          known = new Uint8Array(N).fill(1),
+          screen = new Float32Array(N * 2),
+          seeds = new Float32Array(N);
+        for (let i = 0; i < N; i++)
+          seeds[i] = (((Math.sin(i * 127.1 + 311.7) * 43758.5453) % 1) + 1) % 1;
+        let W = 0,
+          H = 0,
+          dpr = 1,
+          clock = 0,
+          last = 0,
+          dirty = true,
+          tool = "draw",
+          paused = matchMedia("(prefers-reduced-motion: reduce)").matches,
+          reduced = paused,
+          memories = [],
+          serial = 0,
+          selected = null,
+          gesture = null,
+          restore = null,
+          pointer = null,
+          key = { x: 26, y: 18, visible: false },
+          scatterCount = 0;
+        function say(text) {
+          $("#status").textContent = text;
+        }
+        function amount() {
+          let n = 0;
+          for (const v of ink) if (v > 0.25) n++;
+          return n;
+        }
+        function refresh() {
+          const n = amount();
+          $("#keep").disabled = n < 5 || !!restore || memories.length >= 3;
+          $("#scatter").disabled = n < 5 || !!restore;
+          $("#recall").disabled = n < 5 || !memories.length || !!restore;
+          $("#count").textContent = memories.length + " / 3";
+          $("#density").textContent = restore
+            ? "RETURNING…"
+            : n
+              ? `${n} LIT THREADS`
+              : "EMPTY FIELD";
+          $("#pause").textContent = paused ? "▶" : "Ⅱ";
+          $("#pause").setAttribute(
+            "aria-label",
+            paused ? "Resume motion" : "Pause motion",
+          );
+          $("#pause").setAttribute("aria-pressed", String(paused));
+          canvas.dataset.lit = String(n);
+          canvas.dataset.held = String(memories.length);
+          canvas.dataset.restoring = String(!!restore);
+          dirty = true;
+        }
+        function resize() {
+          W = innerWidth;
+          H = innerHeight;
+          dpr = Math.min(devicePixelRatio || 1, 2);
+          canvas.width = W * dpr;
+          canvas.height = H * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          dirty = true;
+        }
+        function project(u, v, t) {
+          const mobile = W <= 600,
+            short = H < 560 && !mobile;
+          const fw = mobile ? W * 0.91 : Math.min(W * 0.64, 900),
+            fh = mobile
+              ? Math.min(H * 0.32, 295)
+              : short
+                ? H * 0.46
+                : Math.min(H * 0.53, 530);
+          const cx = mobile ? W * 0.5 : W * 0.56,
+            cy = mobile ? H * 0.47 : short ? H * 0.44 : H * 0.48;
+          const x = (u - 0.5) * 2,
+            y = (v - 0.5) * 2;
+          const billow =
+            Math.sin(x * 4.4 + y * 1.7) * 0.45 + Math.cos(y * 4.2 - x) * 0.25;
+          const edge = Math.pow(
+            Math.max(0, 1 - Math.pow(Math.abs(x), 5)),
+            0.14,
+          );
+          const breathe =
+            paused || reduced ? 0 : Math.sin(t * 0.34 + x * 2 - y) * 2;
+          return [
+            cx + x * fw * 0.5 + Math.sin(y * 3.4) * fw * 0.025,
+            cy + y * fh * 0.5 * edge + billow * fh * 0.075 + breathe,
+          ];
+        }
+        function updatePoints() {
+          for (let y = 0; y < ROWS; y++)
+            for (let x = 0; x < COLS; x++) {
+              const i = y * COLS + x,
+                p = project(x / (COLS - 1), y / (ROWS - 1), clock);
+              screen[i * 2] = p[0];
+              screen[i * 2 + 1] = p[1];
+            }
+        }
+        function paint(x, y, erase = false) {
+          const radius = W <= 600 ? 12 : 18;
+          let hit = false;
+          for (let i = 0; i < N; i++) {
+            const dist = Math.hypot(screen[i * 2] - x, screen[i * 2 + 1] - y);
+            if (dist < radius) {
+              if (erase) {
+                ink[i] = 0;
+                known[i] = 0;
+              } else {
+                ink[i] = Math.max(
+                  ink[i],
+                  Math.min(1, ((radius - dist) / radius) * 2),
+                );
+                known[i] = 1;
+              }
+              hit = true;
+            }
+          }
+          if (hit) {
+            const shelfChanged =
+              selected !== null ||
+              !!document.querySelector(".memory.candidate");
+            selected = null;
+            if (shelfChanged) drawShelf();
+            refresh();
+          }
+          return hit;
+        }
+        function stroke(a, b, erase) {
+          const distance = Math.hypot(b[0] - a[0], b[1] - a[1]),
+            steps = Math.max(1, Math.ceil(distance / 5));
+          for (let n = 1; n <= steps; n++)
+            paint(
+              a[0] + ((b[0] - a[0]) * n) / steps,
+              a[1] + ((b[1] - a[1]) * n) / steps,
+              erase,
+            );
+        }
+        function clear() {
+          ink.fill(0);
+          known.fill(1);
+          restore = null;
+          selected = null;
+          tool = "draw";
+          $("#draw").setAttribute("aria-pressed", "true");
+          $("#erase").setAttribute("aria-pressed", "false");
+          drawShelf();
+          refresh();
+          say("A fresh piece of fabric. Your held marks are still here.");
+        }
+        function thumbnail(pattern) {
+          const c = document.createElement("canvas");
+          c.width = COLS * 3;
+          c.height = ROWS * 3;
+          const q = c.getContext("2d");
+          for (let i = 0; i < N; i++) {
+            if (pattern[i] < 0.1) continue;
+            q.fillStyle = `rgba(213,243,221,${pattern[i]})`;
+            q.fillRect((i % COLS) * 3, Math.floor(i / COLS) * 3, 2.5, 2.5);
+          }
+          return c.toDataURL();
+        }
+        function drawShelf(candidates = []) {
+          const holder = $("#memories");
+          holder.replaceChildren();
+          if (!memories.length) {
+            const p = document.createElement("p");
+            p.className = "shelf-empty";
+            p.textContent = "Your marks will live here.";
+            holder.append(p);
+          }
+          for (const memory of memories) {
+            const box = document.createElement("div");
+            box.className =
+              "memory" +
+              (selected === memory.id ? " selected" : "") +
+              (candidates.includes(memory.id) ? " candidate" : "");
+            const load = document.createElement("button");
+            load.className = "load";
+            load.title = `Bring back trace ${memory.id}`;
+            load.setAttribute("aria-label", `Load trace ${memory.id}`);
+            const img = document.createElement("img");
+            img.src = memory.thumb;
+            img.alt = `Saved drawing ${memory.id}`;
+            load.append(img);
+            load.onclick = () => {
+              restore = null;
+              ink.set(memory.pattern);
+              known.fill(1);
+              selected = memory.id;
+              drawShelf();
+              refresh();
+              say(
+                `Trace ${memory.id}, back on the fabric. Rub away a piece, or scatter it.`,
+              );
+            };
+            const forget = document.createElement("button");
+            forget.className = "forget";
+            forget.textContent = "×";
+            forget.setAttribute("aria-label", `Forget trace ${memory.id}`);
+            forget.onclick = () => {
+              if (restore?.id === memory.id) restore = null;
+              memories = memories.filter((m) => m.id !== memory.id);
+              if (selected === memory.id) selected = null;
+              drawShelf();
+              refresh();
+              say(`Trace ${memory.id} forgotten. The current drawing remains.`);
+            };
+            box.append(load, forget);
+            holder.append(box);
+          }
+          $("#count").textContent = memories.length + " / 3";
+        }
+        function keep() {
+          if (amount() < 5 || memories.length >= 3 || restore) return;
+          const pattern = Float32Array.from(ink, (v) => (v > 0.25 ? 1 : 0)),
+            id = ++serial;
+          memories.push({ id, pattern, thumb: thumbnail(pattern) });
+          selected = id;
+          drawShelf();
+          refresh();
+          say(
+            `Trace ${id} is held. Scatter it and see what a fragment can bring back.`,
+          );
+        }
+        function scatter() {
+          if (amount() < 5 || restore) return;
+          scatterCount++;
+          let erased = 0;
+          const active = [];
+          for (let i = 0; i < N; i++) if (ink[i] > 0.25) active.push(i);
+          const keepIndex = active[Math.floor(active.length * 0.25)];
+          for (let i = 0; i < N; i++) {
+            const x = i % COLS,
+              y = Math.floor(i / COLS),
+              wave = Math.sin(x * 0.24 + y * 0.11 + scatterCount * 1.2);
+            if (
+              (wave > 0.0 || seeds[(i + scatterCount * 127) % N] > 0.76) &&
+              i !== keepIndex
+            ) {
+              if (ink[i] > 0.25) erased++;
+              ink[i] = 0;
+              known[i] = 0;
+            }
+          } // Keep a small cue if the chosen cut would erase almost everything.
+          if (amount() < 5) {
+            for (const i of active.slice(0, Math.min(8, active.length))) {
+              ink[i] = 1;
+              known[i] = 1;
+            }
+          }
+          selected = null;
+          drawShelf();
+          refresh();
+          say(
+            erased
+              ? "A fragment remains. Does it still point to something you kept?"
+              : "Try rubbing away a patch, then recall.",
+          );
+        }
+        function recall() {
+          if (!memories.length || amount() < 5 || restore) return;
+          const ranked = memories
+            .map((m) => {
+              let intersection = 0,
+                union = 0;
+              for (let i = 0; i < N; i++)
+                if (known[i]) {
+                  const a = ink[i] > 0.25 ? 1 : 0,
+                    b = m.pattern[i];
+                  intersection += Math.min(a, b);
+                  union += Math.max(a, b);
+                }
+              return { memory: m, score: union ? intersection / union : 0 };
+            })
+            .sort((a, b) => b.score - a.score);
+          const best = ranked[0];
+          if (best.score < 0.45) {
+            say(
+              "This fragment does not fit a held mark. Leave a little more to recognize.",
+            );
+            drawShelf();
+            return;
+          }
+          if (ranked[1] && best.score - ranked[1].score < 0.06) {
+            say(
+              "Two traces fit this fragment. Draw a distinguishing piece, then try again.",
+            );
+            drawShelf([best.memory.id, ranked[1].memory.id]);
+            return;
+          }
+          selected = best.memory.id;
+          canvas.dataset.match = String(best.memory.id);
+          drawShelf();
+          if (reduced) {
+            ink.set(best.memory.pattern);
+            known.fill(1);
+            refresh();
+            say(`Trace ${best.memory.id} returned from the observed fragment.`);
+            return;
+          }
+          restore = {
+            from: ink.slice(),
+            to: best.memory.pattern.slice(),
+            elapsed: 0,
+            id: best.memory.id,
+          };
+          refresh();
+          say(`The fragment points to trace ${best.memory.id}. Let it return.`);
+        }
+        function example() {
+          clear();
+          for (let n = 0; n < 130; n++) {
+            const a = (n / 129) * Math.PI * 2,
+              x = 0.5 + Math.cos(a) * 0.25,
+              y = 0.5 + Math.sin(a) * 0.3;
+            const p = project(x, y, clock);
+            paint(p[0], p[1]);
+          }
+          say("A sample loop. Make it yours before you keep it.");
+          refresh();
+        }
+        function render() {
+          ctx.clearRect(0, 0, W, H);
+          const glow = ctx.createRadialGradient(
+            W * 0.57,
+            H * 0.47,
+            0,
+            W * 0.57,
+            H * 0.47,
+            W * 0.45,
+          );
+          glow.addColorStop(0, "#17332322");
+          glow.addColorStop(1, "#080b0a00");
+          ctx.fillStyle = glow;
+          ctx.fillRect(0, 0, W, H);
+          updatePoints();
+          ctx.lineWidth = 0.65;
+          for (let y = 0; y < ROWS; y++) {
+            ctx.beginPath();
+            for (let x = 0; x < COLS; x++) {
+              const i = y * COLS + x;
+              const px = screen[i * 2],
+                py = screen[i * 2 + 1];
+              x ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+            }
+            ctx.strokeStyle = `rgba(131,176,147,${0.05 + 0.03 * Math.sin(y * 0.18) ** 2})`;
+            ctx.stroke();
+          }
+          for (let x = 0; x < COLS; x += 2) {
+            ctx.beginPath();
+            for (let y = 0; y < ROWS; y++) {
+              const i = y * COLS + x;
+              y
+                ? ctx.lineTo(screen[i * 2], screen[i * 2 + 1])
+                : ctx.moveTo(screen[i * 2], screen[i * 2 + 1]);
+            }
+            ctx.strokeStyle = "rgba(145,183,155,.045)";
+            ctx.stroke();
+          }
+          for (let i = 0; i < N; i++) {
+            const value = ink[i],
+              x = screen[i * 2],
+              y = screen[i * 2 + 1];
+            const edge =
+              Math.sin(((i % COLS) / (COLS - 1)) * Math.PI) *
+              Math.sin((Math.floor(i / COLS) / (ROWS - 1)) * Math.PI);
+            if (value > 0.04) {
+              ctx.shadowColor = "#c1ffd4";
+              ctx.shadowBlur = 10 + value * 11;
+              ctx.fillStyle = `rgba(221,247,225,${Math.min(1, 0.2 + value * 0.8)})`;
+              ctx.beginPath();
+              ctx.arc(
+                x,
+                y,
+                (W < 601 ? 1.35 : 1.8) + value * 0.65,
+                0,
+                Math.PI * 2,
+              );
+              ctx.fill();
+              ctx.shadowBlur = 0;
+              if (i % COLS < COLS - 1 && ink[i + 1] > 0.25) {
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(screen[(i + 1) * 2], screen[(i + 1) * 2 + 1]);
+                ctx.strokeStyle = `rgba(191,237,202,${value * 0.35})`;
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+              }
+            } else {
+              ctx.fillStyle = `rgba(157,192,168,${0.08 + edge * 0.22 + (known[i] ? 0 : -0.06)})`;
+              ctx.beginPath();
+              ctx.arc(x, y, 0.65 + seeds[i] * 0.4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          if (key.visible) {
+            const i = key.y * COLS + key.x;
+            ctx.strokeStyle = "#e0efdf";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(
+              screen[i * 2],
+              screen[i * 2 + 1],
+              W < 601 ? 12 : 18,
+              0,
+              Math.PI * 2,
+            );
+            ctx.stroke();
+          }
+          if (pointer) {
+            ctx.strokeStyle = tool === "erase" ? "#d2c6a577" : "#baddc455";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(pointer[0], pointer[1], W < 601 ? 12 : 18, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          if (!amount() && !memories.length) {
+            const p = project(0.5, 0.5, clock);
+            ctx.font = "11px monospace";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#99bba5";
+            ctx.fillText("draw here", p[0], p[1] - 6);
+            ctx.fillStyle = "#536c5b";
+            ctx.font = "9px monospace";
+            ctx.fillText("a shape only you would make", p[0], p[1] + 13);
+          }
+          dirty = false;
+        }
+        function frame(now) {
+          const dt = last ? Math.min((now - last) / 1000, 0.05) : 0;
+          last = now;
+          if (!document.hidden) {
+            if (!paused && !reduced) {
+              clock += dt;
+              dirty = true;
+            }
+            if (restore && !paused) {
+              restore.elapsed += dt;
+              const progress = Math.min(1, restore.elapsed / 1.8);
+              for (let i = 0; i < N; i++) {
+                const delay = seeds[i] * 0.42,
+                  p = Math.max(
+                    0,
+                    Math.min(1, (progress - delay) / (1 - delay)),
+                  );
+                ink[i] =
+                  restore.from[i] +
+                  (restore.to[i] - restore.from[i]) * (p * p * (3 - 2 * p));
+              }
+              dirty = true;
+              if (progress >= 1) {
+                const id = restore.id;
+                ink.set(restore.to);
+                known.fill(1);
+                restore = null;
+                refresh();
+                say(
+                  `Trace ${id} returned. Keep another mark and try to confuse the fabric.`,
+                );
+              }
+            }
+            if (dirty) render();
+          }
+          requestAnimationFrame(frame);
+        }
+        canvas.addEventListener("pointerdown", (e) => {
+          if (restore) return;
+          canvas.focus({ preventScroll: true });
+          canvas.setPointerCapture(e.pointerId);
+          gesture = [e.clientX, e.clientY];
+          pointer = gesture;
+          key.visible = false;
+          paint(...gesture, tool === "erase");
+          say(
+            tool === "erase"
+              ? "Rubbed cells become unknown. The held marks stay intact."
+              : "Your gesture is becoming a mark.",
+          );
+        });
+        canvas.addEventListener("pointermove", (e) => {
+          pointer = [e.clientX, e.clientY];
+          if (gesture) {
+            stroke(gesture, pointer, tool === "erase");
+            gesture = pointer;
+          }
+          dirty = true;
+        });
+        canvas.addEventListener("pointerup", () => {
+          gesture = null;
+          refresh();
+        });
+        canvas.addEventListener("pointercancel", () => {
+          gesture = null;
+        });
+        canvas.addEventListener("pointerleave", () => {
+          if (!gesture) pointer = null;
+          dirty = true;
+        });
+        canvas.addEventListener("keydown", (e) => {
+          if (
+            ![
+              "ArrowLeft",
+              "ArrowRight",
+              "ArrowUp",
+              "ArrowDown",
+              " ",
+              "Delete",
+              "Backspace",
+            ].includes(e.key) ||
+            restore
+          )
+            return;
+          e.preventDefault();
+          key.visible = true;
+          pointer = null;
+          if (e.key === "ArrowLeft") key.x = Math.max(1, key.x - 1);
+          if (e.key === "ArrowRight") key.x = Math.min(COLS - 2, key.x + 1);
+          if (e.key === "ArrowUp") key.y = Math.max(1, key.y - 1);
+          if (e.key === "ArrowDown") key.y = Math.min(ROWS - 2, key.y + 1);
+          if ([" ", "Delete", "Backspace"].includes(e.key)) {
+            const i = key.y * COLS + key.x;
+            paint(
+              screen[i * 2],
+              screen[i * 2 + 1],
+              e.key !== " " || tool === "erase",
+            );
+          }
+          dirty = true;
+        });
+        $("#draw").onclick = () => {
+          tool = "draw";
+          $("#draw").setAttribute("aria-pressed", "true");
+          $("#erase").setAttribute("aria-pressed", "false");
+        };
+        $("#erase").onclick = () => {
+          tool = "erase";
+          $("#draw").setAttribute("aria-pressed", "false");
+          $("#erase").setAttribute("aria-pressed", "true");
+        };
+        $("#keep").onclick = keep;
+        $("#scatter").onclick = scatter;
+        $("#recall").onclick = recall;
+        $("#new").onclick = clear;
+        $("#sample").onclick = example;
+        $("#pause").onclick = () => {
+          paused = !paused;
+          refresh();
+        };
+        function about(show) {
+          $("#about").hidden = !show;
+          document.body.classList.toggle("reading", show);
+          $("#about-toggle").setAttribute("aria-expanded", String(show));
+          (show ? $("#close-about") : $("#about-toggle")).focus();
+        }
+        $("#about-toggle").onclick = () => about($("#about").hidden);
+        $("#close-about").onclick = () => about(false);
+        $("#about-sample").onclick = () => {
+          about(false);
+          example();
+        };
+        $("#forget-all").onclick = () => {
+          memories = [];
+          serial = 0;
+          clear();
+          say("All marks forgotten. Nothing was saved outside this page.");
+        };
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && !$("#about").hidden) about(false);
+        });
+        document.addEventListener("visibilitychange", () => {
+          last = 0;
+        });
+        matchMedia("(prefers-reduced-motion: reduce)").addEventListener(
+          "change",
+          (e) => {
+            reduced = e.matches;
+            paused = reduced;
+            if (reduced && restore) {
+              ink.set(restore.to);
+              restore = null;
+              known.fill(1);
+            }
+            refresh();
+          },
+        );
+        addEventListener("resize", resize);
+        resize();
+        refresh();
+        requestAnimationFrame(frame);
+      })();
+    </script>
+  </body>
+</html>

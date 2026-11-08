@@ -1,0 +1,1371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>doke · Little creature</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #eceee7;
+        --muted: #a6ada8;
+        --mint: #b8e7ce;
+        --amber: #e6bc80;
+        --edge: #ffffff1c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #080b0c;
+        color: var(--ink);
+        font-family:
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        overflow: hidden;
+      }
+      button,
+      a,
+      summary {
+        touch-action: manipulation;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      summary:focus-visible {
+        outline: 2px solid var(--mint);
+        outline-offset: 5px;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      canvas {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+        cursor: crosshair;
+      }
+      header {
+        position: fixed;
+        z-index: 3;
+        top: 28px;
+        left: 36px;
+        right: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        pointer-events: none;
+      }
+      header > * {
+        pointer-events: auto;
+      }
+      .brand {
+        font-size: 31px;
+        font-weight: 750;
+        letter-spacing: -1.8px;
+      }
+      .brand i {
+        display: inline-block;
+        border: 1.5px solid #c3c8c1;
+        border-radius: 50%;
+        width: 7px;
+        height: 7px;
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .concept {
+        font:
+          10px ui-monospace,
+          monospace;
+        color: var(--muted);
+        letter-spacing: 0.13em;
+        margin-left: 21px;
+        vertical-align: middle;
+      }
+      .nav {
+        display: flex;
+        gap: 5px;
+        padding: 5px;
+        border: 1px solid var(--edge);
+        border-radius: 30px;
+        background: #121717b0;
+        backdrop-filter: blur(18px);
+      }
+      .nav a {
+        font-size: 11px;
+        padding: 9px 14px;
+        color: var(--muted);
+        border-radius: 20px;
+      }
+      .nav a[aria-current] {
+        background: #e9f1e112;
+        color: var(--ink);
+      }
+      .all {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .hero {
+        position: fixed;
+        left: 38px;
+        top: 117px;
+        z-index: 2;
+        pointer-events: none;
+        max-width: 440px;
+      }
+      .eyebrow {
+        font:
+          9px ui-monospace,
+          monospace;
+        letter-spacing: 0.18em;
+        color: var(--mint);
+        margin-bottom: 17px;
+      }
+      .hero h1 {
+        font-size: clamp(32px, 4vw, 54px);
+        font-weight: 400;
+        letter-spacing: -2.1px;
+        line-height: 1.06;
+        margin: 0;
+      }
+      .hero em {
+        font-family: Georgia, serif;
+        font-weight: 400;
+      }
+      .hero p {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.7;
+        margin: 17px 0;
+        max-width: 330px;
+      }
+      .upper-actions {
+        position: fixed;
+        right: 36px;
+        top: 113px;
+        z-index: 3;
+        display: flex;
+        gap: 8px;
+      }
+      .quiet {
+        border: 1px solid var(--edge);
+        border-radius: 25px;
+        background: #101617b8;
+        padding: 10px 13px;
+        font-size: 11px;
+        backdrop-filter: blur(15px);
+      }
+      .quiet[aria-pressed="true"] {
+        border-color: #b8e7ce66;
+        background: #b8e7ce13;
+        color: var(--mint);
+      }
+      .legend {
+        position: fixed;
+        right: 39px;
+        top: 167px;
+        font:
+          9px ui-monospace,
+          monospace;
+        letter-spacing: 0.08em;
+        color: #a6ada8;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .legend b {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--mint);
+        margin: 0 7px 1px 0;
+      }
+      .dock {
+        position: fixed;
+        z-index: 4;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(660px, calc(100% - 36px));
+        border: 1px solid #c8dfcf23;
+        border-radius: 24px;
+        background: linear-gradient(130deg, #172020e8, #101617eb);
+        box-shadow: 0 20px 80px #0008;
+        backdrop-filter: blur(24px);
+        padding: 13px 16px 12px;
+      }
+      .tools {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .tool {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 13px;
+        padding: 11px 15px;
+        font-size: 12px;
+        min-height: 43px;
+      }
+      .tool[aria-pressed="true"] {
+        color: #11251b;
+        background: var(--mint);
+        box-shadow: 0 0 20px #b8e7ce12;
+      }
+      .tool-icon {
+        font-size: 16px;
+        line-height: 1;
+      }
+      .tool small {
+        font:
+          9px ui-monospace,
+          monospace;
+        opacity: 0.5;
+      }
+      .divider {
+        width: 1px;
+        height: 22px;
+        background: var(--edge);
+        margin: 0 6px;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .icon {
+        background: #ffffff04;
+        border: 1px solid var(--edge);
+        border-radius: 12px;
+        width: 42px;
+        height: 42px;
+        font-size: 15px;
+      }
+      .meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 10px;
+        color: #aebbb3;
+        border-top: 1px solid #ffffff0d;
+        margin-top: 12px;
+        padding-top: 12px;
+      }
+      .meta strong {
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .stats {
+        display: flex;
+        gap: 16px;
+        font:
+          10px ui-monospace,
+          monospace;
+      }
+      .stats b {
+        font-weight: 500;
+        color: var(--mint);
+      }
+      .footer-note {
+        position: fixed;
+        bottom: 12px;
+        right: 30px;
+        font:
+          8px ui-monospace,
+          monospace;
+        letter-spacing: 0.05em;
+        color: #7b8981;
+        z-index: 5;
+      }
+      .hint {
+        position: fixed;
+        left: 38px;
+        bottom: 47px;
+        z-index: 2;
+        color: #8d9d94;
+        font:
+          10px ui-monospace,
+          monospace;
+        max-width: 185px;
+        line-height: 1.8;
+      }
+      .hint span {
+        color: var(--mint);
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        top: 87px;
+        transform: translateX(-50%) translateY(-8px);
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.2s;
+        z-index: 6;
+        font-size: 11px;
+        color: var(--mint);
+        background: #15211de8;
+        border: 1px solid #b8e7ce22;
+        border-radius: 20px;
+        padding: 10px 17px;
+        white-space: nowrap;
+      }
+      .toast.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      details {
+        position: fixed;
+        z-index: 5;
+        right: 36px;
+        bottom: 171px;
+        width: 290px;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+      summary {
+        cursor: pointer;
+        text-align: right;
+        color: #a4b0a8;
+        list-style: none;
+        font-size: 10px;
+      }
+      summary::after {
+        content: " ⓘ";
+      }
+      details[open] {
+        border: 1px solid var(--edge);
+        background: #101819f5;
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 20px 50px #0008;
+      }
+      details[open] summary {
+        text-align: left;
+        color: var(--mint);
+      }
+      details p {
+        color: #b2beb6;
+        margin: 12px 0 0;
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        clip-path: inset(50%);
+        overflow: hidden;
+      }
+      .keyboard-food {
+        border: 0;
+        background: none;
+        padding: 0;
+        color: var(--mint);
+        font-size: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .pause-banner {
+        position: fixed;
+        inset: 48% auto auto 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 3;
+        color: #d4e3d6;
+        letter-spacing: 0.12em;
+        font:
+          11px ui-monospace,
+          monospace;
+        background: #101919c9;
+        border: 1px solid #bfdcc82b;
+        border-radius: 20px;
+        padding: 12px 20px;
+      }
+      .pause-banner[hidden] {
+        display: none;
+      }
+      @media (max-width: 1000px) {
+        .hint {
+          display: none;
+        }
+        .hero h1 {
+          font-size: 39px;
+        }
+        .hero {
+          max-width: 330px;
+        }
+        .hero p {
+          font-size: 11px;
+          max-width: 260px;
+        }
+        details {
+          bottom: 170px;
+        }
+        .all {
+          display: none;
+        }
+      }
+      @media (max-width: 600px) {
+        header {
+          top: 19px;
+          left: 23px;
+          right: 23px;
+          flex-wrap: wrap;
+          gap: 14px;
+        }
+        .brand {
+          font-size: 29px;
+        }
+        .concept {
+          font-size: 9px;
+          margin-left: 17px;
+        }
+        .nav {
+          width: 100%;
+          justify-content: center;
+          padding: 4px;
+        }
+        .nav a {
+          font-size: 10px;
+          padding: 8px 12px;
+        }
+        .hero {
+          left: 24px;
+          top: 134px;
+          max-width: 300px;
+        }
+        .eyebrow {
+          font-size: 8px;
+          margin-bottom: 12px;
+        }
+        .hero h1 {
+          font-size: 34px;
+          letter-spacing: -1.5px;
+        }
+        .hero p {
+          display: none;
+        }
+        .upper-actions {
+          right: 20px;
+          top: 248px;
+          gap: 6px;
+        }
+        .quiet {
+          padding: 9px 11px;
+          font-size: 10px;
+        }
+        .legend {
+          left: 24px;
+          right: auto;
+          top: 253px;
+          font-size: 8px;
+          max-width: 140px;
+          line-height: 1.7;
+        }
+        .dock {
+          bottom: 29px;
+          padding: 12px;
+          width: calc(100% - 28px);
+          border-radius: 20px;
+        }
+        .tools {
+          gap: 4px;
+          flex-wrap: wrap;
+        }
+        .tool {
+          padding: 10px 12px;
+          flex: 1;
+          font-size: 11px;
+          gap: 8px;
+        }
+        .tool small {
+          display: none;
+        }
+        .spacer {
+          flex-basis: 100%;
+          height: 1px;
+        }
+        .divider {
+          display: none;
+        }
+        .icon {
+          width: 37px;
+          height: 35px;
+          border-radius: 10px;
+          font-size: 13px;
+        }
+        .icon#clear {
+          width: auto;
+          padding: 0 12px;
+          font-size: 10px;
+        }
+        .icon#reset {
+          width: auto;
+          padding: 0 12px;
+          font-size: 10px;
+        }
+        .tools .icon:last-child {
+          margin-left: auto;
+        }
+        .meta {
+          font-size: 9px;
+          margin-top: 9px;
+          padding-top: 9px;
+          align-items: start;
+        }
+        .stats {
+          font-size: 9px;
+          gap: 9px;
+          white-space: nowrap;
+        }
+        .meta .state-text {
+          max-width: 143px;
+          line-height: 1.6;
+        }
+        .footer-note {
+          font-size: 7px;
+          bottom: 10px;
+          right: 15px;
+        }
+        details {
+          bottom: 197px;
+          right: 19px;
+          width: min(290px, calc(100% - 38px));
+        }
+        summary {
+          font-size: 9px;
+        }
+        .toast {
+          top: 107px;
+          font-size: 9px;
+          line-height: 14px;
+          padding: 4px 10px;
+          max-width: 90%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: center;
+        }
+        .pause-banner {
+          top: 50%;
+        }
+      }
+      @media (max-height: 600px) and (min-width: 601px) {
+        header {
+          top: 15px;
+          left: 24px;
+          right: 24px;
+        }
+        .brand {
+          font-size: 25px;
+        }
+        .hero {
+          top: 80px;
+          left: 24px;
+        }
+        .hero h1 {
+          font-size: 27px;
+        }
+        .hero p,
+        .eyebrow,
+        .legend {
+          display: none;
+        }
+        .upper-actions {
+          top: 80px;
+          right: 24px;
+        }
+        .dock {
+          bottom: 20px;
+          padding: 9px 12px;
+          max-width: 600px;
+        }
+        .meta {
+          margin-top: 6px;
+          padding-top: 7px;
+        }
+        .tool {
+          min-height: 35px;
+          padding: 7px 10px;
+        }
+        details {
+          bottom: 132px;
+          right: 25px;
+        }
+        .hint {
+          display: none;
+        }
+        .footer-note {
+          bottom: 5px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .toast {
+          transition: none;
+        }
+      }
+    </style>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <canvas
+      id="world"
+      aria-label="Creature world. Paint food, barriers, or erase with the selected tool. Keyboard alternatives are provided below."
+      tabindex="0"
+    ></canvas>
+    <header>
+      <a class="brand" href="index.html"
+        >doke<i></i><span class="concept">CONCEPT 02 / CREATURE</span></a
+      >
+      <nav class="nav" aria-label="Concepts">
+        <a href="body.html">Body</a
+        ><a href="creature.html" aria-current="page">Creature</a
+        ><a href="echo.html">Memory</a>
+      </nav>
+      <a class="all" href="index.html">All concepts ↗</a>
+    </header>
+    <section class="hero">
+      <div class="eyebrow">A WORLD THAT ANSWERS BACK</div>
+      <h1>Draw its world.<br />Watch it <em>find a way.</em></h1>
+      <p>
+        A little appetite. A little caution.<br />See what happens when you
+        change its world.
+      </p>
+    </section>
+    <div class="upper-actions">
+      <button id="inside" class="quiet" aria-pressed="true">◌ See inside</button
+      ><button id="trail" class="quiet" aria-pressed="true">
+        ⌁ Its journey
+      </button>
+    </div>
+    <div class="legend">
+      <b></b><span id="sense-label">Senses → steers → moves</span>
+    </div>
+    <div class="hint">
+      <span>Leave something to find.</span><br />Drag to scatter food.<br />Draw
+      a wall in its way.
+    </div>
+    <section class="dock" aria-label="World tools">
+      <div class="tools" role="group" aria-label="Painting tools">
+        <button class="tool" data-tool="food" aria-pressed="true">
+          <span class="tool-icon">✧</span>Food <small>1</small>
+        </button>
+        <button class="tool" data-tool="wall" aria-pressed="false">
+          <span class="tool-icon">∿</span>Wall <small>2</small>
+        </button>
+        <button class="tool" data-tool="erase" aria-pressed="false">
+          <span class="tool-icon">◌</span>Erase <small>3</small>
+        </button>
+        <div class="divider"></div>
+        <span class="spacer"></span>
+        <button
+          class="icon"
+          id="clear"
+          aria-label="Clear food and walls"
+          title="Clear world"
+        >
+          Clear
+        </button>
+        <button
+          class="icon"
+          id="reset"
+          aria-label="Reset creature and sample world"
+          title="Reset"
+        >
+          Reset
+        </button>
+        <button
+          class="icon"
+          id="pause"
+          aria-label="Pause simulation"
+          aria-pressed="false"
+          title="Pause"
+        >
+          Ⅱ
+        </button>
+      </div>
+      <div class="meta">
+        <span class="state-text"
+          ><strong id="state">Following a scent</strong> ·
+          <button class="keyboard-food" id="drop">drop a treat</button></span
+        ><span class="stats"
+          ><span><b id="eaten">0</b> found</span
+          ><span><b id="caution">0</b>% caution</span></span
+        >
+      </div>
+    </section>
+    <details id="implementation">
+      <summary>What is actually happening?</summary>
+      <p>
+        This is an original interaction mock with a <b>fictional controller</b>,
+        not a simulated animal brain.
+      </p>
+      <p>
+        Three sensors sample food and walls. Their outputs control turning and
+        speed. Contact increases a bounded avoidance gain; it slowly relaxes
+        afterward. That is the only adaptation implemented.
+      </p>
+      <p>
+        The body follows its traveled path. Internal light shows continuous
+        sensor and motor activity; moving points are visual encodings, not
+        action potentials. No synaptic learning, chemistry, biomechanics, or
+        consciousness is modeled.
+      </p>
+      <p>
+        Keyboard: 1 / 2 / 3 select tools, Space pauses, F drops food, W adds a
+        barrier, C clears, R resets. Touch or drag anywhere in the world to
+        paint.
+      </p>
+    </details>
+    <div class="footer-note">INTERACTION MOCK · FICTIONAL CONTROLLER</div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="pause-banner" id="paused" hidden>
+      PAUSED · KEEP SHAPING THE WORLD
+    </div>
+    <div class="sr" id="outcome" aria-live="polite"></div>
+    <script>
+      (() => {
+        const canvas = document.querySelector("#world"),
+          ctx = canvas.getContext("2d"),
+          $ = (s) => document.querySelector(s),
+          reduced = matchMedia("(prefers-reduced-motion:reduce)").matches;
+        let W = 0,
+          H = 0,
+          area = {},
+          unit = 1,
+          tool = "food",
+          paused = reduced,
+          inside = true,
+          showTrail = true,
+          food = [],
+          walls = [],
+          trail = [],
+          sparks = [],
+          body = [],
+          creature,
+          clock = 0,
+          last = 0,
+          pointer = null,
+          lastPaint = null,
+          lastAnnounce = -10,
+          raf = 0;
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v)),
+          distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y),
+          angle = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+        function announce(text) {
+          $("#toast").textContent = text;
+          $("#toast").classList.add("visible");
+          clearTimeout(announce.timer);
+          announce.timer = setTimeout(
+            () => $("#toast").classList.remove("visible"),
+            2300,
+          );
+        }
+        function metrics() {
+          const mobile = W <= 600,
+            short = H <= 600 && !mobile;
+          return {
+            x: 22,
+            y: mobile ? 286 : short ? 117 : 220,
+            w: W - 44,
+            h: Math.max(100, H - (mobile ? 494 : short ? 245 : 412)),
+          };
+        }
+        function resize() {
+          const old = area;
+          W = innerWidth;
+          H = innerHeight;
+          unit = clamp(W / 900, 0.8, 1.4);
+          const dpr = Math.min(devicePixelRatio || 1, 2);
+          canvas.width = Math.round(W * dpr);
+          canvas.height = Math.round(H * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          area = metrics();
+          if (creature && old.w) {
+            const move = (p) => {
+              p.x = area.x + ((p.x - old.x) / old.w) * area.w;
+              p.y = area.y + ((p.y - old.y) / old.h) * area.h;
+            };
+            [creature, ...food, ...walls, ...trail, ...body].forEach(move);
+          } else reset(false);
+        }
+        function at(x, y) {
+          return { x: area.x + x * area.w, y: area.y + y * area.h };
+        }
+        function reset(message = true) {
+          clock = 0;
+          creature = {
+            ...at(0.3, 0.55),
+            heading: -0.16,
+            speed: 0,
+            eaten: 0,
+            caution: 0,
+            reverse: 0,
+            bias: 1,
+            signals: [0, 0, 0, 0, 0],
+            state: "Searching",
+          };
+          food = [];
+          walls = [];
+          trail = [];
+          sparks = [];
+          body = [];
+          for (const [x, y] of [
+            [0.47, 0.55],
+            [0.65, 0.49],
+            [0.76, 0.36],
+            [0.8, 0.49],
+            [0.75, 0.61],
+            [0.68, 0.43],
+            [0.88, 0.58],
+          ])
+            food.push({ ...at(x, y), amount: 1, phase: food.length * 1.7 });
+          for (let i = 0; i < 8; i++) {
+            const p = at(
+              0.55 + 0.035 * Math.sin((i / 7) * Math.PI),
+              0.32 + i * 0.045,
+            );
+            walls.push({ ...p, r: 10 * unit });
+          }
+          for (let i = 0; i < 120; i++)
+            body.push({ x: creature.x - i * 0.6 * unit, y: creature.y });
+          setPause(reduced, false);
+          updateReadout();
+          if (message) announce("A fresh creature. A new little world.");
+        }
+        function setTool(next) {
+          tool = next;
+          document
+            .querySelectorAll("[data-tool]")
+            .forEach((b) =>
+              b.setAttribute("aria-pressed", String(b.dataset.tool === next)),
+            );
+          canvas.style.cursor = next === "erase" ? "cell" : "crosshair";
+          announce(
+            next === "food"
+              ? "Scatter a scent to follow."
+              : next === "wall"
+                ? "Draw something to find a way around."
+                : "Brush away food and walls.",
+          );
+        }
+        function setPause(value, message = true) {
+          paused = value;
+          $("#pause").textContent = value ? "▶" : "Ⅱ";
+          $("#pause").setAttribute("aria-pressed", String(value));
+          $("#pause").setAttribute(
+            "aria-label",
+            value ? "Resume simulation" : "Pause simulation",
+          );
+          $("#paused").hidden = !value;
+          if (message)
+            announce(
+              value
+                ? "Paused. You can still draw."
+                : "The world is moving again.",
+            );
+        }
+        function paint(p) {
+          if (
+            p.y < area.y - 10 ||
+            p.y > area.y + area.h + 12 ||
+            p.x < area.x ||
+            p.x > area.x + area.w
+          )
+            return;
+          const spacing =
+            (tool === "food" ? 24 : tool === "wall" ? 12 : 9) * unit;
+          if (lastPaint && distance(p, lastPaint) < spacing) return;
+          lastPaint = { ...p };
+          if (tool === "food") {
+            if (food.length >= 90) food.shift();
+            food.push({ ...p, amount: 1, phase: clock });
+          } else if (tool === "wall") {
+            if (walls.length >= 300) walls.shift();
+            walls.push({ ...p, r: 10 * unit });
+          } else {
+            food = food.filter((v) => distance(p, v) > 30 * unit);
+            walls = walls.filter((v) => distance(p, v) > 30 * unit);
+          }
+          updateReadout();
+        }
+        canvas.addEventListener("pointerdown", (e) => {
+          pointer = e.pointerId;
+          lastPaint = null;
+          canvas.setPointerCapture(e.pointerId);
+          paint({ x: e.clientX, y: e.clientY });
+          e.preventDefault();
+        });
+        canvas.addEventListener("pointermove", (e) => {
+          if (pointer === e.pointerId) paint({ x: e.clientX, y: e.clientY });
+        });
+        for (const name of ["pointerup", "pointercancel"])
+          canvas.addEventListener(name, () => {
+            pointer = null;
+            lastPaint = null;
+          });
+        document
+          .querySelectorAll("[data-tool]")
+          .forEach((b) => (b.onclick = () => setTool(b.dataset.tool)));
+        $("#pause").onclick = () => setPause(!paused);
+        $("#reset").onclick = () => reset();
+        $("#clear").onclick = () => {
+          food = [];
+          walls = [];
+          announce("An open world. Draw what comes next.");
+          updateReadout();
+        };
+        $("#inside").onclick = () => {
+          inside = !inside;
+          $("#inside").setAttribute("aria-pressed", String(inside));
+          $("#sense-label").textContent = inside
+            ? "Senses → steers → moves"
+            : "One body. Its own little journey.";
+        };
+        $("#trail").onclick = () => {
+          showTrail = !showTrail;
+          $("#trail").setAttribute("aria-pressed", String(showTrail));
+        };
+        function drop() {
+          const a = creature.heading + 0.7;
+          food.push({
+            x: clamp(
+              creature.x + Math.cos(a) * 115 * unit,
+              area.x + 22,
+              area.x + area.w - 22,
+            ),
+            y: clamp(
+              creature.y + Math.sin(a) * 115 * unit,
+              area.y + 18,
+              area.y + area.h - 18,
+            ),
+            amount: 1,
+            phase: clock,
+          });
+          if (food.length > 90) food.shift();
+          announce("A new scent, just within reach.");
+          updateReadout();
+        }
+        $("#drop").onclick = drop;
+        addEventListener("keydown", (e) => {
+          if (
+            ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) ||
+            e.metaKey ||
+            e.ctrlKey ||
+            e.altKey
+          )
+            return;
+          if (
+            e.code === "Space" &&
+            e.target.tagName !== "BUTTON" &&
+            e.target.tagName !== "SUMMARY"
+          ) {
+            e.preventDefault();
+            setPause(!paused);
+          }
+          if (e.key === "1") setTool("food");
+          if (e.key === "2") setTool("wall");
+          if (e.key === "3") setTool("erase");
+          if (e.key.toLowerCase() === "f") drop();
+          if (e.key.toLowerCase() === "w") {
+            const p = {
+              x: creature.x + Math.cos(creature.heading) * 65 * unit,
+              y: creature.y + Math.sin(creature.heading) * 65 * unit,
+            };
+            for (let i = -2; i <= 2; i++)
+              walls.push({
+                x: p.x - Math.sin(creature.heading) * i * 13 * unit,
+                y: p.y + Math.cos(creature.heading) * i * 13 * unit,
+                r: 10 * unit,
+              });
+            if (walls.length > 300) walls = walls.slice(-300);
+            announce("A small barrier ahead.");
+          }
+          if (e.key.toLowerCase() === "c") $("#clear").click();
+          if (e.key.toLowerCase() === "r") reset();
+        });
+        function scent(p) {
+          let sum = 0;
+          for (const f of food)
+            sum += f.amount * Math.exp(-distance(p, f) / (85 * unit));
+          return 1 - Math.exp(-sum * 0.9);
+        }
+        function danger(p) {
+          let value = 0;
+          for (const wall of walls) {
+            const vx = p.x - creature.x,
+              vy = p.y - creature.y,
+              len = vx * vx + vy * vy,
+              t = clamp(
+                ((wall.x - creature.x) * vx + (wall.y - creature.y) * vy) / len,
+                0,
+                1,
+              ),
+              nearest = { x: creature.x + t * vx, y: creature.y + t * vy };
+            value = Math.max(
+              value,
+              clamp(
+                1 - (distance(nearest, wall) - wall.r) / (23 * unit),
+                0,
+                1,
+              ) *
+                (1 - t * 0.4),
+            );
+          }
+          const edge = Math.min(
+            p.x - area.x,
+            area.x + area.w - p.x,
+            p.y - area.y,
+            area.y + area.h - p.y,
+          );
+          return Math.max(value, clamp((20 * unit - edge) / (35 * unit), 0, 1));
+        }
+        function step(dt) {
+          clock += dt;
+          const c = creature;
+          const sensorAngles = [-0.72, 0, 0.72],
+            reach = (57 + 25 * c.caution) * unit;
+          const probes = sensorAngles.map((a) => ({
+              x: c.x + Math.cos(c.heading + a) * reach,
+              y: c.y + Math.sin(c.heading + a) * reach,
+            })),
+            smell = probes.map(scent),
+            avoid = probes.map(danger),
+            scentTurn =
+              (smell[2] - smell[0]) / Math.max(0.06, smell[0] + smell[2]);
+          const turn = clamp(
+              scentTurn * 3.6 +
+                (avoid[0] - avoid[2]) * (2.7 + c.caution * 2.2) +
+                avoid[1] * c.bias * 0.9 +
+                Math.sin(clock * 0.75) * 0.15,
+              -3,
+              3,
+            ),
+            drive = (33 + 31 * smell[1]) * (1 - 0.65 * avoid[1]);
+          c.heading = angle(c.heading + turn * dt);
+          c.speed += (drive - c.speed) * Math.min(1, dt * 5);
+          if (c.reverse > 0) {
+            c.reverse -= dt;
+            c.heading += c.bias * 2.3 * dt;
+            c.speed = -18;
+          }
+          const before = { x: c.x, y: c.y };
+          c.x += Math.cos(c.heading) * c.speed * unit * dt;
+          c.y += Math.sin(c.heading) * c.speed * unit * dt;
+          let contact = false;
+          for (const wall of walls) {
+            const dist = distance(c, wall),
+              min = wall.r + 18 * unit;
+            if (dist < min) {
+              const dx = (c.x - wall.x) / (dist || 1),
+                dy = (c.y - wall.y) / (dist || 1);
+              c.x = wall.x + dx * min;
+              c.y = wall.y + dy * min;
+              contact = true;
+            }
+          }
+          const margin = 15 * unit,
+            nx = clamp(c.x, area.x + margin, area.x + area.w - margin),
+            ny = clamp(c.y, area.y + margin, area.y + area.h - margin);
+          if (nx !== c.x || ny !== c.y) contact = true;
+          c.x = nx;
+          c.y = ny;
+          if (contact && c.reverse <= 0) {
+            c.caution = clamp(c.caution + 0.16, 0, 1);
+            c.reverse = 0.42;
+            c.bias = avoid[0] > avoid[2] ? 1 : -1;
+            if (clock - lastAnnounce > 6) {
+              $("#outcome").textContent =
+                "Contact detected. The creature now gives obstacles more space.";
+              lastAnnounce = clock;
+            }
+          }
+          c.caution = Math.max(0, c.caution - dt * 0.0035);
+          let eating = false;
+          for (const f of food) {
+            if (distance(c, f) < 26 * unit) {
+              eating = true;
+              f.amount -= dt * 2.5;
+              if (f.amount <= 0) {
+                c.eaten++;
+                for (let i = 0; i < 7; i++)
+                  sparks.push({
+                    x: f.x,
+                    y: f.y,
+                    angle: (i * Math.PI * 2) / 7,
+                    life: 1,
+                  });
+                $("#outcome").textContent = `Found food. ${c.eaten} collected.`;
+              }
+            }
+          }
+          food = food.filter((f) => f.amount > 0);
+          c.signals = [
+            smell[0],
+            smell[1],
+            smell[2],
+            clamp(0.5 - turn / 6, 0, 1),
+            clamp(0.5 + turn / 6, 0, 1),
+          ];
+          c.probes = probes;
+          c.state = eating
+            ? "Found a little feast"
+            : c.reverse > 0
+              ? "Giving edges space"
+              : Math.max(...avoid) > 0.45
+                ? "Finding a way around"
+                : Math.max(...smell) > 0.08
+                  ? "Following a scent"
+                  : "Exploring the quiet";
+          if (distance(c, before) > 0.01) {
+            body.unshift({ x: c.x, y: c.y });
+            if (body.length > 160) body.pop();
+            if (!trail.length || distance(c, trail.at(-1)) > 4 * unit)
+              trail.push({ x: c.x, y: c.y, time: clock, glow: smell[1] });
+          }
+          trail = trail.filter((p) => clock - p.time < 43).slice(-750);
+          for (const s of sparks) {
+            s.life -= dt * 1.2;
+            s.x += Math.cos(s.angle) * dt * 22;
+            s.y += Math.sin(s.angle) * dt * 22;
+          }
+          sparks = sparks.filter((s) => s.life > 0);
+        }
+        function circle(x, y, r, color) {
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+        }
+        function glow(x, y, r, color) {
+          const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+          g.addColorStop(0, color);
+          g.addColorStop(1, "transparent");
+          ctx.fillStyle = g;
+          ctx.fillRect(x - r, y - r, r * 2, r * 2);
+        }
+        function segment(a, b, color, width) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = width;
+          ctx.stroke();
+        }
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          const c = creature;
+          glow(W * 0.58, H * 0.5, Math.min(W, H) * 0.65, "#23423816");
+          ctx.save();
+          ctx.lineCap = "round";
+          if (showTrail) {
+            for (let i = 1; i < trail.length; i++) {
+              const p = trail[i],
+                alpha = (1 - (clock - p.time) / 43) * 0.22;
+              segment(
+                trail[i - 1],
+                p,
+                `rgba(166,220,191,${alpha})`,
+                1.1 * unit,
+              );
+            }
+            if (trail.length > 8) {
+              for (let i = 0; i < trail.length; i += 16) {
+                const p = trail[i];
+                circle(
+                  p.x,
+                  p.y,
+                  1.3 * unit,
+                  `rgba(190,231,207,${(1 - (clock - p.time) / 43) * 0.4})`,
+                );
+              }
+            }
+          }
+          for (const wall of walls) {
+            glow(wall.x, wall.y, wall.r * 3, "#ad8a5e0b");
+            circle(wall.x, wall.y, wall.r, "#131817");
+            ctx.strokeStyle = "#d4b8873e";
+            ctx.lineWidth = 0.7;
+            ctx.beginPath();
+            ctx.arc(wall.x, wall.y, wall.r, 0, Math.PI * 2);
+            ctx.stroke();
+            circle(wall.x - 2, wall.y - 2, 1, "#dbbd8a38");
+          }
+          for (const f of food) {
+            const breath = reduced
+                ? 1
+                : 1 + Math.sin(clock * 1.8 + f.phase) * 0.13,
+              r = (3.5 + 2 * f.amount) * unit;
+            glow(f.x, f.y, (25 + 11 * f.amount) * unit * breath, "#c2edcf24");
+            ctx.save();
+            ctx.translate(f.x, f.y);
+            ctx.rotate(Math.PI / 4 + f.phase * 0.2);
+            ctx.fillStyle = "#d0f1d7";
+            ctx.fillRect(-r / 2, -r / 2, r, r);
+            ctx.strokeStyle = "#c1f0ce38";
+            ctx.strokeRect(-r, -r, r * 2, r * 2);
+            ctx.restore();
+          }
+          for (const p of sparks) circle(p.x, p.y, 1.3 * p.life, "#d6f4dd");
+          const samples = [0, 9, 19, 30, 42, 55, 69, 84].map(
+            (n, i) =>
+              body[Math.min(n, body.length - 1)] || {
+                x: c.x - Math.cos(c.heading) * i * 8,
+                y: c.y - Math.sin(c.heading) * i * 8,
+              },
+          );
+          glow(c.x, c.y, 80 * unit, "#c4e6d510");
+          for (let i = samples.length - 1; i > 0; i--) {
+            const p = samples[i],
+              radius = (17 - i * 1.65) * unit;
+            segment(samples[i - 1], p, "#b4cfbc18", radius * 1.6);
+            circle(
+              p.x,
+              p.y,
+              radius,
+              `rgba(137,170,151,${0.045 + (8 - i) * 0.009})`,
+            );
+            ctx.strokeStyle = "#aec6b526";
+            ctx.lineWidth = 0.65;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+            ctx.stroke();
+            if (inside) {
+              segment(samples[i - 1], p, "#c5e5cd55", 1.2 * unit);
+              circle(p.x, p.y, 2 * unit, "#cfe4cf8c");
+            }
+          }
+          ctx.save();
+          ctx.translate(c.x, c.y);
+          ctx.rotate(c.heading);
+          const s = unit;
+          ctx.scale(s, s);
+          const skin = ctx.createRadialGradient(-6, -7, 0, 0, 0, 28);
+          skin.addColorStop(0, inside ? "#cce6d334" : "#d2ded3aa");
+          skin.addColorStop(1, inside ? "#8cac9914" : "#4e685c90");
+          ctx.fillStyle = skin;
+          ctx.strokeStyle = "#cfe3d16b";
+          ctx.lineWidth = 0.9;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 26, 20, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+          for (const side of [-1, 1]) {
+            ctx.beginPath();
+            ctx.moveTo(15, side * 11);
+            ctx.quadraticCurveTo(34, side * 30, 46, side * 24);
+            ctx.strokeStyle = "#d9e7d44c";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            const signal = c.signals[side < 0 ? 0 : 2];
+            glow(46, side * 24, 10, "#bde8c32b");
+            circle(46, side * 24, 2.1, "#d5ebd0");
+            circle(16, side * 7, 2.1, "#e1ecdfb3");
+            if (inside) {
+              segment(
+                { x: 40, y: side * 22 },
+                { x: 2, y: 0 },
+                `rgba(199,239,207,${0.22 + signal * 0.68})`,
+                1 + signal,
+              );
+              segment(
+                { x: 2, y: 0 },
+                { x: -18, y: side * 9 },
+                `rgba(229,194,143,${0.16 + c.signals[side < 0 ? 3 : 4] * 0.65})`,
+                1.2,
+              );
+              circle(-18, side * 9, 2.5, "#e9c797");
+              if (!reduced) {
+                const t = (clock * (0.5 + signal * 0.8) + side * 0.23) % 1,
+                  point = { x: 40 + (2 - 40) * t, y: side * 22 * (1 - t) };
+                circle(point.x, point.y, 1.1 + signal, "#e5f9dd");
+              }
+            }
+          }
+          if (inside) {
+            glow(2, 0, 13, "#d4ecd94f");
+            circle(2, 0, 3.7, "#daeada");
+            circle(-7, 0, 1.5, "#d0e2c8");
+          }
+          ctx.restore();
+          if (inside && c.probes) {
+            ctx.setLineDash([2, 7]);
+            for (let i = 0; i < 3; i++) {
+              const p = c.probes[i],
+                strength = c.signals[i];
+              if (strength > 0.025) {
+                segment(
+                  c,
+                  p,
+                  `rgba(184,231,206,${0.04 + strength * 0.13})`,
+                  0.7,
+                );
+                circle(p.x, p.y, 2, "#abc8b329");
+              }
+            }
+            ctx.setLineDash([]);
+          }
+          ctx.restore();
+        }
+        function updateReadout() {
+          const c = creature;
+          $("#eaten").textContent = c.eaten;
+          $("#caution").textContent = Math.round(c.caution * 100);
+          $("#state").textContent = paused ? "Taking a breath" : c.state;
+          canvas.dataset.foodCount = String(food.length);
+          canvas.dataset.wallCount = String(walls.length);
+          canvas.dataset.eaten = String(c.eaten);
+          canvas.dataset.paused = String(paused);
+          canvas.dataset.x = c.x.toFixed(2);
+          canvas.dataset.y = c.y.toFixed(2);
+          canvas.dataset.caution = c.caution.toFixed(3);
+          canvas.dataset.simTime = clock.toFixed(3);
+        }
+        let accumulator = 0,
+          lastReadout = 0;
+        function frame(now) {
+          const dt = last ? Math.min((now - last) / 1000, 0.06) : 0;
+          last = now;
+          if (!document.hidden && !paused) {
+            accumulator += dt;
+            while (accumulator >= 1 / 60) {
+              step(1 / 60);
+              accumulator -= 1 / 60;
+            }
+          }
+          draw();
+          if (now - lastReadout > 100) {
+            updateReadout();
+            lastReadout = now;
+          }
+          raf = requestAnimationFrame(frame);
+        }
+        addEventListener("resize", resize);
+        document.addEventListener("visibilitychange", () => {
+          last = 0;
+          accumulator = 0;
+        });
+        resize();
+        requestAnimationFrame(frame);
+        document.documentElement.dataset.ready = "true";
+      })();
+    </script>
+  </body>
+</html>
